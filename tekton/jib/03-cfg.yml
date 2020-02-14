@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jib-cfg
+data:
+  JIB_VERSION: "2.0.0"
+

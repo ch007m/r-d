@@ -1,0 +1,4 @@
+0000000000000000000000000000000000000000 1f9a0824a5ff8b9e78c93d6ce4a90236798b6e44 Charles Moulliard <cmoulliard@redhat.com> 1580477168 +0100	commit (initial): first commit
+1f9a0824a5ff8b9e78c93d6ce4a90236798b6e44 df5cf7b8af1d9379745d5bd28f37f2c8266b918c Charles Moulliard <cmoulliard@redhat.com> 1580721424 +0100	commit: Fix: Review the test case to fix the error as the test was failing
+df5cf7b8af1d9379745d5bd28f37f2c8266b918c 7a7509ac2753cccf504b98e8a12d537e9fe43021 Charles Moulliard <cmoulliard@redhat.com> 1580721443 +0100	commit: Chore: Add jib log file
+7a7509ac2753cccf504b98e8a12d537e9fe43021 c7cd07721af6a61e61f966c6fbf2481029316392 Charles Moulliard <cmoulliard@redhat.com> 1580833599 +0100	commit: Fix: Add maven plugin to copy/rename the jar

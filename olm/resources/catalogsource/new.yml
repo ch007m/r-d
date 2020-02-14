@@ -1,0 +1,9 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: prometheus-manifests
+spec:
+  displayName: Prometheus Operator
+  publisher: Snowdrop
+  sourceType: grpc
+  image: quay.io/cmoulliard/olm-index:0.1.0

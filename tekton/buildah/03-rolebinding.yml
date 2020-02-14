@@ -1,0 +1,14 @@
+apiVersion: authorization.openshift.io/v1
+kind: RoleBinding
+metadata:
+  name: build-bot
+  namespace: test
+roleRef:
+  name: scc-privileged-role
+  namespace: test
+subjects:
+- kind: ServiceAccount
+  name: build-bot
+  namespace: test
+userNames:
+- system:serviceaccount:test:build-bot

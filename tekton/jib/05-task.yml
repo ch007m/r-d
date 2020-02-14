@@ -1,0 +1,68 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: jib-maven
+spec:
+  inputs:
+    params:
+      - name: DIRECTORY
+        default: .
+      - name: CACHE
+        default: m2-data
+      - name: FROM_IMAGE
+        default: registry.redhat.io/redhat-openjdk-18/openjdk18-openshift
+    resources:
+      - name: source
+        type: git
+  outputs:
+    resources:
+      - name: image
+        type: image
+
+  steps:
+    - name: build-and-push
+      image: gcr.io/cloud-builders/mvn
+      command:
+        - mvn
+        - compile
+        - com.google.cloud.tools:jib-maven-plugin:$(JIB_VERSION):build
+        - -DsendCredentialsOverHttp=true
+        - -Duser.home=/builder/home
+        - -Djib.from.image=$(inputs.params.FROM_IMAGE)
+        - -Djib.allowInsecureRegistries=true
+        #- -Djava.util.logging.config.file=src/main/resources/jib-log.properties
+        #- -Djib.serialize=true
+        #- -Djib.console=plain
+        - -Djib.from.auth.username=$(RH_USERNAME)
+        - -Djib.from.auth.password=$(RH_PASSWORD)
+        - -Dimage=$(outputs.resources.image.url)
+      env:
+      - name: "DOCKER_CONFIG"
+        value: "/builder/home/.docker/"
+      - name: JIB_VERSION
+        valueFrom:
+          ConfigMapKeyRef:
+            name: jib-cfg
+            key: JIB_VERSION
+      - name: "RH_USERNAME"
+        valueFrom:
+          secretKeyRef:
+            name: rh-account
+            key: RH_USERNAME
+      - name: "RH_PASSWORD"
+        valueFrom:
+          secretKeyRef:
+            name: rh-account
+            key: RH_PASSWORD
+      workingDir: /workspace/source/$(inputs.params.DIRECTORY)
+      volumeMounts:
+        - name: $(inputs.params.CACHE)
+          mountPath: /builder/home/.m2
+          subPath: m2-cache
+        - name: $(inputs.params.CACHE)
+          mountPath: /builder/home/.cache
+          subPath: jib-cache
+  volumes:
+  - name: m2-data
+    persistentVolumeClaim:
+      claimName: m2-data

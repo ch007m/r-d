@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  labels:
+    prometheus: k8s
+  name: k8s
+spec:
+  externalUrl: http://prometheus.88.99.186.195.nip.io
+  serviceAccountName: prometheus
+  serviceMonitorSelector:
+    matchLabels:
+      app: spring-boot-monitoring
+  alerting:
+    alertmanagers:
+      - name: alertmanager-main
+        namespace: demo
+        port: web

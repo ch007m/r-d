@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1alpha1
+kind: TaskRun
+metadata:
+  name: buildah
+spec:
+  serviceAccountName: build-bot
+  taskRef:
+    name: buildah
+  inputs:
+    resources:
+      - name: git
+        resourceSpec:
+          type: git
+          params:
+            - name: url
+              value: https://github.com/cmoulliard/rest-http-example.git
+            - name: revision
+              value: sb-2.1.x
+  outputs:
+    resources:
+      - name: image
+        resourceSpec:
+          type: image
+          params:
+            - name: url
+              value: docker-registry.default.svc:5000/test/sb-buildah

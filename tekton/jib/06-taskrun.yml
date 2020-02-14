@@ -1,0 +1,33 @@
+apiVersion: tekton.dev/v1alpha1
+kind: TaskRun
+metadata:
+  name: jib-maven
+spec:
+  serviceAccountName: build-bot
+  taskRef:
+    name: jib-maven
+  inputs:
+    params:
+      - name: DIRECTORY
+        value: .
+      - name: CACHE
+        value: m2-data
+      - name: FROM_IMAGE
+        value: registry.redhat.io/redhat-openjdk-18/openjdk18-openshift
+    resources:
+      - name: source
+        resourceSpec:
+          type: git
+          params:
+            - name: url
+              value: https://github.com/cmoulliard/rest-http-example.git
+            - name: revision
+              value: jib-logging
+  outputs:
+    resources:
+      - name: image
+        resourceSpec:
+          type: image
+          params:
+            - name: url
+              value: docker-registry.default.svc:5000/test/sb

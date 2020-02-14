@@ -1,0 +1,27 @@
+apiVersion: tekton.dev/v1alpha1
+kind: TaskRun
+metadata:
+  name: sb-kaniko
+spec:
+  serviceAccount: build-bot
+  taskRef:
+    name: kaniko
+  inputs:
+    resources:
+      - name: source
+        resourceSpec:
+          type: git
+          params:
+            - name: url
+              value: https://github.com/cmoulliard/rest-http-example.git
+            - name: revision
+              value: sb-2.1.x
+  outputs:
+    resources:
+      - name: image
+        resourceSpec:
+          type: image
+          params:
+            - name: url
+              # value: gcr.io/tekton-task-project/my-image
+              value: docker-registry.default.svc:5000/test/sb-kaniko-image:latest

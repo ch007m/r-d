@@ -1,0 +1,13 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: tekton
+spec:
+  channel: canary
+  # startingCSV: openshift-pipelines-operator.v0.10.4
+  installPlanApproval: Automatic
+  # Name of the bundle package
+  name: openshift-pipelines-operator
+  source: community-operators
+  # Namespace containing the sourcecatalog
+  sourceNamespace: marketplace

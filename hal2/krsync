@@ -1,0 +1,11 @@
+#!/bin/bash
+
+USER=jboss
+POD_NAME=${1:-quarkus}
+SOURCE_CODE=${2:-quarkus-demo}
+NAMESPACE=test
+DIR=$(dirname "$0")
+
+POD_ID=$(kubectl get pod -lapp=${POD_NAME} -n ${NAMESPACE} | grep "Running" | awk '{print $1}')
+
+rsync -avurP --blocking-io --rsync-path= --rsh="$(which kubectl) exec -n ${NAMESPACE} $POD_ID -i -- " $DIR/$SOURCE_CODE rsync:/home/$USER/

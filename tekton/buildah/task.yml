@@ -1,0 +1,57 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: buildah
+spec:
+  inputs:
+    params:
+      - default: "false"
+        description: Verify registry certificates
+        name: verifyTLS
+      - default: /workspace/git
+        description: Git path where project is cloned
+        name: workspacePath
+    resources:
+      - name: git
+        type: git
+  outputs:
+    resources:
+      - name: image
+        type: image
+  steps:
+    - name: build
+      image: quay.io/buildah/stable:v1.12.0
+      # '-v',  '/tmp/artefacts:/tmp/artefacts:rw'
+      command: ['buildah', '--log-level=debug', 'bud', '--tls-verify=$(inputs.params.verifyTLS)', '--layers', '-f', '/Dockerfile', '-t', '$(outputs.resources.image.url)', '.']
+      env:
+        - name: contexPath
+          value: .
+        - name: moduleDirName
+          value: .
+      volumeMounts:
+      - mountPath: /var/lib/containers
+        name: libcontainers
+      #- mountPath: /tmp/artefacts
+      #  name: m2-data
+      workingDir: /workspace/git
+      securityContext:
+        privileged: true
+
+    - name: push
+      image: quay.io/buildah/stable:v1.12.0
+      command: ['buildah', '--log-level=debug', 'push', '--tls-verify=$(inputs.params.verifyTLS)', '$(outputs.resources.image.url)', 'docker://$(outputs.resources.image.url)']
+      env:
+      - name: REGISTRY_AUTH_FILE
+        value: /builder/home/.docker/config.json
+      volumeMounts:
+      - name: libcontainers
+        mountPath: /var/lib/containers
+      securityContext:
+        privileged: true
+
+  volumes:
+  - name: libcontainers
+    emptyDir: {}
+  #- name: m2-data
+  #  persistentVolumeClaim:
+  #    claimName: m2-data

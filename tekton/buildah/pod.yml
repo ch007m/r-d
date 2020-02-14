@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: simple-sb
+  name: simple-sb
+spec:
+  containers:
+  - image: docker-registry.default.svc:5000/test/sb-buildah
+    imagePullPolicy: Always
+    name: simple-sb
+    ports:
+    - containerPort: 8080
+      name: http
+      protocol: TCP

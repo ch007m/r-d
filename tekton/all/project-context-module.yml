@@ -1,0 +1,131 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: build-bot
+- apiVersion: authorization.openshift.io/v1
+  kind: Role
+  metadata:
+    name: scc-privileged-role
+  rules:
+    - apiGroups:
+        - security.openshift.io
+      resourceNames:
+        - privileged
+      resources:
+        - securitycontextconstraints
+      verbs:
+        - use
+    - apiGroups:
+        - image.openshift.io
+      resources:
+        - imagestreams
+        - imagestreams/layers
+      verbs:
+        - '*'
+- apiVersion: authorization.openshift.io/v1
+  kind: RoleBinding
+  metadata:
+    name: build-bot
+    namespace: test
+  roleRef:
+    name: scc-privileged-role
+    namespace: test
+  subjects:
+    - kind: ServiceAccount
+      name: build-bot
+      namespace: test
+  userNames:
+    - system:serviceaccount:test:build-bot
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    labels:
+      app: simple-sb
+    name: simple-sb
+  spec:
+    containers:
+      - image: docker-registry.default.svc:5000/test/sb-buildah
+        imagePullPolicy: Always
+        name: simple-sb
+        ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+- apiVersion: tekton.dev/v1alpha1
+  kind: Task
+  metadata:
+    name: buildah
+  spec:
+    inputs:
+      params:
+        - default: "false"
+          description: Verify registry certificates
+          name: verifyTLS
+        - default: /workspace/git
+          description: Git path where project is cloned
+          name: workspacePath
+      resources:
+        - name: git
+          type: git
+    outputs:
+      resources:
+        - name: image
+          type: image
+    steps:
+      - name: build
+        image: quay.io/buildah/stable:v1.9.0
+        command: ['buildah', 'bud', '--build-arg', 'contextPath=demo','--build-arg','moduleDirName=moduleA', '--tls-verify=${inputs.params.verifyTLS}', '--layers', '-f', '/Dockerfile', '-t', '${outputs.resources.image.url}', '.']
+        volumeMounts:
+          - mountPath: /var/lib/containers
+            name: libcontainers
+        workingDir: /workspace/git
+        securityContext:
+          privileged: true
+
+      - name: push
+        image: quay.io/buildah/stable:v1.9.0
+        command: ['buildah', 'push', '--tls-verify=${inputs.params.verifyTLS}', '${outputs.resources.image.url}', 'docker://${outputs.resources.image.url}']
+        env:
+          - name: REGISTRY_AUTH_FILE
+            value: /builder/home/.docker/config.json
+        volumeMounts:
+          - name: libcontainers
+            mountPath: /var/lib/containers
+        securityContext:
+          privileged: true
+
+    volumes:
+      - name: libcontainers
+        emptyDir: {}
+- apiVersion: tekton.dev/v1alpha1
+  kind: TaskRun
+  metadata:
+    name: buildah
+  spec:
+    serviceAccount: build-bot
+    taskRef:
+      name: buildah
+    inputs:
+      resources:
+        - name: git
+          resourceSpec:
+            type: git
+            params:
+              - name: url
+                value: https://github.com/cmoulliard/rest-http-example.git
+              - name: revision
+                value: context-module-a
+    outputs:
+      resources:
+        - name: image
+          resourceSpec:
+            type: image
+            params:
+              - name: url
+                value: docker-registry.default.svc:5000/test/sb-buildah
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""

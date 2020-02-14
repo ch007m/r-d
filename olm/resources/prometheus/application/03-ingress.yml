@@ -1,0 +1,15 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: spring-boot-monitoring
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: sb-monitor.88.99.186.195.nip.io
+      http:
+        paths:
+          - backend:
+              serviceName: spring-boot-monitoring
+              servicePort: 8080
+            path: /

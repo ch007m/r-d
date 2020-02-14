@@ -1,0 +1,20 @@
+apiVersion: authorization.openshift.io/v1
+kind: Role
+metadata:
+  name: scc-privileged-role
+rules:
+- apiGroups:
+    - security.openshift.io
+  resourceNames:
+    - privileged
+  resources:
+    - securitycontextconstraints
+  verbs:
+    - use
+- apiGroups:
+    - image.openshift.io
+  resources:
+    - imagestreams
+    - imagestreams/layers
+  verbs:
+    - '*'

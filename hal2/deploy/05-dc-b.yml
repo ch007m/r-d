@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: quarkusb
+  name: quarkusb
+spec:
+  selector:
+    matchLabels:
+      app: quarkusb
+  template:
+    metadata:
+      labels:
+        app: quarkusb
+      name: quarkusb
+    spec:
+      containers:
+      - command: ["tail", "-f", "/dev/null"]
+        image: 172.30.1.1:5000/test/ubi11
+        name: quarkusb
+        ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+        volumeMounts:
+          - mountPath: /home/jboss/.docker
+            name: docker-cfg
+          - mountPath: /home/jboss/.m2
+            name: m2-data
+            subPath: m2-cache
+          - mountPath: /builder/home/.cache
+            name: m2-data
+            subPath: jib-cache
+      serviceAccountName: build-bot
+      volumes:
+      - name: m2-data
+        persistentVolumeClaim:
+          claimName: m2-data
+      - name: docker-cfg
+        secret:
+          secretName: build-bot-dockercfg-4wpc9

@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: quarkus
+  name: quarkus
+spec:
+  selector:
+    matchLabels:
+      app: quarkus
+  template:
+    metadata:
+      labels:
+        app: quarkus
+      name: quarkus
+    spec:
+      initContainers:
+      - # Convert the old docker config file into the new one only supported by JIB
+        # .dockercfg -> config.json
+        args:
+        - '-docker-cfg=SECRET_NAME'
+        command:
+        - /ko-app/creds-init
+        env:
+          - name: HOME
+            value: /tekton/home
+        image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/creds-init:v0.9.1
+        name: credential-initializer
+        volumeMounts:
+          - mountPath: /tekton/home
+            name: tekton-home
+          - mountPath: /var/build-secrets/SECRET_NAME
+            name: docker-cfg
+      - # Copy the file to the destination that JIB will use to be authenticated
+        # with the internal docker registry
+        command: ["/bin/sh"]
+        args: ["-c", "cp /tekton/home/.docker/config.json /home/jboss/.docker/config.json"]
+        image: 172.30.1.1:5000/test/ubi11
+        name: copy-docker-config
+        volumeMounts:
+          - mountPath: /tekton/home
+            name: tekton-home
+          - mountPath: /home/jboss/.docker
+            name: jboss-home
+      containers:
+      - command: ["tail", "-f", "/dev/null"]
+        image: 172.30.1.1:5000/test/ubi11
+        name: quarkus
+        ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+        env:
+        - name: "DOCKER_CONFIG"
+          value: "/home/jboss/.docker/"
+        volumeMounts:
+          - name: tekton-home
+            mountPath: /tekton/home
+          - name: jboss-home
+            mountPath: /home/jboss/.docker
+          - name: m2-data
+            mountPath: /home/jboss/.m2
+            subPath: m2-cache
+          - name: m2-data
+            mountPath: /builder/home/.cache
+            subPath: jib-cache
+      serviceAccountName: build-bot
+      volumes:
+      - emptyDir: {}
+        name: tekton-home
+      - emptyDir: {}
+        name: jboss-home
+      - name: m2-data
+        persistentVolumeClaim:
+          claimName: m2-data
+      - name: docker-cfg
+        secret:
+          secretName: SECRET_NAME
