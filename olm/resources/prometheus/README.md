@@ -61,6 +61,8 @@ kc -n demo apply -f resources/prometheus/olm/grafana-subscription.yml
 kc -n demo apply -f resources/prometheus/grafana/
 ```
 
+- Open the grafana console at this address: http://grafana-console.88.99.186.195.nip.io
+
 - clean the resources
 ```bash
 kc -n demo delete -f resources/prometheus/grafana/
