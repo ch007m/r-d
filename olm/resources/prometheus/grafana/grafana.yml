@@ -6,10 +6,14 @@ spec:
   ingress:
     enabled: True
     hostname: "grafana-console.88.99.186.195.nip.io"
+  client:
+    preferService: True
   config:
+    #server:
+    #  root_url: http://grafana-console.88.99.186.195.nip.io
     log:
       mode: "console"
-      level: "warn"
+      level: "debug"
     security:
       admin_user: "root"
       admin_password: "secret"
