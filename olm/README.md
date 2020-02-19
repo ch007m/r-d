@@ -76,12 +76,12 @@ lightbend-console-operator          Community Operators   5m19s
 
 - In order to install an operator, it is needed to have an `OperatorGroup` resource to define
 ```bash
-kubectl apply -f resources/operator-group.yml -n marketplace
+kubectl apply -f resources/tekton/operator-group.yml -n marketplace
 ```
 
 - To install the `openshift-pipelines-operator` operator, create a subscription and deploy it
 ```bash
-kubectl apply -f resources/tekton-subscription.yml -n marketplace
+kubectl apply -f resources/tekton/subscription.yml -n marketplace
 ```
 
 - Check the status of the `ClusterServiceVersion` created using the following command:
