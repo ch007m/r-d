@@ -15,9 +15,8 @@ More information is available at this [address](https://github.com/operator-fram
 ```bash
 ./olm.sh 0.14.1
 ```
-**REMARK**: The script will remove the image of the `catalogSource` deployed by default from `operatorhub` as we will install the `Openshift Operators catalog` !
 
-# Install additional catalogs of operators
+# Install additional catalogs of operators (optional)
 
 It is possible to install additional `Catalog(s)` of `operators` if you deploy top of a cluster the `Operator-marketplace`. This operator allows to fetch from an external repository
 called an `operatorsource`, the metadata of the registry containing your operator packaged as a bundle or `upstream`, `community` or `certified operators.
@@ -73,7 +72,7 @@ lightbend-console-operator          Community Operators   5m19s
 ...
 ```
 
-## Deploy an OpenShift Operator using a subscription
+## Deploy an Operator using a subscription
 
 - In order to install an operator, it is needed to have an `OperatorGroup` resource to define
 ```bash
@@ -108,7 +107,7 @@ db=bin/local-registry.db
 docker push  quay.io/cmoulliard/olm-prometheus:0.22.2
 ```
 
-- To add the bundle previsouly created to an index database
+- To add the bundle previously created to an index database
 ```bash
 ./bin/opm index add -b ${bundleImage} -t ${indexImage} -c docker --permissive
 docker push quay.io/cmoulliard/olm-index:0.1.0
