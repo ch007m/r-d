@@ -7,4 +7,4 @@ spec:
   installPlanApproval: Automatic
   name: prometheus
   source: operatorhubio-catalog
-  sourceNamespace: demo
+  sourceNamespace: olm
