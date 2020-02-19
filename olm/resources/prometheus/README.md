@@ -58,13 +58,13 @@ kc delete -n demo -f resources/prometheus/server
 
 - Deploy the Grafana `Subscription`
 ```bash
-kc -n demo apply -f resources/prometheus/olm/grafana-subscription.yml
+kc -n demo apply -f resources/grafana/olm
 ```
 
 - Tell to the operator to create a Grafana instance, service, ingress route, Dashboard and datasource to grab
   information from prometheus server
 ```bash
-kc -n demo apply -f resources/prometheus/grafana/
+kc -n demo apply -f resources/grafana/
 ```
 
 - Open the grafana console at this address: http://grafana-console.88.99.186.195.nip.io
