@@ -2,7 +2,7 @@
 
 ## Table of Contents
 
-   * [Introdution](#introdution)
+   * [Introduction](#introduction)
    * [DevExp on k8s](#devexp-on-k8s)
    * [Cloud Foundry Kubernetes](#cloud-foundry-kubernetes)
       * [Deploy using Kubernetes Kind](#deploy-using-kubernetes-kind)
@@ -10,7 +10,7 @@
       * [Deploy on a Kubernetes created using kubeadm, kubelet](#deploy-on-a-kubernetes-created-using-kubeadm-kubelet)
    * [Interesting references](#interesting-references)
 
-## Introdution
+## Introduction
 
 This project has been created to collect information about [VMWare Tanzu](https://github.com/vmware-tanzu) but also what [Cloudfoundry](https://www.cloudfoundry.org/) is currently developing to 
 provision a kubernetes cluster with their cloud offering and the different components part of their platform :
