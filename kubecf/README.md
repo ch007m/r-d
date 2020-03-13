@@ -23,6 +23,9 @@ provision a kubernetes cluster with their cloud offering and the different compo
 Three upstream projects have been designed to develop the Cloud Foundry distribution for Kubernetes [kubecf](https://kubecf.suse.dev/docs/).
 
 - [Eirini](https://github.com/cloudfoundry-incubator/eirini): In a nutshell Eirini is a Kubernetes backend for Cloud Foundry, made in the effort to decouple Cloud Foundry from Diego, the only current option of a scheduler. . It deploys CF apps to a kube backend, using OCI images and Kube deployments.
+
+![](images/Eirini1.png)
+
 - [Quarks](https://kubecf.suse.dev/docs/concepts/quarks/): Incubating effort that packages `Cloud Foundry Application Runtime` as `containers` instead of `virtual machines`
 - [CFAR](https://www.cloudfoundry.org/container-runtime/): Cloud Foundry Container Runtime (CFCR) 
 
