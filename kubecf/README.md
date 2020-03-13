@@ -47,7 +47,7 @@ which is then processed by [`fissile`](https://github.com/cloudfoundry-incubator
 
 ![](CFAR1.png)
 
-**NOTE**: The new approach should be based on CNCF - Buildpack. Is it then used by fissile or another tool ?
+**NOTE**: The new approach should be based on [`CNCF - Buildpack`](https://docs.cloudfoundry.org/buildpacks/understand-buildpacks.html). Is it then used by `fissile` or another tool internaly ?
 
 ## Interesting references
 
