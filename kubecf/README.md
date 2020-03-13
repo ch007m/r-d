@@ -1,4 +1,17 @@
-# VMWare Tanzu and Pivotal
+# VMWare Tanzu and CloudFoundry Kubernetes
+
+This project has been created to collect information about [VMWare Tanzu](https://github.com/vmware-tanzu) project and what Cloudfoundry is currently developing to 
+provision a kubernetes cluster with their cloud offering and the different components part of their platform :
+- [uua](https://github.com/cloudfoundry/uaa): User Account and Authorisation server - OpenID
+- [Diego](https://github.com/cloudfoundry/diego-design-notes): Diego schedules and runs Tasks and Long-Running Processes
+- [Bosh](https://github.com/cloudfoundry/bosh): an open source tool for release engineering, deployment, lifecycle management, and monitoring of distributed systems.
+- [Stratos](https://github.com/cloudfoundry/stratos): Developer console
+- [Capi](https://github.com/cloudfoundry/cloud_controller_ng): API controller
+
+Two upstream projects have been designed to develop the Cloud Foundry distribution for Kubernetes [kubecf](https://kubecf.suse.dev/docs/).
+KubeCF uses the [Cloud Foundry Operator](https://github.com/cloudfoundry-incubator/cf-operator/) to deploy and track CF Deployments, consuming directly also BOSH Releases, among Kubernetes Native components.
+- [Eirini](https://github.com/cloudfoundry-incubator/eirini): In a nutshell Eirini is a Kubernetes backend for Cloud Foundry, made in the effort to decouple Cloud Foundry from Diego, the only current option of a scheduler. . It deploys CF apps to a kube backend, using OCI images and Kube deployments.
+- [Quarks](https://kubecf.suse.dev/docs/concepts/quarks/): Incubating effort that packages `Cloud Foundry Application Runtime` as `containers` instead of `virtual machines`
 
 ## Doc
 
