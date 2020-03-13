@@ -2,12 +2,13 @@
 
 ## Table of Contents
 
-  * [Introdution](#introdution)
-  * [Interesting references](#interesting-references)
-  * [Cloud Foundry Kubernetes](#cloud-foundry-kubernetes)
-     * [Deploy using Kubernetes Kind](#deploy-using-kubernetes-kind)
-     * [Additional features needed for kind](#additional-features-needed-for-kind)
-     * [Deploy on a Kubernetes created using kubeadm, kubelet](#deploy-on-a-kubernetes-created-using-kubeadm-kubelet)
+   * [Introdution](#introdution)
+   * [DevEXp on k8s](#devexp-on-k8s)
+   * [Interesting references](#interesting-references)
+   * [Cloud Foundry Kubernetes](#cloud-foundry-kubernetes)
+      * [Deploy using Kubernetes Kind](#deploy-using-kubernetes-kind)
+      * [Additional features needed for kind](#additional-features-needed-for-kind)
+      * [Deploy on a Kubernetes created using kubeadm, kubelet](#deploy-on-a-kubernetes-created-using-kubeadm-kubelet)
 
 ## Introdution
 
@@ -39,10 +40,14 @@ The project `kubo` created by Google and CloudFoundry and called now `CF Contain
 project able to manage Kubernetes clusters, scaling them using `Bosh Director` top of vSphere, GCP, ... It then uses `agent` deployed within the VMs where the
 Kubernetes Master/Node are deployed and will schedule jobs in order to create new VMs, perform rolling upgrade without zero downtime.
 
+## DevEXp on k8s
+
 A `CF Application runtime` or `CFAR` is then deployed on Kubernetes using a Helm chart according to the the information defined within a `Bosh` Release yaml manifest 
 which is then processed by [`fissile`](https://github.com/cloudfoundry-incubator/fissile) to populate the container image. 
 
 ![](CFAR1.png)
+
+**NOTE**: The new approach should be based on CNCF - Buildpack. Is it then used by fissile or another tool ?
 
 ## Interesting references
 
