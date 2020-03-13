@@ -9,15 +9,29 @@
 
 ## Deploy kubecf on Kind
 
+- Install first [`kind`](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
+```bash
+curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64
+chmod +x ./kind
+sudo mv kind /usr/local/bin
+```
+
+- Create a kubernetes cluster
 ```bash
 kind create cluster --name kubecf
 kind get kubeconfig --name kubecf > .kubeconfig
 cat .kubeconfig
 alias kc=kubectl
+```
+- Create a namespace for the cf-operator and install it
+```bash
 kc create namespace cf-operator
 helm repo add quarks https://cloudfoundry-incubator.github.io/quarks-helm/
 helm search repo quarks
 helm install cf-operator quarks/cf-operator --namespace cf-operator --set "global.operator.watchNamespace=kubecf"
+```
+- Create the following `values.yaml` file with the VM Ethernet IP address that we could use from our laptop
+```bash
 node_ip=$(kubectl get node kubecf-control-plane \
   --output jsonpath='{ .status.addresses[?(@.type == "InternalIP")].address }')
 cat << _EOF_  > values.yaml
@@ -30,9 +44,20 @@ kube:
   service_cluster_ip_range: 0.0.0.0/0
   pod_cluster_ip_range: 0.0.0.0/0
 _EOF_
-helm install kubecf --namespace kubecf --values values.yaml https://github.com/cloudfoundry-incubator/kubecf/releases/download/v1.0.0/kubecf-v1.0.0.tgz
-kubectl -n kubecf get pods
 ```
+
+- Install the `KubeCF` helm chart
+```bash
+helm install kubecf \
+   --namespace kubecf \
+   --values values.yaml https://github.com/cloudfoundry-incubator/kubecf/releases/download/v1.0.0/kubecf-v1.0.0.tgz
+```
+
+- Watch the pods
+```bash
+kubectl -n kubecf get pods -w
+```
+
 
 ## Using Kubernetes cluster
 
