@@ -46,7 +46,7 @@ It has to be installed in the same Kubernetes cluster that Kubecf will be deploy
 
 In this default deployment, kubecf is launched without Ingress, and it uses the Diego scheduler.
 
-### Deploy kubecf on Kind
+### Deploy using Kubernetes Kind
 
 - Install first [`kind`](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
 ```bash
@@ -216,7 +216,7 @@ kc apply -f ingress-dashboard.yml
 sudo kind delete cluster --name kubecf
 ```
 
-### Using a vanilla Kubernetes cluster
+### Deploy on a Kubernetes created using kubeadm, kubelet
 
 **NOTE**: The scenario reported here will fail due to a problem with the Certificate needed by the UAA application. [Ticket](https://github.com/cloudfoundry-incubator/kubecf/issues/483) has been created and should be fiexed with
 release [1.2.0](https://github.com/cloudfoundry-incubator/kubecf/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.2.0)
