@@ -3,7 +3,7 @@
 This project has been created to collect information about [VMWare Tanzu](https://github.com/vmware-tanzu) but also what [Cloudfoundry](https://www.cloudfoundry.org/) is currently developing to 
 provision a kubernetes cluster with their cloud offering and the different components part of their platform :
 - [uua](https://github.com/cloudfoundry/uaa): User Account and Authorisation server - OpenID
-- [Diego](https://github.com/cloudfoundry/diego-design-notes): Diego schedules and runs Tasks and Long-Running Processes
+- [Diego](https://github.com/cloudfoundry/diego-design-notes): Diego schedules and runs Tasks and Long-Running Processes. it is able to take a `Docker image` and create a container
 - [Bosh](https://github.com/cloudfoundry/bosh): an open source tool for release engineering, deployment, lifecycle management, and monitoring of distributed systems.
 - [Stratos](https://github.com/cloudfoundry/stratos): Developer console
 - [Capi](https://github.com/cloudfoundry/cloud_controller_ng): API controller
