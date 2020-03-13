@@ -45,7 +45,7 @@ Kubernetes Master/Node are deployed and will schedule jobs in order to create ne
 A `CF Application runtime` or `CFAR` is then deployed on Kubernetes using a Helm chart according to the the information defined within a `Bosh` Release yaml manifest 
 which is then processed by [`fissile`](https://github.com/cloudfoundry-incubator/fissile) to populate the container image. 
 
-![](CFAR1.png)
+![](images/CFAR1.png)
 
 **NOTE**: The new approach should be based on [`CNCF - Buildpack`](https://docs.cloudfoundry.org/buildpacks/understand-buildpacks.html). Is it then used by `fissile` or another tool internaly ?
 
