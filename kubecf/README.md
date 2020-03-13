@@ -88,7 +88,7 @@ kubectl -n kubecf get pods -w
 
 ### Additional features needed for kind
 
-- Create a Cluster RBAC for the `` group used to access the console/dashboard using a Token
+- Create a Cluster Admin Group for the group `system:bootstrappers` used to access the console/dashboard using a Token created as a secret with token-id, token-secret, auth-extra-groups: system:bootstrappers:worker
 ```bash
 export NODE_IP=95.217.134.196
 export TOKEN_PUBLIC=<CHANGE.ME>
