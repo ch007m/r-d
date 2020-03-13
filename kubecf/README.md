@@ -11,15 +11,38 @@
 
 - Install first [`kind`](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
 ```bash
+cd ~/temp
+alias sudo='sudo env PATH=$PATH'
 curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64
 chmod +x ./kind
 sudo mv kind /usr/local/bin
-alias sudo='sudo env PATH=$PATH'
 ```
-
+- Create a [kind config file]() mapping and exposing additional ports and configuring ingress
+```bash
+cat << _EOF_  > cfg.yml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
+        authorization-mode: "AlwaysAllow"
+  extraPortMappings:
+  - containerPort: 80
+    hostPort: 80
+    protocol: TCP
+  - containerPort: 443
+    hostPort: 443
+    protocol: TCP
+_EOF_
+```
 - Create a kubernetes cluster
 ```bash
-sudo kind create cluster --name kubecf
+sudo kind create cluster --name kubecf --config=cfg.yml
 sudo kind get kubeconfig --name kubecf > .kubeconfig
 ```
 
@@ -63,11 +86,93 @@ helm install kubecf \
 kubectl -n kubecf get pods -w
 ```
 
+### Additional features needed for kind
+
+- Create a RBAC and token for the user accessing the dashboard
+```bash
+export NODE_IP=95.217.134.196
+cat << _EOF_  > security-dashboard.yml
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cluster-admin-for-bootstrappers
+subjects:
+- kind: Group
+  name: system:bootstrappers
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bootstrap-token-4rp3cg
+  namespace: kube-system
+
+type: bootstrap.kubernetes.io/token
+stringData:
+  # Human readable description. Optional.
+  description: snowdrop-admin-user
+
+  # Token ID and secret. Required.
+  token-id: 4rp3cg
+  token-secret: gyc63n7m1t0oj8wv
+
+  # Allowed usages.
+  usage-bootstrap-authentication: "true"
+  usage-bootstrap-signing: "true"
+  auth-extra-groups: system:bootstrappers:worker
+_EOF_
+
+kc apply -f security-dashboard.yml
+```
+
+- Install the k8s dashboard
+```bash
+kc apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/recommended.yaml
+```
+
+- Deploy [Ingress](https://kind.sigs.k8s.io/docs/user/ingress/) controller
+```bash
+kc apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/mandatory.yaml
+kc apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/baremetal/service-nodeport.yaml
+kc patch deployments -n ingress-nginx nginx-ingress-controller -p '{"spec":{"template":{"spec":{"containers":[{"name":"nginx-ingress-controller","ports":[{"containerPort":80,"hostPort":80},{"containerPort":443,"hostPort":443}]}],"nodeSelector":{"ingress-ready":"true"},"tolerations":[{"key":"node-role.kubernetes.io/master","operator":"Equal","effect":"NoSchedule"}]}}}}'
+```
+- Create an `ingress resource` for the dashboard
+```bash
+cat << _EOF_  > ingress-dashboard.yml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    kubernetes.io/ingress.class: nginx
+  labels:
+    app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+spec:
+  rules:
+  - host: k8s-console.${NODE_IP}.nip.io
+    http:
+      paths:
+      - backend:
+          serviceName: kubernetes-dashboard
+          servicePort: 443
+        path: /
+_EOF_
+
+kc apply -f ingress-dashboard.yml
+```
+
 - To destroy/clean the cluster
 ```bash
 sudo kind delete cluster --name kubecf
 ```
-
 
 ## Using Kubernetes cluster
 
