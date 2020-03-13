@@ -31,9 +31,14 @@ Cloud Foundry offers then 2 solutions to manage either the Kubernetes clusters t
 
 List of Cloud Foundry [projects](https://www.cloudfoundry.org/projects/), github repo, points of contact, channels to chat, ...
 
-**Remark**: The project `kubo` created by Google and CloudFoundry and called now `CF Container Runtime` is positioned within the [Cloud Foundry doc](https://www.youtube.com/watch?v=CwAmh8MdWCg) as a 
+**Remarks**: 
+
+The project `kubo` created by Google and CloudFoundry and called now `CF Container Runtime` is positioned within the [Cloud Foundry doc](https://www.youtube.com/watch?v=CwAmh8MdWCg) as a 
 project able to manage Kubernetes clusters, scaling them using `Bosh Director` top of vSphere, GCP, ... It then uses `agent` deployed within the VMs where the
 Kubernetes Master/Node are deployed and will schedule jobs in order to create new VMs, perform rolling upgrade without zero downtime.
+
+A `CF Application runtime` or `CFAR` is then deployed on Kubernetes using a Helm chart according to the the information defined within a `Bosh` Release yaml manifest 
+which is then processed by [`fissile`](https://github.com/cloudfoundry-incubator/fissile) to populate the container image. 
 
 ## Interesting references
 
