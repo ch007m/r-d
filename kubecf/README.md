@@ -45,7 +45,7 @@ Kubernetes Master/Node are deployed and will schedule jobs in order to create ne
 
 ## DevExp on k8s
 
-A `CF Application runtime` or `CFAR` is then deployed on Kubernetes using a Helm chart according to the the information defined within a `Bosh` Release yaml manifest 
+A `CF Application runtime` or `CFAR` is then deployed on Kubernetes using a Helm chart according to the the information defined within an [Application yaml manifest](https://docs.cloudfoundry.org/devguide/deploy-apps/manifest-attributes.html) 
 which is then processed by [`fissile or Buildpack`](https://github.com/cloudfoundry-incubator/fissile) to populate the container image. 
 
 ![](images/CFAR.png)
