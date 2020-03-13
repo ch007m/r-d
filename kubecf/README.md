@@ -46,7 +46,7 @@ sudo kind create cluster --name kubecf --config=cfg.yml
 sudo kind get kubeconfig --name kubecf > .kubeconfig
 ```
 
-- Create an alias to use `kc` instead of kubectl and export the KUBECONFIG var
+- Create an alias to use `kc` instead of `kubectl` and export the `KUBECONFIG` env var
 ```bash
 alias kc=kubectl
 export KUBECONFIG=.kubeconfig
@@ -88,9 +88,12 @@ kubectl -n kubecf get pods -w
 
 ### Additional features needed for kind
 
-- Create a RBAC and token for the user accessing the dashboard
+- Create a Cluster RBAC for the `` group used to access the console/dashboard using a Token
 ```bash
 export NODE_IP=95.217.134.196
+export TOKEN_PUBLIC=<CHANGE.ME>
+export TOKEN_SECRET=<CHANGE.ME>
+
 cat << _EOF_  > security-dashboard.yml
 ---
 kind: ClusterRoleBinding
@@ -110,7 +113,7 @@ roleRef:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: bootstrap-token-4rp3cg
+  name: bootstrap-token-${TOKEN_PUBLIC}
   namespace: kube-system
 
 type: bootstrap.kubernetes.io/token
@@ -119,8 +122,8 @@ stringData:
   description: snowdrop-admin-user
 
   # Token ID and secret. Required.
-  token-id: 4rp3cg
-  token-secret: gyc63n7m1t0oj8wv
+  token-id: ${TOKEN_PUBLIC}
+  token-secret: ${TOKEN_SECRET}
 
   # Allowed usages.
   usage-bootstrap-authentication: "true"
@@ -142,7 +145,7 @@ kc apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.3
 kc apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/baremetal/service-nodeport.yaml
 kc patch deployments -n ingress-nginx nginx-ingress-controller -p '{"spec":{"template":{"spec":{"containers":[{"name":"nginx-ingress-controller","ports":[{"containerPort":80,"hostPort":80},{"containerPort":443,"hostPort":443}]}],"nodeSelector":{"ingress-ready":"true"},"tolerations":[{"key":"node-role.kubernetes.io/master","operator":"Equal","effect":"NoSchedule"}]}}}}'
 ```
-- Create an `ingress resource` for the dashboard
+- Create an `ingress resource` to access the dashboard from any machine
 ```bash
 cat << _EOF_  > ingress-dashboard.yml
 apiVersion: extensions/v1beta1
