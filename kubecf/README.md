@@ -20,10 +20,12 @@ provision a kubernetes cluster with their cloud offering and the different compo
 - [Capi](https://github.com/cloudfoundry/cloud_controller_ng): API controller
 
 Three upstream projects have been designed to develop the Cloud Foundry distribution for Kubernetes [kubecf](https://kubecf.suse.dev/docs/).
-KubeCF uses the [Cloud Foundry Operator](https://github.com/cloudfoundry-incubator/cf-operator/) to deploy and track CF Deployments, consuming directly also BOSH Releases, among Kubernetes Native components.
+
 - [Eirini](https://github.com/cloudfoundry-incubator/eirini): In a nutshell Eirini is a Kubernetes backend for Cloud Foundry, made in the effort to decouple Cloud Foundry from Diego, the only current option of a scheduler. . It deploys CF apps to a kube backend, using OCI images and Kube deployments.
 - [Quarks](https://kubecf.suse.dev/docs/concepts/quarks/): Incubating effort that packages `Cloud Foundry Application Runtime` as `containers` instead of `virtual machines`
 - [CFAR](https://www.cloudfoundry.org/container-runtime/): Cloud Foundry Container Runtime (CFCR) 
+
+**NOTE**: KubeCF uses the [Cloud Foundry Operator](https://github.com/cloudfoundry-incubator/cf-operator/) to deploy and track CF Deployments, consuming directly also `BOSH Releases`, among Kubernetes Native components.
 
 Cloud Foundry offers then 2 solutions to manage either the Kubernetes clusters top of a public cloud provider (vSphere, GCP, ...) or the containerized applications:
 - `CF Container Runtime` which is built using `Kubernetes` and `CF BOSH`. They will be used when you need more flexibility and developer-built containers for apps, or are using pre-packaged apps delivered in a container.
@@ -39,6 +41,8 @@ Kubernetes Master/Node are deployed and will schedule jobs in order to create ne
 
 A `CF Application runtime` or `CFAR` is then deployed on Kubernetes using a Helm chart according to the the information defined within a `Bosh` Release yaml manifest 
 which is then processed by [`fissile`](https://github.com/cloudfoundry-incubator/fissile) to populate the container image. 
+
+![](CFAR.png)
 
 ## Interesting references
 
