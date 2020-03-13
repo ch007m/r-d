@@ -20,14 +20,33 @@ Cloud Foundry gives you 2 choices to develop an application:
 
 List of Cloud Foundry [projects](https://www.cloudfoundry.org/projects/), github repo, points of contact, channels to chat, ...
 
-## Doc
+## Interesting references
 
 - Install locally cfdev and deploy an application: https://tanzu.vmware.com/tutorials/getting-started/local/install-pivotal-dev
 - Deploy cloudfoundry on a local k8s: https://medium.com/@jmpinto/deploying-cloudfoundry-on-a-local-kubernetes-9103a57bf713
 - kubecf doc: https://kubecf.suse.dev/docs/getting-started/kubernetes-deploy/
 - cf-operator: https://github.com/cloudfoundry-incubator/cf-operator
 
-## Deploy kubecf on Kind
+## Cloud Foundry Kubernetes
+
+To play with the new Cloud Foundry Kubernetes distribution, it is required to have :
+- A Kubernetes cluster (>= 1.14)
+- The Helm tool (>= 1.13)
+- The kubectl client installed
+- A docker daemon
+
+Next, you will install 2 helm charts in order to deploy:
+- cf-operator: https://cloudfoundry-incubator.github.io/quarks-helm/
+- kubecf: https://github.com/cloudfoundry-incubator/kubecf/tree/master/deploy/helm/kubecf
+
+**NOTES**
+
+The `cf-operator` is the underlying generic tool to deploy a (modified) BOSH deployment like Kubecf for use.
+It has to be installed in the same Kubernetes cluster that Kubecf will be deployed to.
+
+In this default deployment, kubecf is launched without Ingress, and it uses the Diego scheduler.
+
+### Deploy kubecf on Kind
 
 - Install first [`kind`](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
 ```bash
@@ -197,7 +216,7 @@ kc apply -f ingress-dashboard.yml
 sudo kind delete cluster --name kubecf
 ```
 
-## Using Kubernetes cluster
+### Using a vanilla Kubernetes cluster
 
 **NOTE**: The scenario reported here will fail due to a problem with the Certificate needed by the UAA application. [Ticket](https://github.com/cloudfoundry-incubator/kubecf/issues/483) has been created and should be fiexed with
 release [1.2.0](https://github.com/cloudfoundry-incubator/kubecf/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.2.0)
