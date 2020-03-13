@@ -14,14 +14,19 @@
 curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64
 chmod +x ./kind
 sudo mv kind /usr/local/bin
+alias sudo='sudo env PATH=$PATH'
 ```
 
 - Create a kubernetes cluster
 ```bash
-kind create cluster --name kubecf
-kind get kubeconfig --name kubecf > .kubeconfig
-cat .kubeconfig
+sudo kind create cluster --name kubecf
+sudo kind get kubeconfig --name kubecf > .kubeconfig
+```
+
+- Create an alias to use `kc` instead of kubectl and export the KUBECONFIG var
+```bash
 alias kc=kubectl
+export KUBECONFIG=.kubeconfig
 ```
 - Create a namespace for the cf-operator and install it
 ```bash
@@ -30,7 +35,7 @@ helm repo add quarks https://cloudfoundry-incubator.github.io/quarks-helm/
 helm search repo quarks
 helm install cf-operator quarks/cf-operator --namespace cf-operator --set "global.operator.watchNamespace=kubecf"
 ```
-- Create the following `values.yaml` file with the VM Ethernet IP address that we could use from our laptop
+- Create the following `values.yaml` file with the `Node IP` address that we could use within the vm
 ```bash
 node_ip=$(kubectl get node kubecf-control-plane \
   --output jsonpath='{ .status.addresses[?(@.type == "InternalIP")].address }')
@@ -56,6 +61,11 @@ helm install kubecf \
 - Watch the pods
 ```bash
 kubectl -n kubecf get pods -w
+```
+
+- To destroy/clean the cluster
+```bash
+sudo kind delete cluster --name kubecf
 ```
 
 
