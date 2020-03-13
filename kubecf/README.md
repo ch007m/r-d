@@ -3,12 +3,12 @@
 ## Table of Contents
 
    * [Introdution](#introdution)
-   * [DevExp on k8s](#devexp-on-k8s)
-   * [Interesting references](#interesting-references)
-   * [Cloud Foundry Kubernetes](#cloud-foundry-kubernetes)
-      * [Deploy using Kubernetes Kind](#deploy-using-kubernetes-kind)
-      * [Additional features needed for kind](#additional-features-needed-for-kind)
-      * [Deploy on a Kubernetes created using kubeadm, kubelet](#deploy-on-a-kubernetes-created-using-kubeadm-kubelet)
+      * [DevExp on k8s](#devexp-on-k8s)
+      * [Cloud Foundry Kubernetes](#cloud-foundry-kubernetes)
+         * [Deploy using Kubernetes Kind](#deploy-using-kubernetes-kind)
+         * [Additional features needed for kind](#additional-features-needed-for-kind)
+         * [Deploy on a Kubernetes created using kubeadm, kubelet](#deploy-on-a-kubernetes-created-using-kubeadm-kubelet)
+      * [Interesting references](#interesting-references)
 
 ## Introdution
 
@@ -51,13 +51,6 @@ which is then processed by [`fissile or Buildpack`](https://github.com/cloudfoun
 ![](images/CFAR.png)
 
 **NOTE**: The new approach should be based on [`CNCF - Buildpack`](https://docs.cloudfoundry.org/buildpacks/understand-buildpacks.html). Is it then used by `fissile` or another tool internally ?
-
-## Interesting references
-
-- Install locally cfdev and deploy an application: https://tanzu.vmware.com/tutorials/getting-started/local/install-pivotal-dev
-- Deploy cloudfoundry on a local k8s: https://medium.com/@jmpinto/deploying-cloudfoundry-on-a-local-kubernetes-9103a57bf713
-- kubecf doc: https://kubecf.suse.dev/docs/getting-started/kubernetes-deploy/
-- cf-operator: https://github.com/cloudfoundry-incubator/cf-operator
 
 ## Cloud Foundry Kubernetes
 
@@ -305,3 +298,10 @@ helm install kubecf \
 ```bash
 kubectl -n kubecf get pods -w
 ```
+
+## Interesting references
+
+- Install locally cfdev and deploy an application: https://tanzu.vmware.com/tutorials/getting-started/local/install-pivotal-dev
+- Deploy cloudfoundry on a local k8s: https://medium.com/@jmpinto/deploying-cloudfoundry-on-a-local-kubernetes-9103a57bf713
+- kubecf doc: https://kubecf.suse.dev/docs/getting-started/kubernetes-deploy/
+- cf-operator: https://github.com/cloudfoundry-incubator/cf-operator
