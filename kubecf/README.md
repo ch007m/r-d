@@ -3,7 +3,7 @@
 ## Table of Contents
 
    * [Introdution](#introdution)
-   * [DevEXp on k8s](#devexp-on-k8s)
+   * [DevExp on k8s](#devexp-on-k8s)
    * [Interesting references](#interesting-references)
    * [Cloud Foundry Kubernetes](#cloud-foundry-kubernetes)
       * [Deploy using Kubernetes Kind](#deploy-using-kubernetes-kind)
