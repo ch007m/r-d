@@ -22,7 +22,7 @@ This project has been created to collect information about the Kubernetes offeri
 
 A portfolio of products and services for modernizing applications and infrastructure
 
-![](images/tanzu-application-service.png
+![](images/tanzu-application-service.png)
 
 1. BUILD BETTER APPS
 
