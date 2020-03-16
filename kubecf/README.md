@@ -3,6 +3,8 @@
 ## Table of Contents
 
    * [Introduction](#introduction)
+      * [VMware Tanzu](#vmware-tanzu)
+      * [Cloudfoundry](#cloudfoundry)
    * [DevExp on k8s](#devexp-on-k8s)
    * [Cloud Foundry Kubernetes](#cloud-foundry-kubernetes)
       * [Deploy using Kubernetes Kind](#deploy-using-kubernetes-kind)
@@ -12,8 +14,39 @@
 
 ## Introduction
 
-This project has been created to collect information about [VMWare Tanzu](https://github.com/vmware-tanzu) but also what [Cloudfoundry](https://www.cloudfoundry.org/) is currently developing to 
-provision a kubernetes cluster with their cloud offering and the different components part of their platform :
+This project has been created to collect information about the Kubernetes offering of [VMWare Tanzu](https://github.com/vmware-tanzu) and [Cloudfoundry](https://www.cloudfoundry.org/).
+ 
+### VMware Tanzu 
+
+A portfolio of products and services for modernizing applications and infrastructure
+
+1.BUILD BETTER APPS
+
+- Application Service: A modern runtime for apps
+- Build Service: Build containers from source code
+- Application Catalog: Production-ready open-source containers
+
+2. SIMPLIFY CLOUD OPS
+- Mission Control: Centralized cluster management
+- Observability: Modern app monitoring and analytics
+- Kubernetes Grid: Enterprise-ready runtime
+
+Spring : Cloud native Java development
+Spring Runtime:  OpenJDK, Spring, Apache Tomcat support
+
+3. CI/CD
+- Concourse: Scale delivery across platforms and teams
+
+4. DATA SERVICES
+- GemFire: In-memory data store for microservices
+- Greenplum: Scale-out EDW for analytics
+- Postgres: Packaged and supported Postgres
+- RabbitMQ: Cloud native message broker
+ 
+### Cloudfoundry
+
+The Cloudfoundry platform is progressively migrating to kubernetes. The core components of the platform are listed hereafter: 
+
 - [uua](https://github.com/cloudfoundry/uaa): User Account and Authorisation server - OpenID
 - [Diego](https://github.com/cloudfoundry/diego-design-notes): Diego schedules and runs Tasks and Long-Running Processes. it is able to take a `Docker image` and create a container
 - [Bosh](https://github.com/cloudfoundry/bosh): an open source tool for release engineering, deployment, lifecycle management, and monitoring of distributed systems.
@@ -128,6 +161,16 @@ node_ip=$(kubectl get node kubecf-control-plane \
   --output jsonpath='{ .status.addresses[?(@.type == "InternalIP")].address }')
 cat << _EOF_  > values.yaml
 system_domain: ${node_ip}.nip.io
+features:
+  eirini:
+    enabled: true
+  ingress:
+    enabled: false
+    tls:
+      crt: ~
+      key: ~
+    annotations: {}
+    labels: {}
 services:
   router:
     externalIPs:
