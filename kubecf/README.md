@@ -342,6 +342,104 @@ helm install kubecf \
 kubectl -n kubecf get pods -w
 ```
 
+### Play with Eirini
+
+- Maven and JDK should be installed on the VM
+```bash
+sudo yum install maven
+```
+
+- Install first the `cf` client as documented [here](https://github.com/cloudfoundry/cli#downloads)
+```bash
+cd temp
+curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github" | tar -zx
+sudo mv cf /usr/local/bin
+```
+
+- If you want to use the Developer console - stratos, install it using the following helm chart
+```bash
+kc create ns consolehelm status my-console
+helm repo add stratos https://cloudfoundry.github.io/stratos
+helm install my-console stratos/console --namespace console
+```
+**NOTE**: TODO: Add ingress and create a resource to access the console !
+
+- Next, access the CF API using the node ip address as registered
+```bash
+cf api --skip-ssl-validation api.172.17.0.2.nip.io
+Setting api endpoint to api.172.17.0.2.nip.io...
+OK
+
+api endpoint:   https://api.172.17.0.2.nip.io
+api version:    2.146.0
+Not logged in. Use 'cf login' or 'cf login --sso' to log in.
+```
+
+- We fetch the random generated credentials for the default `admin user` 
+```bash
+export admin_pass=$(kubectl get secret \
+          --namespace kubecf kubecf.var-cf-admin-password \
+          -o jsonpath='{.data.password}' \
+          | base64 --decode)
+```
+
+- We authenticate using those credentials
+```bash
+cf auth admin "${admin_pass}"
+API endpoint: https://api.172.17.0.2.nip.io
+Authenticating...
+OK
+
+Use 'cf target' to view or set your target org and space.
+```
+- Let’s create a `demo` organization, a `space` and a `development user`
+```bash
+cf create-org redhat.com
+cf create-space demo -o redhat.com
+cf create-user developer password
+cf set-space-role developer redhat.com demo SpaceManager
+```
+- Switch to the developer user
+```bash
+cf login -u developer -p password
+API endpoint: https://api.172.17.0.2.nip.io
+Authenticating...
+OK
+Targeted org redhat.com
+Targeted space demo
+
+API endpoint:   https://api.172.17.0.2.nip.io (API version: 2.146.0)
+User:           developer
+Org:            redhat.com
+Space:          demo
+```
+- Install a Spring Boot application and build it
+```bash
+git clone https://github.com/cloudfoundry-samples/spring-music
+cd spring-music/
+./gradlew assemble
+```
+- Next push it on the k8s cluster
+```bash
+cf push --hostname spring-music
+Deprecation warning: Use of the '--hostname' command-line flag option is deprecated in favor of the 'routes' property in the manifest. Please see https://docs.cloudfoundry.org/devguide/deploy-apps/manifest-attributes.html#routes for usage information. The '--hostname' command-line flag option will be removed in the future.
+
+Pushing from manifest to org redhat.com / space demo as developer...
+Using manifest file /home/snowdrop/temp/spring-music/manifest.yml
+Getting app info...
+Creating app with these attributes...
++ name:       spring-music
+  path:       /home/snowdrop/temp/spring-music/build/libs/spring-music-1.0.jar
++ memory:     1G
+  env:
++   JBP_CONFIG_SPRING_AUTO_RECONFIGURATION
+  routes:
++   spring-music.172.17.0.2.nip.io
+
+Creating app spring-music...
+You are not authorized to perform the requested action
+FAILED
+```
 ## Interesting references
 
 - Install locally cfdev and deploy an application: https://tanzu.vmware.com/tutorials/getting-started/local/install-pivotal-dev
