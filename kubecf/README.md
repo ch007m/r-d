@@ -68,6 +68,10 @@ Three upstream projects have been designed to develop the Cloud Foundry distribu
 
 ![](images/Eirini1.png)
 
+  **NOTE**: When Eirini deploys an application on kubernetes (= `cf push`), then it will create by default a `statefulset` kubernetes like a `Service` or `Ingress` resources (TO BE CHECKED). If the team/project
+  wants to extend the resources created, then it is needed to create a K8s Webhook. This is the reason why the [project](https://www.cloudfoundry.org/blog/introducing-eirinix-how-to-build-eirini-extensions/) `EiriniX` has been created
+  to make the Eirini ecosystem `pluggable`.
+
 - [Quarks](https://kubecf.suse.dev/docs/concepts/quarks/): Incubating effort that packages `Cloud Foundry Application Runtime` as `containers` instead of `virtual machines`
 - [CFAR](https://www.cloudfoundry.org/container-runtime/): Cloud Foundry Container Runtime (CFCR) 
 
