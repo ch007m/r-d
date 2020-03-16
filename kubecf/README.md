@@ -54,17 +54,26 @@ A portfolio of products and services for modernizing applications and infrastruc
  
 ### Cloudfoundry
 
-The Cloudfoundry platform is progressively migrating to kubernetes. The core components of the platform are listed hereafter: 
+The Cloudfoundry platform is progressively migrating to kubernetes and to support such a migration, the core components of the platform have been packaged
+as helm charts and containerized. 
 
-- [uua](https://github.com/cloudfoundry/uaa): User Account and Authorisation server - OpenID
+**FYI**: Some of the most important components of the CloudFoundry platform are listed hereafter: 
+
+- [Capi](https://github.com/cloudfoundry/cloud_controller_ng): API controller used by the `CLI` to interact with the Cloud platform
+- [Uua](https://github.com/cloudfoundry/uaa): User Account and Authorisation server - OpenID
+- [Bosh](https://github.com/cloudfoundry/bosh): An open source tool for release engineering, deployment, lifecycle management, and monitoring of distributed systems.
 - [Diego](https://github.com/cloudfoundry/diego-design-notes): Diego schedules and runs Tasks and Long-Running Processes. it is able to take a `Docker image` and create a container
-- [Bosh](https://github.com/cloudfoundry/bosh): an open source tool for release engineering, deployment, lifecycle management, and monitoring of distributed systems.
 - [Stratos](https://github.com/cloudfoundry/stratos): Developer console
-- [Capi](https://github.com/cloudfoundry/cloud_controller_ng): API controller
 
-Three upstream projects have been designed to develop the Cloud Foundry distribution for Kubernetes [kubecf](https://kubecf.suse.dev/docs/).
+#### Kubernetes projects
 
-- [Eirini](https://github.com/cloudfoundry-incubator/eirini): In a nutshell Eirini is a Kubernetes backend for Cloud Foundry, made in the effort to decouple Cloud Foundry from Diego, the only current option of a scheduler. It deploys CF apps to a kube backend, using OCI images and Kube deployments.
+Different upstream projects have been designed to manage the Cloud Foundry distribution top of Kubernetes [kubecf](https://kubecf.suse.dev/docs/). The most important of such projects are : `Eirini` and `Quarks`
+
+1. [Eirini](https://github.com/cloudfoundry-incubator/eirini)
+
+In a nutshell Eirini is a Kubernetes backend for Cloud Foundry, made in the effort to decouple Cloud Foundry from Diego, the only current option of a scheduler. It deploys CF apps to a kube backend, using OCI images and Kube deployments.
+Eirini provides an `Orchestrator Provider Interface (OPI)` layer, that abstracts away orchestration from Cloud Foundry's control plane. This means Eirini is not solely a Kube backend at all, 
+but that it is a generic backend for any scheduler! This means it could schedule to `Diego`, `Kube`, `Swarm` and other orchestration providers, as long as there is `an implementation` of the `OPI layer` for the target platform.
 
 ![](images/Eirini1.png)
 
@@ -72,7 +81,13 @@ Three upstream projects have been designed to develop the Cloud Foundry distribu
   wants to extend the resources created, then it is needed to create a K8s Webhook. This is the reason why the [project](https://www.cloudfoundry.org/blog/introducing-eirinix-how-to-build-eirini-extensions/) `EiriniX` has been created
   to make the Eirini ecosystem `pluggable`.
 
-- [Quarks](https://kubecf.suse.dev/docs/concepts/quarks/): Incubating effort that packages `Cloud Foundry Application Runtime` as `containers` instead of `virtual machines`
+2. [Quarks](https://kubecf.suse.dev/docs/concepts/quarks/)
+
+The is like `Eirini` an incubating project and effort that packages `Cloud Foundry Application Runtime` as `containers` instead of `virtual machines` enabling easy deployment to Kubernetes.
+The resulting containerized CFAR provides an identical developer experience to that of BOSH-managed Cloud Foundry installations, requires less infrastructure capacity and delivers an operational experience that is familiar to Kubernetes operators.
+
+It is delivered as a Kubernetes Operator called [`cf-operator`](https://github.com/cloudfoundry-incubator/cf-operator) which enables the deployment of BOSH Releases, especially Cloud Foundry, to Kubernetes.
+
 - [CFAR](https://www.cloudfoundry.org/container-runtime/): Cloud Foundry Container Runtime (CFCR) 
 
 **NOTE**: KubeCF uses the [Cloud Foundry Operator](https://github.com/cloudfoundry-incubator/cf-operator/) to deploy and track CF Deployments, consuming directly also `BOSH Releases`, among Kubernetes Native components.
