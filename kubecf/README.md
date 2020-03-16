@@ -456,7 +456,7 @@ Waiting for API to complete processing files...
 Staging app and tracing logs...
 ```
 - During the execution of the command `cf push`, the project will be uploaded and `buidpack` will be executed. Next, `eirini` will create a `statefulset` and `pod`
-- Check pod created
+- Check the pod of the application created. 
 ```bash
 kc get all -n kubecf-eirini
 NAME                                 READY   STATUS             RESTARTS   AGE
@@ -465,6 +465,8 @@ pod/spring-music-demo-f47828c9d8-0   0/1     ImagePullBackOff   0          79s
 NAME                                            READY   AGE
 statefulset.apps/spring-music-demo-f47828c9d8   0/1     79s
 ```
+
+**NOTE**: The pod will fail to be created as currently there is a x508 certificate authority issue which has been reported [here](https://github.com/cloudfoundry-incubator/kubecf/issues/487)
 
 ## Interesting references
 
