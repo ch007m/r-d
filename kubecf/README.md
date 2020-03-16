@@ -22,18 +22,19 @@ This project has been created to collect information about the Kubernetes offeri
 
 A portfolio of products and services for modernizing applications and infrastructure
 
+![](images/tanzu-application-service.png
 
 1. BUILD BETTER APPS
 
-  - Application Service: A modern runtime for apps
-  - Build Service: Build containers from source code
-  - Application Catalog: Production-ready open-source containers
+  - [Application Service](https://tanzu.vmware.com/application-service): A modern runtime for apps
+  - [Build Service](https://tanzu.vmware.com/build-service): Build containers from source code and automates container creation, management, and governance at enterprise scale
+  - [Application Catalog](https://tanzu.vmware.com/application-catalog): Catalog of production-ready open-source software from the Bitnami collection.
 
 2. SIMPLIFY CLOUD OPS
 
-  - Mission Control: Centralized cluster management
-  - Observability: Modern app monitoring and analytics
-  - Kubernetes Grid: Enterprise-ready runtime
+  - [Mission Control](https://tanzu.vmware.com/mission-control): Centralized cluster management
+  - [Observability](https://tanzu.vmware.com/observability): Modern app monitoring and analytics
+  - [Kubernetes Grid](https://tanzu.vmware.com/kubernetes-grid): Streamline operations across multi-cloud infrastructure
 
 3. FRAMEWORKS
   - Spring : Cloud native Java development
@@ -41,12 +42,12 @@ A portfolio of products and services for modernizing applications and infrastruc
 
 4. CI/CD
 
-  - Concourse: Scale delivery across platforms and teams
+  - [Concourse](https://tanzu.vmware.com/concourse): Scale delivery across platforms and teams
 
 5. DATA SERVICES
 
-  - GemFire: In-memory data store for microservices
-  - Greenplum: Scale-out EDW for analytics
+  - [GemFire](https://tanzu.vmware.com/gemfire): In-memory data store for microservices
+  - [Greenplum](https://tanzu.vmware.com/greenplum): Scale-out EDW for analytics
   - Postgres: Packaged and supported Postgres
   - RabbitMQ: Cloud native message broker
  
