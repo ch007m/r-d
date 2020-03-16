@@ -10,7 +10,7 @@
       * [Deploy using Kubernetes Kind](#deploy-using-kubernetes-kind)
       * [Additional features needed for kind](#additional-features-needed-for-kind)
       * [Deploy on a Kubernetes created using kubeadm, kubelet](#deploy-on-a-kubernetes-created-using-kubeadm-kubelet)
-      * [Play with Eirini](#play-with-eirini)
+   * [Play with Eirini](#play-with-eirini)
    * [Interesting references](#interesting-references)
 
 
@@ -344,7 +344,7 @@ helm install kubecf \
 kubectl -n kubecf get pods -w
 ```
 
-### Play with Eirini
+## Play with Eirini
 
 - Maven and JDK should be installed on the VM
 ```bash
