@@ -10,7 +10,9 @@
       * [Deploy using Kubernetes Kind](#deploy-using-kubernetes-kind)
       * [Additional features needed for kind](#additional-features-needed-for-kind)
       * [Deploy on a Kubernetes created using kubeadm, kubelet](#deploy-on-a-kubernetes-created-using-kubeadm-kubelet)
+      * [Play with Eirini](#play-with-eirini)
    * [Interesting references](#interesting-references)
+
 
 ## Introduction
 
