@@ -86,6 +86,9 @@ Kubernetes Master/Node are deployed and will schedule jobs in order to create ne
 
 ## DevExp on k8s
 
+**WARNING**: The following section which has been created from this [video](https://www.youtube.com/watch?v=CwAmh8MdWCg) is certainly not correct at all anymore as currently `fissile` is not used at all but instead `buildpack` and 
+no `helm chart` is created when we push a spring boot application on k8s. It must be reviewed and updated !
+
 A `CF Application runtime` or `CFAR` is then deployed on Kubernetes using a Helm chart according to the the information defined within an [Application yaml manifest](https://docs.cloudfoundry.org/devguide/deploy-apps/manifest-attributes.html) 
 which is then processed by [`fissile or Buildpack`](https://github.com/cloudfoundry-incubator/fissile) to populate the container image. 
 
