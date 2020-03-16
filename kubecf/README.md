@@ -22,28 +22,32 @@ This project has been created to collect information about the Kubernetes offeri
 
 A portfolio of products and services for modernizing applications and infrastructure
 
-1.BUILD BETTER APPS
 
-- Application Service: A modern runtime for apps
-- Build Service: Build containers from source code
-- Application Catalog: Production-ready open-source containers
+1. BUILD BETTER APPS
+
+  - Application Service: A modern runtime for apps
+  - Build Service: Build containers from source code
+  - Application Catalog: Production-ready open-source containers
 
 2. SIMPLIFY CLOUD OPS
-- Mission Control: Centralized cluster management
-- Observability: Modern app monitoring and analytics
-- Kubernetes Grid: Enterprise-ready runtime
+
+  - Mission Control: Centralized cluster management
+  - Observability: Modern app monitoring and analytics
+  - Kubernetes Grid: Enterprise-ready runtime
 
 Spring : Cloud native Java development
 Spring Runtime:  OpenJDK, Spring, Apache Tomcat support
 
 3. CI/CD
-- Concourse: Scale delivery across platforms and teams
+
+  - Concourse: Scale delivery across platforms and teams
 
 4. DATA SERVICES
-- GemFire: In-memory data store for microservices
-- Greenplum: Scale-out EDW for analytics
-- Postgres: Packaged and supported Postgres
-- RabbitMQ: Cloud native message broker
+
+  - GemFire: In-memory data store for microservices
+  - Greenplum: Scale-out EDW for analytics
+  - Postgres: Packaged and supported Postgres
+  - RabbitMQ: Cloud native message broker
  
 ### Cloudfoundry
 
@@ -399,6 +403,7 @@ Use 'cf target' to view or set your target org and space.
 cf create-org redhat.com
 cf create-space demo -o redhat.com
 cf create-user developer password
+cf set-space-role developer redhat.com demo SpaceDeveloper
 cf set-space-role developer redhat.com demo SpaceManager
 ```
 - Switch to the developer user
@@ -439,9 +444,27 @@ Creating app with these attributes...
 +   spring-music.172.17.0.2.nip.io
 
 Creating app spring-music...
-You are not authorized to perform the requested action
-FAILED
+Mapping routes...
+Comparing local files to remote cache...
+Packaging files to upload...
+Uploading files...
+ 49.96 MiB / 49.96 MiB [=================================================================================================================================================================] 100.00% 1s
+
+Waiting for API to complete processing files...
+
+Staging app and tracing logs...
 ```
+- During the execution of the command `cf push`, the project will be uploaded and `buidpack` will be executed. Next, `eirini` will create a `statefulset` and `pod`
+- Check pod created
+```bash
+kc get all -n kubecf-eirini
+NAME                                 READY   STATUS             RESTARTS   AGE
+pod/spring-music-demo-f47828c9d8-0   0/1     ImagePullBackOff   0          79s
+
+NAME                                            READY   AGE
+statefulset.apps/spring-music-demo-f47828c9d8   0/1     79s
+```
+
 ## Interesting references
 
 - Install locally cfdev and deploy an application: https://tanzu.vmware.com/tutorials/getting-started/local/install-pivotal-dev
