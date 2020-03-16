@@ -11,6 +11,7 @@
       * [Additional features needed for kind](#additional-features-needed-for-kind)
       * [Deploy on a Kubernetes created using kubeadm, kubelet](#deploy-on-a-kubernetes-created-using-kubeadm-kubelet)
    * [Play with Eirini](#play-with-eirini)
+   * [Backlog of issues](#backlog-of-issues)
    * [Interesting references](#interesting-references)
 
 
@@ -471,6 +472,12 @@ statefulset.apps/spring-music-demo-f47828c9d8   0/1     79s
 ```
 
 **NOTE**: The pod will fail to be created as currently there is a x508 certificate authority issue which has been reported [here](https://github.com/cloudfoundry-incubator/kubecf/issues/487)
+
+## Backlog of issues
+
+- `CF Push` - X509 certificate issue : https://github.com/cloudfoundry-incubator/kubecf/issues/487
+- `kubecf-diego` - Diego fails to start on K8s when it is used instead of `Eirini` with `Kind`: https://github.com/cloudfoundry-incubator/kubecf/issues/484
+- `kubecf-diego-api-0` pod is crashing due to x509 certificate issue using externalIP top k8s - : https://github.com/cloudfoundry-incubator/kubecf/issues/483
 
 ## Interesting references
 
