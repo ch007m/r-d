@@ -35,14 +35,15 @@ A portfolio of products and services for modernizing applications and infrastruc
   - Observability: Modern app monitoring and analytics
   - Kubernetes Grid: Enterprise-ready runtime
 
-Spring : Cloud native Java development
-Spring Runtime:  OpenJDK, Spring, Apache Tomcat support
+3. FRAMEWORKS
+  - Spring : Cloud native Java development
+  - Spring Runtime:  OpenJDK, Spring, Apache Tomcat support
 
-3. CI/CD
+4. CI/CD
 
   - Concourse: Scale delivery across platforms and teams
 
-4. DATA SERVICES
+5. DATA SERVICES
 
   - GemFire: In-memory data store for microservices
   - Greenplum: Scale-out EDW for analytics
