@@ -21,7 +21,7 @@ To play with the new Cloud Foundry Kubernetes distribution, it is required to ha
 
 ### Install Tanzu cf-for-k8s
 
-TODO
+TODO - See instructions [here](https://github.com/cloudfoundry/cf-for-k8s/blob/master/docs/deploy.md)
 
 ### Install KubeCF
 
