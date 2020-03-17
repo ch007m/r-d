@@ -2,12 +2,14 @@
 
 ## Table of Contents
 
-  *[Prerequisites](#prerequisites)
-     * [Deploy using Kubernetes Kind](#deploy-using-kubernetes-kind)
-     * [Additional features needed for kind](#additional-features-needed-for-kind)
-     * [Deploy on a Kubernetes created using kubeadm, kubelet](#deploy-on-a-kubernetes-created-using-kubeadm-kubelet)
-  * [Play with CF Push](#play-with-cf-push)
-  * [Backlog of issues](#backlog-of-issues)
+   * [Prerequisites](#prerequisites)
+      * [Install Tanzu cf-for-k8s](#install-tanzu-cf-for-k8s)
+      * [Install KubeCF](#install-kubecf)
+      * [Using Kind](#using-kind)
+      * [Additional features needed for kind](#additional-features-needed-for-kind)
+      * [Using kubeadm, kubelet](#using-kubeadm-kubelet)
+   * [Play with CF Push](#play-with-cf-push)
+   * [Backlog of issues](#backlog-of-issues)
 
 ## Prerequisites
 
@@ -17,18 +19,25 @@ To play with the new Cloud Foundry Kubernetes distribution, it is required to ha
 - The kubectl client installed
 - A docker daemon
 
-Next, you will install 2 helm charts in order to deploy:
+### Install Tanzu cf-for-k8s
+
+TODO
+
+### Install KubeCF
+
+To use [`kubecf`](https://kubecf.suse.dev/), you will install 2 helm charts in order to deploy:
+
 - cf-operator: https://cloudfoundry-incubator.github.io/quarks-helm/
 - kubecf: https://github.com/cloudfoundry-incubator/kubecf/tree/master/deploy/helm/kubecf
 
 **NOTES**
 
-The `cf-operator` is the underlying generic tool to deploy a (modified) BOSH deployment like Kubecf for use.
+The `cf-operator` is the underlying generic tool to deploy a (modified) BOSH deployment like `Kubecf` for use.
 It has to be installed in the same Kubernetes cluster that Kubecf will be deployed to.
 
-In this default deployment, kubecf is launched without Ingress, and it uses the Diego scheduler.
+In this default deployment, kubecf is launched without Ingress, and it uses the `Eirini` scheduler.
 
-### Deploy using Kubernetes Kind
+### Using Kind
 
 - Install first [`kind`](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
 ```bash
@@ -216,7 +225,7 @@ kc apply -f ingress-dashboard.yml
 sudo kind delete cluster --name kubecf
 ```
 
-### Deploy on a Kubernetes created using kubeadm, kubelet
+### Using kubeadm, kubelet
 
 **NOTE**: The scenario reported here will fail due to a problem with the Certificate needed by the UAA application. [Ticket](https://github.com/cloudfoundry-incubator/kubecf/issues/483) has been created and should be fiexed with
 release [1.2.0](https://github.com/cloudfoundry-incubator/kubecf/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.2.0)
