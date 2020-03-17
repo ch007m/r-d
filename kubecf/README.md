@@ -21,13 +21,15 @@ This project has been created to collect information about the Kubernetes offeri
  
 ### VMware Tanzu 
 
-A portfolio of products and services for modernizing applications and infrastructure
+A portfolio of products and services for modernizing applications and infrastructure on Kubernetes. According to the web site, the platform is based on the following open source projects: https://tanzu.vmware.com/open-source.
+
+Here is the list of the features as proposed - March 2020.
 
 ![](images/tanzu-application-service.png)
 
 1. BUILD BETTER APPS
 
-  - [Application Service](https://tanzu.vmware.com/application-service): A modern runtime for apps
+  - [Application Service](https://tanzu.vmware.com/application-service): A modern runtime for apps. Dependency management, load balancing, container orchestration, logging, and auditing are done for you.
   - [Build Service](https://tanzu.vmware.com/build-service): Build containers from source code and automates container creation, management, and governance at enterprise scale
   - [Application Catalog](https://tanzu.vmware.com/application-catalog): Catalog of production-ready open-source software from the Bitnami collection.
 
@@ -43,19 +45,19 @@ A portfolio of products and services for modernizing applications and infrastruc
 
 4. CI/CD
 
-  - [Concourse](https://tanzu.vmware.com/concourse): Scale delivery across platforms and teams
+  - [Concourse](https://tanzu.vmware.com/concourse): Scale delivery across platforms and teams. Simplify CI/CD workflows. Automate your path to production with declarative, reusable pipelines.
 
 5. DATA SERVICES
 
-  - [GemFire](https://tanzu.vmware.com/gemfire): In-memory data store for microservices
+  - [GemFire](https://tanzu.vmware.com/gemfire): In-memory data store for microservices. High-performance application cache, a database, and much more
   - [Greenplum](https://tanzu.vmware.com/greenplum): Scale-out EDW for analytics
-  - Postgres: Packaged and supported Postgres
+  - [Postgres](https://tanzu.vmware.com/postgres): Packaged and supported Postgres 10,11 & 12. 24x7 support. Includes high availability, backups, and analytics
   - RabbitMQ: Cloud native message broker
  
 ### Cloudfoundry
 
-The Cloudfoundry platform is progressively migrating to kubernetes and to support such a migration, the core components of the platform have been packaged
-as helm charts and containerized. 
+The Cloudfoundry platform, which is in fact what `VMWare Tanzu` is using under the hood, is progressively migrating to `kubernetes`. To support such a migration, the core components of the platform have been containerized and
+packaged as helm charts. 
 
 **FYI**: Some of the most important components of the CloudFoundry platform are listed hereafter: 
 
@@ -63,6 +65,7 @@ as helm charts and containerized.
 - [Uua](https://github.com/cloudfoundry/uaa): User Account and Authorisation server - OpenID
 - [Bosh](https://github.com/cloudfoundry/bosh): An open source tool for release engineering, deployment, lifecycle management, and monitoring of distributed systems.
 - [Diego](https://github.com/cloudfoundry/diego-design-notes): Diego schedules and runs Tasks and Long-Running Processes. it is able to take a `Docker image` and create a container
+- [Bits-service](https://github.com/cloudfoundry-incubator/bits-service): OCI Registry
 - [Stratos](https://github.com/cloudfoundry/stratos): Developer console
 
 #### Kubernetes projects
