@@ -3,13 +3,15 @@
 ## Table of Contents
 
    * [Prerequisites](#prerequisites)
-      * [Install Tanzu cf-for-k8s](#install-tanzu-cf-for-k8s)
-      * [Install KubeCF](#install-kubecf)
+   * [Install Tanzu cf-for-k8s](#install-tanzu-cf-for-k8s)
+      * [Deploy an application using cf](#deploy-an-application-using-cf)
+   * [Install KubeCF](#install-kubecf)
       * [Using Kind](#using-kind)
       * [Additional features needed for kind](#additional-features-needed-for-kind)
       * [Using kubeadm, kubelet](#using-kubeadm-kubelet)
-   * [Play with CF Push](#play-with-cf-push)
-   * [Backlog of issues](#backlog-of-issues)
+      * [Play with CF Push](#play-with-cf-push)
+      * [Backlog of issues](#backlog-of-issues)
+
 
 ## Prerequisites
 
@@ -20,7 +22,7 @@ To play with the new Cloud Foundry Kubernetes distribution, it is required to ha
 - A docker daemon
 - Homebrew
 
-### Install Tanzu cf-for-k8s
+## Install Tanzu cf-for-k8s
 
 TODO - See instructions [here](https://github.com/cloudfoundry/cf-for-k8s/blob/master/docs/deploy.md)
 
@@ -53,13 +55,16 @@ sudo kind get kubeconfig --name cf-k8s  > ~/.kube/config
 ```bash
 ./hack/generate-values.sh 95.217.134.196.nip.io > /tmp/cf-values.yml
 ```
+
+### Deploy an application using cf
+
 - Next, deploy `cf-4-k8s` using the `kapp` tool and some additional files
 ```bash
 kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/remove-resource-requirements.yml -f config-optional/use-nodeport-for-ingress.yml)
 ```
 
 - Setup the `cf` client to access the API and be authenticated
-```bash
+```bashkc 
 cf api --skip-ssl-validation https://api.95.217.134.196.nip.io
 cf auth admin <admin_pwd>
 ```
@@ -89,7 +94,7 @@ curl http://diego-docker-app.95.217.134.196.nip.io/env
 sudo kind delete cluster --name cf-k8s
 ```
 
-### Install KubeCF
+## Install KubeCF
 
 To use [`kubecf`](https://kubecf.suse.dev/), you will install 2 helm charts in order to deploy:
 
@@ -349,7 +354,7 @@ helm install kubecf \
 kubectl -n kubecf get pods -w
 ```
 
-## Play with CF Push
+### Play with CF Push
 
 - Maven and JDK should be installed on the VM
 ```bash
@@ -504,7 +509,7 @@ start command:   JAVA_OPTS="-agentpath:$PWD/.java-buildpack/open_jdk_jre/bin/jvm
 - Check if the Application is well started, play with it
 - Test an application with a [database](https://tanzu.vmware.com/tutorials/getting-started/introduction)
 
-## Backlog of issues
+### Backlog of issues
 
 - `CF Push` - X509 certificate issue : https://github.com/cloudfoundry-incubator/kubecf/issues/487
 - `kubecf-diego` - Diego fails to start on K8s when it is used instead of `Eirini` with `Kind`: https://github.com/cloudfoundry-incubator/kubecf/issues/484
