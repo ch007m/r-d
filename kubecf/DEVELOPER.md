@@ -61,7 +61,7 @@ kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/re
 - Setup the `cf` client to access the API and be authenticated
 ```bash
 cf api --skip-ssl-validation https://api.95.217.134.196.nip.io
-cf auth admin bk7frchjj2sppfwde4du
+cf auth admin <admin_pwd>
 ```
 - Enable the docker feature
 ```bash
