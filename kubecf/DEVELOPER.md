@@ -18,10 +18,76 @@ To play with the new Cloud Foundry Kubernetes distribution, it is required to ha
 - The Helm tool (>= 1.13)
 - The kubectl client installed
 - A docker daemon
+- Homebrew
 
 ### Install Tanzu cf-for-k8s
 
 TODO - See instructions [here](https://github.com/cloudfoundry/cf-for-k8s/blob/master/docs/deploy.md)
+
+- Install the needed tools
+```bash
+brew tap k14s/tap
+brew install ytt kbld kapp imgpkg kwt vendir
+#brew install cloudfoundry/tap/bosh-cli
+#chmod u+x /home/linuxbrew/.linuxbrew/Cellar/bosh-cli/6.2.1/bin/bosh
+wget https://github.com/cloudfoundry/bosh-cli/releases/download/v6.2.1/bosh-cli-6.2.1-linux-amd64
+mv bosh-cli-6.2.1-linux-amd64 bosh
+chmod +x ./bosh
+sudo mv ./bosh /usr/local/bin/bosh
+```
+- Git clone the project
+```bash
+git clone https://github.com/cloudfoundry/cf-for-k8s.git && cd cf-for-k8s
+```
+- Create a kind cluster
+```bash
+sudo kind create cluster --name cf-k8s --config=./deploy/kind/cluster.yml
+```
+- Got the k8s config
+```bash
+mkdir ~/.kube
+sudo kind get kubeconfig --name cf-k8s  > ~/.kube/config
+```
+
+- Generate the `install` values such as domain name, app domain, certificates, ... using the bosh client 
+```bash
+./hack/generate-values.sh 95.217.134.196.nip.io > /tmp/cf-values.yml
+```
+- Next, deploy `cf-4-k8s` using the `kapp` tool and some additional files
+```bash
+kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/remove-resource-requirements.yml -f config-optional/use-nodeport-for-ingress.yml)
+```
+
+- Setup the `cf` client to access the API and be authenticated
+```bash
+cf api --skip-ssl-validation https://api.95.217.134.196.nip.io
+cf auth admin bk7frchjj2sppfwde4du
+```
+- Enable the docker feature
+```bash
+cf enable-feature-flag diego_docker
+```
+
+- Create an `ORG` and `SPACE` to deploy an application
+```bash
+cf create-org redhat.com
+cf create-space demo -o redhat.com
+cf target -o "redhat.com" -s "demo"
+```
+- Push the docker image of an application
+```bash
+cf push diego-docker-app -o cloudfoundry/diego-docker-app
+```
+- Validate the `app` is reachable
+```bash
+curl http://diego-docker-app.95.217.134.196.nip.io/env
+{"BAD_QUOTE":"'","BAD_SHELL":"$1","CF_INSTANCE_ADDR":"0.0.0.0:8080","CF_INSTANCE_INTERNAL_IP":"10.244.0.32","CF_INSTANCE_IP":"10.244.0.32","CF_INSTANCE_PORT":"8080","CF_INSTANCE_PORTS":"[{\"external\":8080,\"internal\":8080}]","HOME":"/home/some_docker_user","HOSTNAME":"diego-docker-app-demo-3c087bf83d-0","KUBERNETES_PORT":"tcp://10.96.0.1:443","KUBERNETES_PORT_443_TCP":"tcp://10.96.0.1:443","KUBERNETES_PORT_443_TCP_ADDR":"10.96.0.1","KUBERNETES_PORT_443_TCP_PORT":"443","KUBERNETES_PORT_443_TCP_PROTO":"tcp","KUBERNETES_SERVICE_HOST":"10.96.0.1","KUBERNETES_SERVICE_PORT":"443","KUBERNETES_SERVICE_PORT_HTTPS":"443","LANG":"en_US.UTF-8","MEMORY_LIMIT":"1024m","PATH":"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/myapp/bin","POD_NAME":"diego-docker-app-demo-3c087bf83d-0","PORT":"8080","SOME_VAR":"some_docker_value","S_CD8A51EC_F591_488B_B98D_5884B15C156B_PORT":"tcp://10.100.236.5:8080","S_CD8A51EC_F591_488B_B98D_5884B15C156B_PORT_8080_TCP":"tcp://10.100.236.5:8080","S_CD8A51EC_F591_488B_B98D_5884B15C156B_PORT_8080_TCP_ADDR":"10.100.236.5","S_CD8A51EC_F591_488B_B98D_5884B15C156B_PORT_8080_TCP_PORT":"8080","S_CD8A51EC_F591_488B_B98D_5884B15C156B_PORT_8080_TCP_PROTO":"tcp","S_CD8A51EC_F591_488B_B98D_5884B15C156B_SERVICE_HOST":"10.100.236.5","S_CD8A51EC_F591_488B_B98D_5884B15C156B_SERVICE_PORT":"8080","S_CD8A51EC_F591_488B_B98D_5884B15C156B_SERVICE_PORT_HTTP":"8080","VCAP_APPLICATION":"{\"cf_api\":\"https://api.95.217.134.196.nip.io\",\"limits\":{\"fds\":16384,\"mem\":1024,\"disk\":1024},\"application_name\":\"diego-docker-app\",\"application_uris\":[\"diego-docker-app.95.217.134.196.nip.io\"],\"name\":\"diego-docker-app\",\"space_name\":\"demo\",\"space_id\":\"f148f02d-fcf3-4657-a3ea-f3f8cae530ad\",\"organization_id\":\"c4f7aa9b-18cf-4687-8073-719f61cc4168\",\"organization_name\":\"redhat.com\",\"uris\":[\"diego-docker-app.95.217.134.196.nip.io\"],\"process_id\":\"7e52ed45-3a98-41ca-ac94-21b69cf06f9f\",\"process_type\":\"web\",\"application_id\":\"7e52ed45-3a98-41ca-ac94-21b69cf06f9f\",\"version\":\"63884c6e-3e6d-45a9-b16a-40cc3e3d5c48\",\"application_version\":\"63884c6e-3e6d-45a9-b16a-40cc3e3d5c48\"}","VCAP_APP_HOST":"0.0.0.0","VCAP_APP_PORT":"8080","VCAP_SERVICES":"{}"}[snowdrop@k03-k116 cf-for-k8s]$
+```
+
+- Clean the cluster
+```bash
+sudo kind delete cluster --name cf-k8s
+```
 
 ### Install KubeCF
 
