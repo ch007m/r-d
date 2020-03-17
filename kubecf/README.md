@@ -19,7 +19,9 @@ This project has been created to collect information about the Kubernetes offeri
 VMware Tanzu is a new brand from VMware that encompasses many application-platform products, and now that Pivotal is part of VMware 
 the Pivotal Application Service distribution of CF is moving into the collection of products under that Tanzu brand.
 
-So strictu sensu, Tanzu (ex Pivotal) is a portfolio of products and services for modernizing applications and infrastructure on Kubernetes.
+![](images/vmware-tanzu.png)
+
+So stricto sensu, Tanzu (ex Pivotal) is a portfolio of products and services for modernizing applications and infrastructure on Kubernetes.
 According to the web site, the platform is based on the following open source projects: https://tanzu.vmware.com/open-source.
 
 The Tanzu team have been working on a version running on K8s and have been basing that primarily on the [cf-for-k8s integration project](https://github.com/cloudfoundry/cf-for-k8s).
