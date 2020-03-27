@@ -21,7 +21,7 @@ the Pivotal Application Service distribution of CF is moving into the collection
 
 ![](images/vmware-tanzu.png)
 
-So stricto sensu, Tanzu (ex Pivotal) is a portfolio of products and services for modernizing applications and infrastructure on Kubernetes.
+So stricto sensu, Tanzu (ex Pivotal) is a `portfolio of products and services for modernizing applications and infrastructure` on Kubernetes.
 According to the web site, the platform is based on the following open source projects: https://tanzu.vmware.com/open-source.
 
 The Tanzu team have been working on a version running on K8s and have been basing that primarily on the [cf-for-k8s integration project](https://github.com/cloudfoundry/cf-for-k8s).
@@ -58,7 +58,7 @@ Here is the list of the features as proposed - March 2020.
   - [GemFire](https://tanzu.vmware.com/gemfire): In-memory data store for microservices. High-performance application cache, a database, and much more
   - [Greenplum](https://tanzu.vmware.com/greenplum): Scale-out EDW for analytics
   - [Postgres](https://tanzu.vmware.com/postgres): Packaged and supported Postgres 10,11 & 12. 24x7 support. Includes high availability, backups, and analytics
-  - RabbitMQ: Cloud native message broker
+  - [RabbitMQ](https://tanzu.vmware.com/rabbitmq): Cloud native message broker
  
 ### Cloudfoundry
 
