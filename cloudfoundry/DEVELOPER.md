@@ -26,7 +26,15 @@ To play with the new Cloud Foundry Kubernetes distribution, it is required to ha
 
 TODO - See instructions [here](https://github.com/cloudfoundry/cf-for-k8s/blob/master/docs/deploy.md)
 
+- Install `brew` tool on the linux box
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+sudo yum groupinstall 'Development Tools'
+echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)' >> /home/snowdrop/.bash_profile
+eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+```
 - Install the needed tools
+
 ```bash
 brew tap k14s/tap
 brew install ytt kbld kapp imgpkg kwt vendir
@@ -153,8 +161,8 @@ alias kc=kubectl
 export KUBECONFIG=.kubeconfig
 ```
 - Trust the `kubernetes root CA` on the `kind docker container`
-``` bash 
-docker exec -it "kubecf-control-plane" bash -c 'cp /etc/kubernetes/pki/ca.crt /etc/ssl/certs/ && update-ca-certificates && (systemctl list-units | grep containerd > /dev/null && systemctl restart containerd)'
+```bash 
+sudo docker exec -it "kubecf-control-plane" bash -c 'cp /etc/kubernetes/pki/ca.crt /etc/ssl/certs/ && update-ca-certificates && (systemctl list-units | grep containerd > /dev/null && systemctl restart containerd)'
 Updating certificates in /etc/ssl/certs...
 0 added, 0 removed; done.
 Running hooks in /etc/ca-certificates/update.d...
@@ -167,7 +175,7 @@ helm repo add quarks https://cloudfoundry-incubator.github.io/quarks-helm/
 helm search repo quarks
 helm install cf-operator quarks/cf-operator --namespace cf-operator --set "global.operator.watchNamespace=kubecf"
 ```
-- Create the following `values.yaml` file with the `Node IP` address that we could use within the vm
+- Create the following `values.yaml` file with the `Node IP` address that we could use within the vm.
 ```bash
 node_ip=$(kubectl get node kubecf-control-plane \
   --output jsonpath='{ .status.addresses[?(@.type == "InternalIP")].address }')
@@ -197,13 +205,30 @@ _EOF_
 ```bash
 helm install kubecf \
    --namespace kubecf \
-   --values values.yaml https://github.com/cloudfoundry-incubator/kubecf/releases/download/v1.0.0/kubecf-v1.0.0.tgz
+   --values values.yaml https://github.com/cloudfoundry-incubator/kubecf/releases/download/v1.0.1/kubecf-v1.0.1.tgz
 ```
 
 - Watch the pods
 ```bash
 kubectl -n kubecf get pods -w
 ```
+
+### Install Developer console - stratos
+
+```bash
+export node_ip=95.217.161.67
+kc create ns stratos
+cat << _EOF_ > stratos.yml
+console:
+  service:
+    externalIPs: ["${node_ip}"]
+    servicePort: 8443
+_EOF_
+
+helm repo add suse https://kubernetes-charts.suse.com/
+helm install stratos --namespace stratos --values ./stratos.yml suse/console
+```
+
 
 ### Additional features needed for kind
 
@@ -346,7 +371,7 @@ _EOF_
 ```bash
 helm install kubecf \
    --namespace kubecf \
-   --values values.yaml https://github.com/cloudfoundry-incubator/kubecf/releases/download/v1.0.0/kubecf-v1.0.0.tgz
+   --values values.yaml https://github.com/cloudfoundry-incubator/kubecf/releases/download/v1.0.1/kubecf-v1.0.1.tgz
 ```
 
 - Watch the pods
