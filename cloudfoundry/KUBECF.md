@@ -14,10 +14,10 @@ In this default deployment, kubecf is launched without Ingress, and it uses the 
 
 ## Table of Contents
 
-   * [Using kubeadm, kubelet](#using-kubeadm-kubelet)
+   * [Cluster created with kubeadm, kubelet](#cluster-created-with-kubeadm-kubelet)
    * [Using Kind](#using-kind)
    
-### Using kubeadm, kubelet
+### Cluster created with kubeadm, kubelet
 
 **NOTE**: The scenario reported here will fail due to a problem with the Certificate needed by the UAA application. [Ticket](https://github.com/cloudfoundry-incubator/kubecf/issues/483) has been created and should be fiexed with
 release [1.2.0](https://github.com/cloudfoundry-incubator/kubecf/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.2.0)
