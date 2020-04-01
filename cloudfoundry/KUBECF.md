@@ -16,6 +16,7 @@ In this default deployment, kubecf is launched without Ingress, and it uses the 
 
    * [Cluster created with kubeadm, kubelet](#cluster-created-with-kubeadm-kubelet)
    * [Using Kind](#using-kind)
+   * [Stratos console (Optinal)](#stratos-console-optinal)
    
 ### Cluster created with kubeadm, kubelet
 
@@ -169,3 +170,7 @@ kubectl -n kubecf get pods -w
 ```bash
 sudo kind delete cluster --name kubecf
 ```
+
+### Stratos console (Optinal)
+
+See [instructions](OTHERS.md)
