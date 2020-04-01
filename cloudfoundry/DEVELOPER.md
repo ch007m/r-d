@@ -34,19 +34,38 @@ See [intructions](KUBECF.md)
 ```bash
 IP=<VM_ETH0_IP_ADDRESS>
 cf api --skip-ssl-validation https://api.${IP}.nip.io
-cf auth admin <admin_pwd>
 ```
-**Remark**: The admin password has been generated within the `/tmp/cf-values/` file and is available at the field `cf_admin_password`
+**Remarks**: 
+
+- For `cf-4-k8s`: The admin password has been generated within the `/tmp/cf-values/` file and is available at the field `cf_admin_password`
+```bash
+export admin_pass=<cf_admin_password>
+```
+- For `kubecf`: We can fetch the random generated credentials for the default `admin user` 
+```bash
+export admin_pass=$(kubectl get secret \
+          --namespace kubecf kubecf.var-cf-admin-password \
+          -o jsonpath='{.data.password}' \
+          | base64 --decode)
+```
+
+- We authenticate using those credentials
+```bash
+cf auth admin "${admin_pass}"
+```
+- Let’s create a `demo` organization and a `redhat.com` space
+```bash
+cf create-org redhat.com
+cf create-space demo -o redhat.com
+```
+- Select the target space and org
+```bash
+cf target -o "redhat.com" -s "demo"
+```
 
 - Enable the docker feature
 ```bash
 cf enable-feature-flag diego_docker
-```
-- Create an `ORG` and `SPACE` to deploy an application
-```bash
-cf create-org redhat.com
-cf create-space demo -o redhat.com
-cf target -o "redhat.com" -s "demo"
 ```
 
 ### Push a docker image
@@ -63,7 +82,7 @@ curl http://test-app.95.217.134.196.nip.io/env
 
 ### Push and build a spring application
 
-- Git clone a spring example project and build it
+- Git clone a Spring Boot example project and build it
 ```bash
 git clone https://github.com/cloudfoundry-samples/spring-music
 cd spring-music/
@@ -71,91 +90,6 @@ cd spring-music/
 ```
 
 - Next push it to CF
-```bash
-cf push spring-music
-```
-
-TODO
-
-### Play with CF Push
-
-- Maven and JDK should be installed on the VM
-```bash
-sudo yum install maven
-```
-
-- Install first the `cf` client as documented [here](https://github.com/cloudfoundry/cli#downloads)
-```bash
-cd temp
-curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github" | tar -zx
-sudo mv cf /usr/local/bin
-```
-
-- If you want to use the Developer console - stratos, install it using the following helm chart
-```bash
-kc create ns consolehelm status my-console
-helm repo add stratos https://cloudfoundry.github.io/stratos
-helm install my-console stratos/console --namespace console
-```
-**NOTE**: TODO: Add ingress and create a resource to access the console !
-
-- Next, access the CF API using the node ip address as registered
-```bash
-cf api --skip-ssl-validation api.172.17.0.2.nip.io
-Setting api endpoint to api.172.17.0.2.nip.io...
-OK
-
-api endpoint:   https://api.172.17.0.2.nip.io
-api version:    2.146.0
-Not logged in. Use 'cf login' or 'cf login --sso' to log in.
-```
-
-- We fetch the random generated credentials for the default `admin user` 
-```bash
-export admin_pass=$(kubectl get secret \
-          --namespace kubecf kubecf.var-cf-admin-password \
-          -o jsonpath='{.data.password}' \
-          | base64 --decode)
-```
-
-- We authenticate using those credentials
-```bash
-cf auth admin "${admin_pass}"
-API endpoint: https://api.172.17.0.2.nip.io
-Authenticating...
-OK
-
-Use 'cf target' to view or set your target org and space.
-```
-- Let’s create a `demo` organization, a `space` and a `development user`
-```bash
-cf create-org redhat.com
-cf create-space demo -o redhat.com
-cf create-user developer password
-cf set-space-role developer redhat.com demo SpaceDeveloper
-cf set-space-role developer redhat.com demo SpaceManager
-```
-- Switch to the developer user
-```bash
-cf login -u developer -p password
-API endpoint: https://api.172.17.0.2.nip.io
-Authenticating...
-OK
-Targeted org redhat.com
-Targeted space demo
-
-API endpoint:   https://api.172.17.0.2.nip.io (API version: 2.146.0)
-User:           developer
-Org:            redhat.com
-Space:          demo
-```
-- Install a Spring Boot application and build it
-```bash
-git clone https://github.com/cloudfoundry-samples/spring-music
-cd spring-music/
-./gradlew assemble
-```
-- Next push it on the k8s cluster
 ```bash
 cf push spring-music
 
@@ -228,5 +162,4 @@ start command:   JAVA_OPTS="-agentpath:$PWD/.java-buildpack/open_jdk_jre/bin/jvm
      state     since                  cpu    memory    disk      details
 #0   running   2020-03-17T14:27:36Z   0.0%   0 of 1G   0 of 1G
 ```
-- Check if the Application is well started, play with it
-- Test an application with a [database](https://tanzu.vmware.com/tutorials/getting-started/introduction)
+- Check if the Application is well started, play with it ;-)

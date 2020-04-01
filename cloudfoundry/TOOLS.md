@@ -23,6 +23,13 @@ echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)' >> /home/snowdrop/.b
 eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 ```
 
+- Install the `cf` client as documented [here](https://github.com/cloudfoundry/cli#downloads)
+```bash
+cd temp
+curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github" | tar -zx
+sudo mv cf /usr/local/bin
+```
+
 - Deploy the `k9s` user tool
 ```bash
 wget https://github.com/derailed/k9s/releases/download/v0.17.7/k9s_Linux_x86_64.tar.gz

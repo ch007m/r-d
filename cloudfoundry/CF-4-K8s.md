@@ -20,12 +20,6 @@ chmod +x ./bosh
 sudo mv ./bosh /usr/local/bin/bosh
 ```
 
-- Install the CF Client to demo within the VM
-```bash
-curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github" | tar -zx
-sudo mv cf /usr/local/bin
-```
-
 - Git clone the project
 ```bash
 git clone https://github.com/cloudfoundry/cf-for-k8s.git && cd cf-for-k8s
