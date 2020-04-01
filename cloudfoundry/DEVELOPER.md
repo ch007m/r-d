@@ -11,7 +11,6 @@
      * [Push and build a spring application](#push-and-build-a-spring-application)
      * [Play with CF Push](#play-with-cf-push)
 
-
 ## Prerequisites
 
 To play with Cloud Foundry on Kubernetes, it is required to have :

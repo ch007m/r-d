@@ -4,29 +4,8 @@
 
 Additional information about how to install/configure is available with the project [instructions](https://github.com/cloudfoundry/cf-for-k8s/blob/master/docs/deploy.md)
 
-- Install wget, helm, jq, brew, maven, k9s
-```bash
-sudo yum install wget -y
-sudo yum install epel-release -y
-sudo yum install jq -y 
-sudo yum install maven -y
-```
-
-- Deploy helm3
-```bash
-mkdir temp && cd temp
-wget https://get.helm.sh/helm-v3.1.2-linux-amd64.tar.gz
-tar -vxf helm-v3.1.2-linux-amd64.tar.gz
-sudo mv linux-amd64/helm /usr/local/bin
-```
-- Install `brew` tool on the linux box
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-sudo yum groupinstall 'Development Tools'
-echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)' >> /home/snowdrop/.bash_profile
-eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-```
-- Install the tools needed to populate the kubernetes resources using ytt, kapp
+- Install common [tools](TOOLS.md)
+- Next, install the tools only used by cf-4-k8s project and able to populate the kubernetes resources using ytt, kapp
 
 ```bash
 brew tap k14s/tap

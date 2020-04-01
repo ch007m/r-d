@@ -27,16 +27,8 @@ release [1.2.0](https://github.com/cloudfoundry-incubator/kubecf/issues?q=is%3Ao
 ```bash
 ssh -i ~/.ssh/id_rsa_snowdrop_hetzner_k03-k116 snowdrop@95.217.134.196 -p 47286
 ```
-- Install wget, Helm tool within the VM
 
-```bash
-mkdir temp && cd temp
-sudo yum install wget
-wget https://get.helm.sh/helm-v3.1.1-linux-amd64.tar.gz
-tar -vxf helm-v3.1.1-linux-amd64.tar.gz
-sudo mv linux-amd64/helm /usr/local/bin/helm
-alias kc=kubectl
-```
+- Install common [tools](TOOLS.md)
 
 - Create a namespace for the cf-operator and install it
 ```bash
