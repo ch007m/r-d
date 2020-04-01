@@ -12,6 +12,11 @@ It has to be installed in the same Kubernetes cluster that Kubecf will be deploy
 
 In this default deployment, kubecf is launched without Ingress, and it uses the `Eirini` scheduler.
 
+## Table of Contents
+
+   * [Using kubeadm, kubelet](#using-kubeadm-kubelet)
+   * [Using Kind](#using-kind)
+   
 ### Using kubeadm, kubelet
 
 **NOTE**: The scenario reported here will fail due to a problem with the Certificate needed by the UAA application. [Ticket](https://github.com/cloudfoundry-incubator/kubecf/issues/483) has been created and should be fiexed with
