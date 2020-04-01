@@ -3,8 +3,9 @@
 ## Table of Contents
 
   * [Prerequisites](#prerequisites)
-  * [Install cf-for-k8s](#install-cf-for-k8s)
-  * [Install kubecf](#install-kubecf)
+  * [Using cf-for-k8s](#using-cf-for-k8s)
+  * [Using kubecf](#using-kubecf)
+
   * [Deploy an application using cf](#deploy-an-application-using-cf)
      * [Push a docker image](#push-a-docker-image)
      * [Push and build a spring application](#push-and-build-a-spring-application)
@@ -20,11 +21,11 @@ To play with Cloud Foundry on Kubernetes, it is required to have :
 - A docker daemon
 - Homebrew
 
-## Install cf-for-k8s
+## Using cf-for-k8s
 
 See intructions [here](CF-4-K8s.md)
 
-## Install kubecf
+## Using kubecf
 
 See intructions [here](KUBECF.md)
 
