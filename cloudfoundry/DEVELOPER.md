@@ -61,7 +61,7 @@ sudo kind get kubeconfig --name cf-k8s  > ~/.kube/config
 
 - Generate the `install` values such as domain name, app domain, certificates, ... using the bosh client 
 ```bash
-./hack/generate-values.sh 95.217.134.196.nip.io > /tmp/cf-values.yml
+./hack/generate-values.sh -d 95.217.134.196.nip.io > /tmp/cf-values.yml
 ```
 
 ### Deploy an application using cf
@@ -459,8 +459,7 @@ cd spring-music/
 ```
 - Next push it on the k8s cluster
 ```bash
-cf push --hostname spring-music
-Deprecation warning: Use of the '--hostname' command-line flag option is deprecated in favor of the 'routes' property in the manifest. Please see https://docs.cloudfoundry.org/devguide/deploy-apps/manifest-attributes.html#routes for usage information. The '--hostname' command-line flag option will be removed in the future.
+cf push spring-music
 
 Pushing from manifest to org redhat.com / space demo as developer...
 Using manifest file /home/snowdrop/temp/spring-music/manifest.yml
