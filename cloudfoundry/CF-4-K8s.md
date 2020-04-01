@@ -92,7 +92,7 @@ mkdir ~/.kube
 sudo kind get kubeconfig --name cf-k8s  > ~/.kube/config
 ```
 
-#### Stratos console 
+### Stratos console 
 
 See [instructions](OTHERS.md)
 
