@@ -1,8 +1,8 @@
-## Install Tanzu - cf-for-k8s
+## Install cf-for-k8s (aka VMWare Tanzu)
 
 ### Deploy the tools and configure cf-4-k8s
 
-See instructions [here](https://github.com/cloudfoundry/cf-for-k8s/blob/master/docs/deploy.md)
+Additional information about how to install/configure is available with the project [instructions](https://github.com/cloudfoundry/cf-for-k8s/blob/master/docs/deploy.md)
 
 - Install wget, helm, jq, brew, maven, k9s
 ```bash
@@ -76,11 +76,11 @@ app_registry:
 kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/remove-resource-requirements.yml -f config-optional/use-nodeport-for-ingress.yml)
 ```
 
-### Install additional features
+### Additional features (optional)
 
 ### Kind cluster
 
-- See how to install `kind` tool [here](KIND.md)
+- See how to install `kind` tool - [here](KIND.md)
 - Create a kind cluster
 ```bash
 sudo kind create cluster --name cf-k8s --config=./deploy/kind/cluster.yml
@@ -94,5 +94,5 @@ sudo kind get kubeconfig --name cf-k8s  > ~/.kube/config
 
 #### Stratos console 
 
-See - [here](OTHERS.md)
+See [instructions](OTHERS.md)
 

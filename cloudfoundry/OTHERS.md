@@ -1,4 +1,4 @@
-## Install Developer console - stratos
+## Install Developer console - Stratos
 
 ```bash
 export node_ip=95.217.161.67
