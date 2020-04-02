@@ -103,8 +103,49 @@ spec:
   volumeMode: Filesystem
 _EOF_
 
-kc apply -f pv00{6,7,8,9}.yml
-mkdir /tmp/pv00{6,7,8,9}
+cat << _EOF_ > pv010.yml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv010
+spec:
+  accessModes:
+  - ReadWriteOnce
+  capacity:
+    storage: 8Gi
+  hostPath:
+    path: /tmp/pv010
+    type: ""
+  persistentVolumeReclaimPolicy: Recycle
+  volumeMode: Filesystem
+_EOF_
+
+cat << _EOF_ > pv011.yml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv011
+spec:
+  accessModes:
+  - ReadWriteOnce
+  capacity:
+    storage: 8Gi
+  hostPath:
+    path: /tmp/pv011
+    type: ""
+  persistentVolumeReclaimPolicy: Recycle
+  volumeMode: Filesystem
+_EOF_
+
+kc apply -f pv006.yml
+kc apply -f pv007.yml
+kc apply -f pv008.yml
+kc apply -f pv009.yml
+kc apply -f pv010.yml
+kc apply -f pv011.yml
+mkdir /tmp/pv00{6,7,8,9,10,11}
+chown -R snowdrop:snowdrop /tmp
+chown -R 777 /tmp
 ```
 
 # Install tools

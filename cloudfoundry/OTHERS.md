@@ -7,7 +7,7 @@ cat << _EOF_ > stratos.yml
 console:
   service:
     externalIPs: ["${node_ip}"]
-    servicePort: 8443
+    servicePort: 8444
 _EOF_
 
 helm repo add suse https://kubernetes-charts.suse.com/
