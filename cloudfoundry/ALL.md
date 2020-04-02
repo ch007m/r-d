@@ -16,8 +16,6 @@ ansible-playbook ansible/playbook/sec_host.yml -e vm_name=${VM_NAME} -e provider
 
 ansible-playbook kubernetes/ansible/k8s.yml --limit ${VM_NAME}
 
-TASK [k8s_dashboard : Print kubernetes dashboard URL & Token] ***********************************************************************************************************************************************************************************************************
-Tuesday 31 March 2020  17:57:17 +0200 (0:00:02.174)       0:04:48.756 ********* 
 ok: [h01-116] => {
     "msg": [
         "You can also view the kubernetes dashboard at",
@@ -27,6 +25,7 @@ ok: [h01-116] => {
         "43qo7d.l7iwyyrw1g2tblrl"
     ]
 }
+
 ```
 
 - SSH to the VM
