@@ -24,6 +24,8 @@ chmod +x ./svcat
 sudo mv ./svcat /usr/local/bin/
 ```
 
+## Minibroker
+
 - And deploy the mini-broker. More information] is available [here](https://svc-cat.io/docs/walkthrough/). 
  
 ```bash
@@ -39,6 +41,57 @@ helm install minibroker -n minibroker minibroker/minibroker \
 ```
 
 - To play with CF and minibroker - see [here](https://github.com/kubernetes-sigs/minibroker#usage)
+
+## OAB
+
+```bash
+cat << _EOF_ > oab.yml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: oab
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: automation-broker-apb
+  namespace: oab
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: automation-broker-apb
+roleRef:
+  name: cluster-admin
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+  - kind: ServiceAccount
+    name: automation-broker-apb
+    namespace: oab
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: automation-broker-apb
+  namespace: oab
+spec:
+  serviceAccount: automation-broker-apb
+  containers:
+    - name: apb
+      image: docker.io/automationbroker/automation-broker-apb:latest
+      args:
+        - "provision"
+        - "-e create_broker_namespace=true"
+        - "-e broker_auto_escalate=true"
+        - "-e wait_for_broker=true"
+      imagePullPolicy: IfNotPresent
+  restartPolicy: Never
+_EOF_
+
+kc apply -f oab.yml
+```
+- Wait a few minutes and next check plans, brokers
 
 ## Dummy test
 
