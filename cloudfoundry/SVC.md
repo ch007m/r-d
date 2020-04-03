@@ -85,6 +85,7 @@ spec:
         - "-e create_broker_namespace=true"
         - "-e broker_auto_escalate=true"
         - "-e wait_for_broker=true"
+        - "-e broker_basic_auth_enabled=true"
       imagePullPolicy: IfNotPresent
   restartPolicy: Never
 _EOF_
@@ -92,6 +93,31 @@ _EOF_
 kc apply -f oab.yml
 ```
 - Wait a few minutes and next check plans, brokers
+
+## Configure cf to use OAB
+
+- Register the Service Broker
+```bash
+cf create-service-broker oab admin admin https://broker.automation-broker.svc:1338/ansible-service-broker
+```
+
+- Enable some services
+```bash
+cf service-access
+cf enable-service-access
+cf enable-service-access dh-prometheus-apb
+cf enable-service-access dh-postgresql-apb
+```
+
+- Create a service
+```bash
+cf create-service dh-postgresql-apb dev mypostgresql
+```
+- Bind the service and restart it
+```bash
+cf bind-service <app name> <service name>
+cf restart
+```
 
 ## Dummy test
 

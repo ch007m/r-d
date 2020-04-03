@@ -326,7 +326,7 @@ _EOF_
 - Install the bitnami service catalog
 ```bash
 helm repo add bitnami https://charts.bitnami.com/bitnami
-kubectl create namespace kubeapps
+kubectl create ns kubeapps
 helm install kubeapps -n kubeapps --values ./bitnami.yml bitnami/kubeapps 
 
 NAME: kubeapps
