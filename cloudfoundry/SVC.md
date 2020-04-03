@@ -24,26 +24,9 @@ chmod +x ./svcat
 sudo mv ./svcat /usr/local/bin/
 ```
 
-## Minibroker
-
-- And deploy the mini-broker. More information] is available [here](https://svc-cat.io/docs/walkthrough/). 
- 
-```bash
-helm repo add minibroker https://minibroker.blob.core.windows.net/charts
-kc create ns minibroker
-helm install minibroker -n minibroker minibroker/minibroker
-```
-- If minibroker will be used with CF, then use the following [instructions](https://github.com/kubernetes-sigs/minibroker#usage-with-cloud-foundry)
-```bash
-helm install minibroker -n minibroker minibroker/minibroker \
-	--set "deployServiceCatalog=false" \
-    --set "defaultNamespace=minibroker"
-```
-
-- To play with CF and minibroker - see [here](https://github.com/kubernetes-sigs/minibroker#usage)
-
 ## OAB
 
+- Follow these instructions to install the Automation Broker (aka Ansible Service Broker)
 ```bash
 cat << _EOF_ > oab.yml
 apiVersion: v1
@@ -92,6 +75,19 @@ _EOF_
 
 kc apply -f oab.yml
 ```
+- As we have enabled the basic auth, it is then needed to change manually the config of the `ClusterServiceBroker`
+```bash
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ClusterServiceBroker
+metadata:
+  name: automation-broker
+spec:
+  authInfo:
+    basic:
+      secretRef:
+        namespace: automation-broker
+        name: broker-auth
+```
 - Wait a few minutes and next check plans, brokers
 
 ## Configure cf to use OAB
@@ -104,7 +100,6 @@ cf create-service-broker oab admin admin https://broker.automation-broker.svc:13
 - Enable some services
 ```bash
 cf service-access
-cf enable-service-access
 cf enable-service-access dh-prometheus-apb
 cf enable-service-access dh-postgresql-apb
 ```
@@ -132,10 +127,11 @@ spec:
   clusterServiceClassExternalName: dh-postgresql-apb
   clusterServicePlanExternalName: dev
   parameters:
-    postgresql_database: admin
-    postgresql_password: admin
-    postgresql_user: admin
-    postgresql_version: 9.6
+    app_name: "postgresql"
+    postgresql_user: "luke"
+    postgresql_password: "secret"
+    postgresql_database: "my_data"
+    postgresql_version: "9.6"
 _EOF_
 
 kc apply -f serviceinstance.yml -n cf-workloads
@@ -164,4 +160,22 @@ _EOF_
 kc apply -f servicebinding.yml -n cf-workloads
 svcat describe binding mini-binding -n cf-workloads
 ```
+
+## Minibroker
+
+- And deploy the mini-broker. More information] is available [here](https://svc-cat.io/docs/walkthrough/). 
+ 
+```bash
+helm repo add minibroker https://minibroker.blob.core.windows.net/charts
+kc create ns minibroker
+helm install minibroker -n minibroker minibroker/minibroker
+```
+- If minibroker will be used with CF, then use the following [instructions](https://github.com/kubernetes-sigs/minibroker#usage-with-cloud-foundry)
+```bash
+helm install minibroker -n minibroker minibroker/minibroker \
+	--set "deployServiceCatalog=false" \
+    --set "defaultNamespace=minibroker"
+```
+
+- To play with CF and minibroker - see [here](https://github.com/kubernetes-sigs/minibroker#usage)
 
