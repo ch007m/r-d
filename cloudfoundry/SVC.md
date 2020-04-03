@@ -115,41 +115,53 @@ cf create-service dh-postgresql-apb dev mypostgresql
 ```
 - Bind the service and restart it
 ```bash
-cf bind-service <app name> <service name>
+cf bind-service spring-music mypostgresql
 cf restart
 ```
 
-## Dummy test
+**Issue**: https://github.com/openshift/ansible-service-broker/issues/1290
 
-- Create a Service instance and binding
+- Plan B : Create a Service instance manually
 ```bash
 cat << _EOF_ > serviceinstance.yml
 apiVersion: servicecatalog.k8s.io/v1beta1
 kind: ServiceInstance
 metadata:
-  name: mini-postgresql
+  name: postgresql
 spec:
-  clusterServiceClassExternalName: postgresql
-  clusterServicePlanExternalName: 11-6-0
+  clusterServiceClassExternalName: dh-postgresql-apb
+  clusterServicePlanExternalName: dev
   parameters:
-    param-1: value-1
-    param-2: value-2
+    postgresql_database: admin
+    postgresql_password: admin
+    postgresql_user: admin
+    postgresql_version: 9.6
 _EOF_
 
-kc apply -n db -f serviceinstance.yml
-svcat describe instance -n db mini-postgresql
+kc apply -f serviceinstance.yml -n cf-workloads
+svcat describe instance postgresql -n cf-workloads
+```
 
+*Issue* :
+```
+Error communicating with broker for provisioning
+Put https://broker.automation-broker.svc:1338/ansible-service-broker/v2/service_instances/c5084206-eb41-4a86-862b-fdbb329ac6d8?accepts_incomplete=true:
+x509: certificate signed by unknown authority (possibly because of "crypto/rsa: verification error" while trying to verify candidate authority certificate "broker.automation-broker.svc"
+````
+
+- Next, create binding
+```bash
 cat << _EOF_ > servicebinding.yml
 apiVersion: servicecatalog.k8s.io/v1beta1
 kind: ServiceBinding
 metadata:
-  name: mini-binding
+  name: postgresql-binding
 spec:
   instanceRef:
-    name: mini-postgresql
+    name: postgresql
 _EOF_
 
-kc apply -n db -f servicebinding.yml
-svcat describe binding -n db mini-binding
+kc apply -f servicebinding.yml -n cf-workloads
+svcat describe binding mini-binding -n cf-workloads
 ```
 
