@@ -179,3 +179,81 @@ helm install minibroker -n minibroker minibroker/minibroker \
 
 - To play with CF and minibroker - see [here](https://github.com/kubernetes-sigs/minibroker#usage)
 
+## Using Postgresql service and cups
+
+- Create a service to access the PostgreSQL DB
+```bash
+cat << _EOF_ > mypostgresql.yml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mypostgresql
+  name: mypostgresql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mypostgresql
+  template:
+    metadata:
+      labels:
+        app: mypostgresql
+    spec:
+      containers:
+        - env:
+            - name: POSTGRESQL_DATABASE
+              value: my_data
+            - name: POSTGRESQL_PASSWORD
+              value: secret
+            - name: POSTGRESQL_USER
+              value: luke
+          image: centos/postgresql-10-centos7
+          name: mypostgresql
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - mountPath: /var/lib/pgsql/data
+              name: mypostgresql-volume
+      volumes:
+        - emptyDir: {}
+          name: mypostgresql-volume
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mypostgresql
+  name: mypostgresql
+spec:
+  ports:
+    - name: 5432-tcp
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+  selector:
+    app: mypostgresql
+_EOF_
+
+kc apply -f mypostgresql.yml -n cf-workloads
+```
+
+- Create cups
+```bash
+cf cups myspostgresql -p '{"uri":"postgresql://postgres:@mypostgresql.cf-workloads.svc:5432/music"}'
+```
+- Bind the service to the application
+```bash
+cf bind-service spring-music myspostgresql
+```
+- Restart the application
+```bash
+cf restart
+```
+- To unbind 
+```bash
+cf unbind-service spring-music myspostgresql
+```
