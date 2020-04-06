@@ -76,6 +76,8 @@ _EOF_
 kc apply -f oab.yml
 ```
 - As we have enabled the basic auth, it is then needed to change manually the config of the `ClusterServiceBroker`
+  and to add the reference of the secret containing the `username` and `password` to access using basic auth http the Broker.
+  **Remark**: This is needed for CF
 ```bash
 apiVersion: servicecatalog.k8s.io/v1beta1
 kind: ClusterServiceBroker
@@ -88,7 +90,7 @@ spec:
         namespace: automation-broker
         name: broker-auth
 ```
-- Wait a few minutes and next check plans, brokers
+- Wait a few minutes and next verify if classes, plans, brokers have been created using the `svcat get classes|brokers|plans` command
 
 ## Configure cf to use OAB
 
