@@ -79,6 +79,7 @@ kc apply -f oab.yml
   and to add the reference of the secret containing the `username` and `password` to access using basic auth http the Broker.
   **Remark**: This is needed for CF
 ```bash
+kc edit ClusterServiceBroker/automation-broker
 apiVersion: servicecatalog.k8s.io/v1beta1
 kind: ClusterServiceBroker
 metadata:
@@ -145,6 +146,7 @@ svcat describe instance postgresql -n cf-workloads
 
 - Workaround. Create manually the APB pod to provision the DB
 ```bash
+cat << _EOF_ > apb_postgresql_pod.yml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -172,6 +174,7 @@ metadata:
     apb-fqname: dh-postgresql-apb
     apb-pod-name: apb-test
   name: apb-test
+  namespace: demo
 spec:
   serviceAccount: ansible-broker-apb
   containers:
@@ -190,11 +193,16 @@ spec:
         fieldRef:
           apiVersion: v1
           fieldPath: metadata.namespace
-    image: docker.io/ansibleplaybookbundle/postgresql-apb:v3.10
+    image: docker.io/ansibleplaybookbundle/postgresql-apb:latest
     imagePullPolicy: IfNotPresent
     name: apb
     resources: {}
     terminationMessagePath: /dev/termination-log
+_EOF_
+```
+- Deploy the workaround
+```bash
+kc apply -f apb_postgresql_pod.yml
 ```
 
 - Next, create binding
@@ -230,6 +238,14 @@ helm install minibroker -n minibroker minibroker/minibroker \
 ```
 
 - To play with CF and minibroker - see [here](https://github.com/kubernetes-sigs/minibroker#usage)
+```bash
+cf service-access
+cf enable-service-access postgresql -p 10-8-0
+cf create-service postgresql 10-8-0 mypostgresql
+cf service mypostgresql
+cf bind-service spring-music mypostgresql
+cf restart
+```
 
 ## Using Postgresql service and cups
 
