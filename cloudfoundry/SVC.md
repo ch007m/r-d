@@ -235,14 +235,34 @@ helm install minibroker -n minibroker minibroker/minibroker
 helm install minibroker -n minibroker minibroker/minibroker \
 	--set "deployServiceCatalog=false" \
     --set "defaultNamespace=minibroker"
+-->
+helm install minibroker -n minibroker suse/minibroker \
+      --set "defaultNamespace=minibroker"
 ```
 
 - To play with CF and minibroker - see [here](https://github.com/kubernetes-sigs/minibroker#usage)
+- Register the broker
+```bash
+cf create-service-broker minibroker user pass http://minibroker-minibroker.minibroker.svc.cluster.local
+```
+- Enable the needed services
 ```bash
 cf service-access
 cf enable-service-access postgresql -p 10-8-0
+```
+- Create an `ASG` rule
+```bash
+echo > postgresql.json '[{ "protocol": "tcp", "destination": "10.0.0.0/8", "ports": "5432", "description": "Allow PostgreSQL traffic" }]'
+cf create-security-group postgresql_networking postgresql.json
+cf bind-security-group postgresql_networking redhat.com demo
+```
+- Create the mypostgresql service
+```bash
 cf create-service postgresql 10-8-0 mypostgresql
 cf service mypostgresql
+```
+- Bind it to your application
+```bash
 cf bind-service spring-music mypostgresql
 cf restart
 ```
