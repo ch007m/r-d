@@ -125,6 +125,7 @@ apiVersion: servicecatalog.k8s.io/v1beta1
 kind: ServiceInstance
 metadata:
   name: postgresql
+  namespace: demo
 spec:
   clusterServiceClassExternalName: dh-postgresql-apb
   clusterServicePlanExternalName: dev
@@ -140,12 +141,61 @@ kc apply -f serviceinstance.yml -n cf-workloads
 svcat describe instance postgresql -n cf-workloads
 ```
 
-*Issue* :
+*Issue* : see ticket - https://github.com/openshift/ansible-service-broker/issues/1291
+
+- Workaround. Create manually the APB pod to provision the DB
+```bash
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ansible-broker-apb
+  namespace: demo
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: ansible-broker-apb
+roleRef:
+  name: cluster-admin
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+  - kind: ServiceAccount
+    name: ansible-broker-apb
+    namespace: demo 
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    apb-action: provision
+    apb-fqname: dh-postgresql-apb
+    apb-pod-name: apb-test
+  name: apb-test
+spec:
+  serviceAccount: ansible-broker-apb
+  containers:
+  - args:
+    - provision
+    - --extra-vars
+    - '{"_apb_last_requesting_user":"system:serviceaccount:catalog:service-catalog-controller-manager","_apb_plan_id":"dev","_apb_service_class_id":"1dda1477cace09730bd8ed7a6505607e","_apb_service_instance_id":"4eba4471-a357-46b5-8fd3-dc96033e06d4","app_name":"postgresql","cluster":"kubernetes","namespace":"demo","postgresql_database":"my_data","postgresql_password":"secret","postgresql_user":"luke","postgresql_version":"9.6"}'
+    env:
+    - name: POD_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.name
+    - name: POD_NAMESPACE
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.namespace
+    image: docker.io/ansibleplaybookbundle/postgresql-apb:v3.10
+    imagePullPolicy: IfNotPresent
+    name: apb
+    resources: {}
+    terminationMessagePath: /dev/termination-log
 ```
-Error communicating with broker for provisioning
-Put https://broker.automation-broker.svc:1338/ansible-service-broker/v2/service_instances/c5084206-eb41-4a86-862b-fdbb329ac6d8?accepts_incomplete=true:
-x509: certificate signed by unknown authority (possibly because of "crypto/rsa: verification error" while trying to verify candidate authority certificate "broker.automation-broker.svc"
-````
 
 - Next, create binding
 ```bash
