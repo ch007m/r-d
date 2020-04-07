@@ -25,7 +25,6 @@ ok: [h01-116] => {
         "43qo7d.l7iwyyrw1g2tblrl"
     ]
 }
-
 ```
 
 - SSH to the VM
@@ -144,8 +143,8 @@ kc apply -f pv009.yml
 kc apply -f pv010.yml
 kc apply -f pv011.yml
 mkdir /tmp/pv00{6,7,8,9,10,11}
-chown -R snowdrop:snowdrop /tmp
-chown -R 777 /tmp
+sudo chown -R snowdrop:snowdrop /tmp
+sudo chown -R 777 /tmp
 ```
 
 # Install tools
@@ -240,8 +239,13 @@ IP=95.217.161.67
 ./bin/install-cf.sh /tmp/cf-values.yml
 kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/remove-resource-requirements.yml -f config-optional/use-nodeport-for-ingress.yml)
 ```
+- Scale down the `ingress nginx` application deployed within the kube-system namespace, otherwise cf for k8s will failt to be deployed
+```bash
+$ kc scale --replicas=0 deployment.apps/nginx-ingress-controller -n kube-system
+``` 
 
 ## Install cf, Stratos
+
 ```bash
 kc create ns stratos
 cat << _EOF_ > stratos.yml
