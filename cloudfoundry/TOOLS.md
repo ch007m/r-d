@@ -30,9 +30,19 @@ curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=
 sudo mv cf /usr/local/bin
 ```
 
+- To install the client supporting the API `v7`, execute this brew command
+```bash
+brew install cloudfoundry/tap/cf7-cli
+```
+
 - Deploy the `k9s` user tool
 ```bash
 wget https://github.com/derailed/k9s/releases/download/v0.17.7/k9s_Linux_x86_64.tar.gz
 tar -vxf k9s_Linux_x86_64.tar.gz
 sudo mv k9s /usr/local/bin
+```
+
+- Install the `httpie` tool showing better json responses than curl
+```bash
+brew install httpie
 ```
