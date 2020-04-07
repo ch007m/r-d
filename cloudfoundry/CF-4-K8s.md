@@ -48,6 +48,10 @@ app_registry:
 ```bash
 kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/remove-resource-requirements.yml -f config-optional/use-nodeport-for-ingress.yml)
 ```
+- Scale down the `ingress nginx` application deployed within the kube-system namespace, otherwise cf for k8s will failt to be deployed
+```bash
+$ kc scale --replicas=0 deployment.apps/nginx-ingress-controller -n kube-system
+``` 
 
 ### Additional features (optional)
 
