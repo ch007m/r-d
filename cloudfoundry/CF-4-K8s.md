@@ -44,6 +44,11 @@ app_registry:
   password: <password>
 ```
 
+- Deploy the Kubernetes metrics server needed by the cf-for-k8s metrics-proxy pod
+```bash
+kc apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml
+```
+
 - Next, deploy `cf-4-k8s` using the `kapp` tool and some additional files
 ```bash
 kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/remove-resource-requirements.yml -f config-optional/use-nodeport-for-ingress.yml)
