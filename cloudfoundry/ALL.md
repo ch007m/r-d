@@ -251,12 +251,13 @@ $ kc scale --replicas=0 deployment.apps/nginx-ingress-controller -n kube-system
 ## Install cf, Stratos
 
 ```bash
+export node_ip=95.217.161.67
 kc create ns stratos
 cat << _EOF_ > stratos.yml
 console:
   service:
-    externalIPs: ["95.217.134.208"]
-    servicePort: 8443
+    externalIPs: ["${node_ip}"]
+    servicePort: 8444
 _EOF_
 
 helm repo add suse https://kubernetes-charts.suse.com/
@@ -268,11 +269,6 @@ helm install stratos --namespace stratos --values ./stratos.yml suse/console
 curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github" | tar -zx
 sudo mv cf /usr/local/bin
 ```
-- Enable docker feature (needed when using cf-4-k8s)
-```bash
-cf enable-feature-flag diego_docker
-```
-
 - Get secret
 ```bash
 kubectl get secret \
@@ -294,16 +290,22 @@ acp=$(kubectl get secret \
 
 cf auth admin "${acp}"
 ```
+- Login using the admin credentials for key cf_admin_password in /tmp/cf-values.yml
+```bash
+cf auth admin <cf-values.yml.cf_admin_password>
+```  
+
+- Enable docker feature (needed when using cf-4-k8s)
+```bash
+cf enable-feature-flag diego_docker
+```
+
 - Create the org, space
 ```bash
 cf create-org redhat.com
 cf create-space demo -o redhat.com
 cf create-user developer password
 cf target -o redhat.com -s demo
-```
-- Enable the docker feature
-```bash
-cf enable-feature-flag diego_docker
 ```
 - Deploy an app based using `pre-built` Docker image
 ```bash
