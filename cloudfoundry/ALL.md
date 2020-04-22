@@ -237,6 +237,9 @@ IP=95.217.161.67
 - Next, deploy `cf-4-k8s` using the `kapp` tool and some additional files
 ```bash
 ./bin/install-cf.sh /tmp/cf-values.yml
+```
+- **REMARK**: When using `kind`, please execute the following command 
+```bash
 kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/remove-resource-requirements.yml -f config-optional/use-nodeport-for-ingress.yml)
 ```
 - Scale down the `ingress nginx` application deployed within the kube-system namespace, otherwise cf for k8s will failt to be deployed
