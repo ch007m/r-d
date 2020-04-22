@@ -1,5 +1,52 @@
 ## Deploy Service Catalog
 
+Table of Contents
+=================
+
+  * [Minibroker](#minibroker)
+  * [Install the Kubernetes Service Catalog](#install-the-kubernetes-service-catalog)
+  * [OAB](#oab)
+  * [Configure cf to use OAB](#configure-cf-to-use-oab)
+  * [Using Postgresql service and cups](#using-postgresql-service-and-cups)
+
+## Minibroker
+
+- And deploy the mini-broker. More information] is available [here](https://svc-cat.io/docs/walkthrough/). 
+ 
+```bash
+helm repo add minibroker https://minibroker.blob.core.windows.net/charts
+helm  repo update
+kc create ns minibroker
+helm install  minibroker --namespace minibroker minibroker/minibroker --set "deployServiceCatalog=false" --set "defaultNamespace=minibroker"
+```
+**REMARK**: If minibroker will be used with CF, then use the following [instructions](https://github.com/kubernetes-sigs/minibroker#usage-with-cloud-foundry)
+
+- To play with CF and minibroker - see [here](https://github.com/kubernetes-sigs/minibroker#usage)
+- Register the broker
+```bash
+cf create-service-broker minibroker user pass http://minibroker-minibroker.minibroker.svc.cluster.local
+```
+- Enable the needed services
+```bash
+cf service-access
+cf enable-service-access mysql
+cf enable-service-access redis
+cf enable-service-access mongodb
+cf enable-service-access mariadb
+cf enable-service-access postgresql
+```
+- Create the mypostgresql service
+```bash
+cf create-service postgresql 11-6-0 postgresql-svc -c '{"db.name":"my_database"}'
+```
+- Bind it to your application
+```bash
+cf bind-service spring-music mypostgresql
+cf restart
+```
+
+## Install the Kubernetes Service Catalog
+
 - Deploy first the Service Catalog API and change the webhook service secure port as the same port is already used by Istio
 ```bash
 git clone https://github.com/kubernetes-sigs/service-catalog.git
@@ -219,52 +266,6 @@ _EOF_
 
 kc apply -f servicebinding.yml -n cf-workloads
 svcat describe binding mini-binding -n cf-workloads
-```
-
-## Minibroker
-
-- And deploy the mini-broker. More information] is available [here](https://svc-cat.io/docs/walkthrough/). 
- 
-```bash
-helm repo add minibroker https://minibroker.blob.core.windows.net/charts
-kc create ns minibroker
-helm install minibroker -n minibroker minibroker/minibroker
-```
-- If minibroker will be used with CF, then use the following [instructions](https://github.com/kubernetes-sigs/minibroker#usage-with-cloud-foundry)
-```bash
-helm install minibroker -n minibroker minibroker/minibroker \
-	--set "deployServiceCatalog=false" \
-    --set "defaultNamespace=minibroker"
--->
-helm install minibroker -n minibroker suse/minibroker \
-      --set "defaultNamespace=minibroker"
-```
-
-- To play with CF and minibroker - see [here](https://github.com/kubernetes-sigs/minibroker#usage)
-- Register the broker
-```bash
-cf create-service-broker minibroker user pass http://minibroker-minibroker.minibroker.svc.cluster.local
-```
-- Enable the needed services
-```bash
-cf service-access
-cf enable-service-access postgresql -p 10-8-0
-```
-- Create an `ASG` rule
-```bash
-echo > postgresql.json '[{ "protocol": "tcp", "destination": "10.0.0.0/8", "ports": "5432", "description": "Allow PostgreSQL traffic" }]'
-cf create-security-group postgresql_networking postgresql.json
-cf bind-security-group postgresql_networking redhat.com demo
-```
-- Create the mypostgresql service
-```bash
-cf create-service postgresql 10-8-0 mypostgresql
-cf service mypostgresql
-```
-- Bind it to your application
-```bash
-cf bind-service spring-music mypostgresql
-cf restart
 ```
 
 ## Using Postgresql service and cups
