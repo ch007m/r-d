@@ -57,11 +57,11 @@ kc apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/
 ```bash
 kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/remove-resource-requirements.yml -f config-optional/remove-ingressgateway-service.yml)
 ```
-
 - Scale down the `ingress nginx` application deployed within the kube-system namespace, otherwise cf for k8s will failt to be deployed
 ```bash
 $ kc scale --replicas=0 deployment.apps/nginx-ingress-controller -n kube-system
 ``` 
+**REMARK**: This step is only needed when ingress has been deployed on a kubernetes cluster
 
 ### Additional features (optional)
 

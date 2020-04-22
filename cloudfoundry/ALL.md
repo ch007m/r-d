@@ -246,6 +246,7 @@ kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/re
 ```bash
 $ kc scale --replicas=0 deployment.apps/nginx-ingress-controller -n kube-system
 ``` 
+**REMARK**: This step is only needed when ingress has been deployed on a kubernetes cluster
 
 ## Install cf, Stratos
 
