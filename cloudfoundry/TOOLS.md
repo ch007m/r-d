@@ -46,3 +46,8 @@ sudo mv k9s /usr/local/bin
 ```bash
 brew install httpie
 ```
+- To build an image using `buildpack`
+```bash
+brew tap buildpack/tap
+brew install pack
+```
