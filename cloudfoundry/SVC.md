@@ -15,9 +15,9 @@ Table of Contents
  
 ```bash
 helm repo add minibroker https://minibroker.blob.core.windows.net/charts
-helm  repo update
+helm repo update
 kc create ns minibroker
-helm install  minibroker --namespace minibroker minibroker/minibroker --set "deployServiceCatalog=false" --set "defaultNamespace=minibroker"
+helm install minibroker --namespace minibroker minibroker/minibroker --set "deployServiceCatalog=false" --set "defaultNamespace=minibroker"
 ```
 **REMARK**: If minibroker will be used with CF, then use the following [instructions](https://github.com/kubernetes-sigs/minibroker#usage-with-cloud-foundry)
 
@@ -35,14 +35,51 @@ cf enable-service-access mongodb
 cf enable-service-access mariadb
 cf enable-service-access postgresql
 ```
-- Create the mypostgresql service
+- Create the postgresql service
 ```bash
-cf create-service postgresql 11-6-0 postgresql-svc -c '{"db.name":"my_database"}'
+cf create-service postgresql 11-6-0 postgresql-svc
+```
+
+- Cehck the status of the service
+```bash
+Showing info of service postgresql-svc in org redhat.com / space demo as admin...
+
+name:             postgresql-svc
+service:          postgresql
+tags:
+plan:             11-6-0
+description:      Helm Chart for postgresql
+documentation:
+dashboard:
+service broker:   minibroker
+
+Showing status of last operation from service postgresql-svc...
+
+status:    create succeeded
+message:   service instance "43c24aba-0ad0-4a02-a5f5-e481c7c8f3da" provisioned
+started:   2020-04-22T09:15:54Z
+updated:   2020-04-22T09:16:54Z
+
+There are no bound apps for this service.
+
+Upgrades are not supported by this broker.
 ```
 - Bind it to your application
 ```bash
-cf bind-service spring-music mypostgresql
-cf restart
+cf bind-service spring-music postgresql-svc
+Binding service postgresql-svc to app spring-music in org redhat.com / space demo as admin...
+OK
+
+TIP: Use 'cf restage spring-music' to ensure your env variable changes take effect
+cf restage spring-music
+```
+
+****: If you prefer to use `cups` then use the following commands
+```bash
+cf cups my-postgresql-db -p '{ "uri" : "postgres://postgres:@interesting-orangutan-postgresql.minibroker.svc.cluster.local:5432/music", "username" : "postgres", "password" : "nFONm5TYFK" }'
+cf bind-service spring-music my-postgresql-db
+cf restage spring-music
+cf logs spring-music --recent
 ```
 
 ## Install the Kubernetes Service Catalog
