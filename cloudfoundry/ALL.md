@@ -238,9 +238,9 @@ IP=95.217.161.67
 ```bash
 ./bin/install-cf.sh /tmp/cf-values.yml
 ```
-- **REMARK**: When using `kind`, please execute the following command 
+- **REMARK**: When using `kind`, please execute the following command to remove istio ingress service and fix healthcheck, cpu/memory
 ```bash
-kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/remove-resource-requirements.yml -f config-optional/use-nodeport-for-ingress.yml)
+kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/remove-resource-requirements.yml -f config-optional/remove-ingressgateway-service.yml)
 ```
 - Scale down the `ingress nginx` application deployed within the kube-system namespace, otherwise cf for k8s will failt to be deployed
 ```bash
