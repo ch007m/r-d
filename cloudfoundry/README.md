@@ -62,6 +62,8 @@ Here is the list of the features as proposed - March 2020.
  
 ### Cloudfoundry
 
+Great introduction : http://basics-workshop.cloudfoundry.org/slides/#/20
+
 The Cloudfoundry platform, which is in fact what `VMWare Tanzu` is using under the hood, is progressively migrating to `kubernetes`. To support such a migration, the core components of the platform have been containerized and
 packaged as helm charts within the project `kubecf`. 
 
