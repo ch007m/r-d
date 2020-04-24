@@ -1,5 +1,6 @@
 ## Install Developer console - Stratos
 
+- Deploy it with the help of a helm chart. That will fail on cf-for-k8s
 ```bash
 export node_ip=95.217.161.67
 kc create ns stratos
@@ -13,3 +14,9 @@ _EOF_
 helm repo add suse https://kubernetes-charts.suse.com/
 helm install stratos --namespace stratos --values ./stratos.yml suse/console
 ```
+
+- An alternative is to run the console using locally stratos
+```bash
+docker run -p 8444:443 splatform/stratos:latest
+```
+
