@@ -35,18 +35,24 @@ cf enable-service-access mongodb
 cf enable-service-access mariadb
 cf enable-service-access postgresql
 ```
-- Create the postgresql service
+- Create the `postgresql-svc` service. Pass as parameter the tags `postgres, postgresql` and database name
 ```bash
-cf create-service postgresql 11-6-0 postgresql-svc
+$ cf create-service postgresql 11-6-0 postgresql-svc -t "postgres,postgresql" -c '{"postgresDatabase":"music"}'
 ```
 
-- Cehck the status of the service
+- or do the same using `mysql` if you prefer
 ```bash
+$ cf create-service mysql 5-7-28 mysql-svc -t "mysql" -c '{"mysqlDatabase":"music"}'
+```
+
+- Check the status of the service created
+```bash
+cf service postgresql-svc
 Showing info of service postgresql-svc in org redhat.com / space demo as admin...
 
 name:             postgresql-svc
 service:          postgresql
-tags:
+tags:             postgres, postgresql
 plan:             11-6-0
 description:      Helm Chart for postgresql
 documentation:
@@ -56,14 +62,90 @@ service broker:   minibroker
 Showing status of last operation from service postgresql-svc...
 
 status:    create succeeded
-message:   service instance "43c24aba-0ad0-4a02-a5f5-e481c7c8f3da" provisioned
-started:   2020-04-22T09:15:54Z
-updated:   2020-04-22T09:16:54Z
+message:   service instance "4538ba15-7b6d-4693-bfe5-e9979d655eea" provisioned
+started:   2020-04-23T15:53:53Z
+updated:   2020-04-23T15:54:56Z
 
 There are no bound apps for this service.
 
 Upgrades are not supported by this broker.
 ```
+
+- Verify the ENV VAR VCAP
+```bash
+cf env spring-music
+Getting env variables for app spring-music2 in org redhat.com / space demo as admin...
+OK
+
+System-Provided:
+{
+ "VCAP_SERVICES": {
+  "postgresql": [
+   {
+    "binding_name": null,
+    "credentials": {
+     "Protocol": "tcp-postgresql",
+     "host": "peeking-goose-postgresql.minibroker.svc.cluster.local",
+     "password": "87ElH9HEWG",
+     "port": 5432,
+     "postgresql-password": "87ElH9HEWG",
+     "uri": "tcp-postgresql://postgres:87ElH9HEWG@peeking-goose-postgresql.minibroker.svc.cluster.local:5432/music",
+     "username": "postgres"
+    },
+    "instance_name": "postgresql-svc",
+    "label": "postgresql",
+    "name": "postgresql-svc",
+    "plan": "11-6-0",
+    "provider": null,
+    "syslog_drain_url": null,
+    "tags": [
+     "postgresql",
+     "postgres",
+     "database",
+     "sql"
+    ],
+    "volume_mounts": []
+   }
+  ]
+ }
+}
+
+{
+ "VCAP_APPLICATION": {
+  "application_id": "3a68fcb1-737c-4a1b-9e1b-0867ca012e52",
+  "application_name": "spring-music",
+  "application_uris": [
+   "spring-music2.95.217.161.67.nip.io"
+  ],
+  "application_version": "7dc81a59-7676-479f-96ae-fe7ccaf450f2",
+  "cf_api": "https://api.95.217.161.67.nip.io",
+  "limits": {
+   "disk": 1024,
+   "fds": 16384,
+   "mem": 1024
+  },
+  "name": "spring-music",
+  "organization_id": "8c48a272-9c9c-4e4c-bd1a-8dc7891a1e38",
+  "organization_name": "redhat.com",
+  "process_id": "3a68fcb1-737c-4a1b-9e1b-0867ca012e52",
+  "process_type": "web",
+  "space_id": "2ba1ccf8-7f6d-4e06-86fb-7a535a8b7c45",
+  "space_name": "demo",
+  "uris": [
+   "spring-music2.95.217.161.67.nip.io"
+  ],
+  "users": null,
+  "version": "7dc81a59-7676-479f-96ae-fe7ccaf450f2"
+ }
+}
+
+User-Provided:
+SPRING_PROFILES_ACTIVE: postgres
+
+No running env variables have been set
+
+No staging env variables have been set
+``` 
 - Bind it to your application
 ```bash
 cf bind-service spring-music postgresql-svc
@@ -71,6 +153,11 @@ Binding service postgresql-svc to app spring-music in org redhat.com / space dem
 OK
 
 TIP: Use 'cf restage spring-music' to ensure your env variable changes take effect
+cf restage spring-music
+```
+- Change the active profile to `postgres` and restage
+```bash
+cf set-env spring-music SPRING_PROFILES_ACTIVE postgres
 cf restage spring-music
 ```
 
@@ -81,6 +168,20 @@ cf bind-service spring-music my-postgresql-db
 cf restage spring-music
 cf logs spring-music --recent
 ```
+
+- All commands using mysql
+```bash
+cf unbind-service spring-music mysql-svc
+cf delete-service mysql-svc -f
+cf delete spring-music -f
+cf create-service mysql 5-7-28 mysql-svc -t "mysql" -c '{"mysqlDatabase":"music"}'
+cf push spring-music -o cmoulliard/spring-music-app
+cf set-env spring-music SPRING_PROFILES_ACTIVE mysql
+cf bind-service spring-music mysql-svc
+cf restage spring-music
+```
+
+- Open the application at the following address: `http://spring-music.95.217.161.67.nip.io/`
 
 ## Install the Kubernetes Service Catalog
 
