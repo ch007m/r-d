@@ -3,8 +3,7 @@
 ## Table of Contents
 
   * [Prerequisites](#prerequisites)
-  * [Using cf-for-k8s](#using-cf-for-k8s)
-  * [Using kubecf](#using-kubecf)
+  * [Deployment of Cloud Foundry](#deployment-of-cloud-foundry)
   * [Deploy an application using cf](#deploy-an-application-using-cf)
      * [Push a docker image](#push-a-docker-image)
      * [Deploy a spring application accessing a Database](#deploy-a-spring-application-accessing-a-database)
@@ -19,13 +18,17 @@ To play with Cloud Foundry on Kubernetes, it is required to have :
 - A docker daemon
 - Homebrew
 
-## Using cf-for-k8s
+## Deployment of Cloud Foundry
 
-See [intructions](CF-4-K8s.md)
+2 projects have been created to install Cloud Foundry on Kubernetes but the one which is currently packaged, as commercial
+product, by VMWare for their product `Tanzu application Service` is `cf-for-k8s`.
 
-## Using kubecf
+- [cf-for-k8s](https://github.com/cloudfoundry/cf-for-k8s) - see [intructions](CF-4-K8s.md)
+- [KubeCf](https://kubecf.suse.dev/) - see [intructions](KUBECF.md)
 
-See [intructions](KUBECF.md)
+**REMARK**: `cf-for-k8` leverages Kubernetes native features such as `Controller, Secret, ConfigMap,...` and is built top of Kubernetes ecosystem projects: istio, fluentd, kpack, .... then `KubeCf`
+
+The following sections of this documentaton will rely on `cf-for-k8s` installation
 
 ## Deploy an application using cf
 
