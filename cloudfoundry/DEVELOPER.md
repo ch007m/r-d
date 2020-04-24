@@ -109,22 +109,16 @@ cf service-access
 cf enable-service-access mysql
 cf enable-service-access postgresql
 ```
-- Create the `postgresql-svc` service. Pass as parameter the tags `postgres, postgresql` and database name
-```bash
-$ cf create-service postgresql 11-6-0 postgresql-svc -t "postgres,postgresql" -c '{"postgresDatabase":"music"}'
-```
 
-- Create the `mysql-svc` service. Pass as parameter the tags `mysql` which is needed and usedby the Java CfEnv library to match the profile of the application
+- Create the `mysql-svc` service. Pass as parameter the tags `mysql` which is needed and used by the Java CfEnv library to match the profile of the application
   with the name of the service as defined by `VCAP_SERVICES`. It is also needed to specify the database name as it will be used by the Spring music application datasource
 ```bash
 $ cf create-service mysql 5-7-28 mysql-svc -t "mysql" -c '{"mysqlDatabase":"music"}'
 ```
-
 - Optional. Check the status of the service created
 ```bash
 cf service mysql-svc
 ```
-
 - Git clone the spring music project and build it locally
 ```bash
 git clone https://github.com/cmoulliard/spring-music.git && cd spring-music
@@ -138,7 +132,7 @@ docker tag spring-music-app cmoulliard/spring-music-app
 docker push cmoulliard/spring-music-app
 ```
 **REMARK**: We build manually the image instead of using `kpack` on cf-for-k8s as the release `v0.1.0` injects a wrong Spring Cloud library within the image which conflicts with the project `Pivotal CfEnv` 
-whe nthe spring boot application starts !
+when the spring boot application starts !
 
 - Push and create the `spring music` application
 ```bash
