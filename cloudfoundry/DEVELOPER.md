@@ -26,9 +26,9 @@ product, by VMWare for their product `Tanzu application Service` is `cf-for-k8s`
 - [cf-for-k8s](https://github.com/cloudfoundry/cf-for-k8s) - see [intructions](CF-4-K8s.md)
 - [KubeCf](https://kubecf.suse.dev/) - see [intructions](KUBECF.md)
 
-**REMARK**: `cf-for-k8` leverages Kubernetes native features such as `Controller, Secret, ConfigMap,...` and is built top of Kubernetes ecosystem projects: istio, fluentd, kpack, .... then `KubeCf`
+**REMARK**: `cf-for-k8` leverages Kubernetes native features such as `Controller, Secret, ConfigMap,...` and is built top of Kubernetes ecosystem projects: `istio`, `fluentd`, `kpack`, .... then `KubeCf`
 
-The following sections of this documentaton will rely on `cf-for-k8s` installation
+The following sections of this documentation will rely on `cf-for-k8s` installation.
 
 ## Deploy an application using cf
 
