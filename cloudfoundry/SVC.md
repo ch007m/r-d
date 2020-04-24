@@ -161,14 +161,6 @@ cf set-env spring-music SPRING_PROFILES_ACTIVE postgres
 cf restage spring-music
 ```
 
-****: If you prefer to use `cups` then use the following commands
-```bash
-cf cups my-postgresql-db -p '{ "uri" : "postgres://postgres:@interesting-orangutan-postgresql.minibroker.svc.cluster.local:5432/music", "username" : "postgres", "password" : "nFONm5TYFK" }'
-cf bind-service spring-music my-postgresql-db
-cf restage spring-music
-cf logs spring-music --recent
-```
-
 - All commands using mysql
 ```bash
 cf unbind-service spring-music mysql-svc
@@ -179,6 +171,14 @@ cf push spring-music -o cmoulliard/spring-music-app
 cf set-env spring-music SPRING_PROFILES_ACTIVE mysql
 cf bind-service spring-music mysql-svc
 cf restage spring-music
+```
+
+**IMPORTANT**: If you prefer to use `cups` to define a user provided service, then use the following commands
+```bash
+cf cups my-postgresql-db -p '{ "uri" : "postgres://postgres:@interesting-orangutan-postgresql.minibroker.svc.cluster.local:5432/music", "username" : "postgres", "password" : "nFONm5TYFK" }'
+cf bind-service spring-music my-postgresql-db
+cf restage spring-music
+cf logs spring-music --recent
 ```
 
 - Open the application at the following address: `http://spring-music.95.217.161.67.nip.io/`
