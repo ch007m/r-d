@@ -39,11 +39,11 @@ cf api --skip-ssl-validation https://api.${IP}.nip.io
 ```
 **Remarks**: 
 
-- For `cf-4-k8s`: The admin password has been generated within the `/tmp/cf-values.yml` file and is available at the field `cf_admin_password`
+- The admin password has been generated within the `/tmp/cf-values.yml` and is available under the variable: `cf_admin_password`
 ```bash
-export admin_pass=<cf_admin_password>
+export admin_pass=$(yq r /tmp/cf-values.yml 'cf_admin_password')
 ```
-- For `kubecf`: We can fetch the random generated credentials for the default `admin user` 
+**REMARK**: For `kubecf`, we can fetch the random generated credentials for the default `admin user` using the secret created: 
 ```bash
 export admin_pass=$(kubectl get secret \
           --namespace kubecf kubecf.var-cf-admin-password \
