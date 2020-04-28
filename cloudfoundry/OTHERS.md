@@ -1,18 +1,20 @@
 ## Install Developer console - Stratos
 
-- Deploy it with the help of a helm chart. That will fail on cf-for-k8s
+- Deploy it with the help of a helm chart on kind
 ```bash
-export node_ip=95.217.161.67
-kc create ns stratos
-cat << _EOF_ > stratos.yml
+cat << EOF > stratos.yaml
 console:
   service:
-    externalIPs: ["${node_ip}"]
-    servicePort: 8444
-_EOF_
+    type: NodePort
+    nodePort: 30000
+EOF
 
-helm repo add suse https://kubernetes-charts.suse.com/
-helm install stratos --namespace stratos --values ./stratos.yml suse/console
+kubectl create ns console
+helm install stratos -n console --values ./stratos.yml stratos/console
+kubectl port-forward stratos-0 --address localhost,<EXTERNAL_IP_ADDRESS> 30000:443 -n console
+Next, open your browser at the address
+
+https://<EXTERNAL_IP_ADDRESS>:30000
 ```
 
 - An alternative is to run the console using locally stratos
