@@ -7,7 +7,6 @@
   * [Deploy an application using cf](#deploy-an-application-using-cf)
      * [Push a docker image](#push-a-docker-image)
      * [Deploy a spring application accessing a Database](#deploy-a-spring-application-accessing-a-database)
-     * [Push and build a spring application](#push-and-build-a-spring-application)
 
 ## Prerequisites
 
@@ -163,88 +162,5 @@ cf push spring-music -o cmoulliard/spring-music-app
 cf set-env spring-music SPRING_PROFILES_ACTIVE mysql
 cf bind-service spring-music mysql-svc
 cf restage spring-music
-```
-
-### Push and build a spring application
-
-- Git clone a Spring Boot example project and build it
-```bash
-git clone https://github.com/cloudfoundry-samples/spring-music
-cd spring-music/
-./gradlew assemble
-```
-
-- Next push it to CF
-```bash
-cf push spring-music
-
-Pushing from manifest to org redhat.com / space demo as developer...
-Using manifest file /home/snowdrop/temp/spring-music/manifest.yml
-Getting app info...
-Updating app with these attributes...
-  name:                spring-music
-  path:                /home/snowdrop/temp/spring-music/build/libs/spring-music-1.0.jar
-  command:             JAVA_OPTS="-agentpath:$PWD/.java-buildpack/open_jdk_jre/bin/jvmkill-1.16.0_RELEASE=printHeapHistogram=1 -Djava.io.tmpdir=$TMPDIR -XX:ActiveProcessorCount=$(nproc) -Djava.ext.dirs=$PWD/.java-buildpack/container_security_provider:$PWD/.java-buildpack/open_jdk_jre/lib/ext -Djava.security.properties=$PWD/.java-buildpack/java_security/java.security $JAVA_OPTS" && CALCULATED_MEMORY=$($PWD/.java-buildpack/open_jdk_jre/bin/java-buildpack-memory-calculator-3.13.0_RELEASE -totMemory=$MEMORY_LIMIT -loadedClasses=20232 -poolType=metaspace -stackThreads=250 -vmOptions="$JAVA_OPTS") && echo JVM Memory Configuration: $CALCULATED_MEMORY && JAVA_OPTS="$JAVA_OPTS $CALCULATED_MEMORY" && MALLOC_ARENA_MAX=2 SERVER_PORT=$PORT eval exec $PWD/.java-buildpack/open_jdk_jre/bin/java $JAVA_OPTS -cp $PWD/. org.springframework.boot.loader.JarLauncher
-  disk quota:          1G
-  health check type:   port
-  instances:           1
-  memory:              1G
-  stack:               cflinuxfs3
-  env:
-    JBP_CONFIG_SPRING_AUTO_RECONFIGURATION
-  routes:
-    spring-music.172.17.0.2.nip.io
-
-Updating app spring-music...
-Mapping routes...
-Comparing local files to remote cache...
-Packaging files to upload...
-Uploading files...
- 679.77 KiB / 679.77 KiB [===============================================================================================================================================] 100.00% 1s
-
-Waiting for API to complete processing files...
-
-Stopping app...
-
-Staging app and tracing logs...
-   2020/03/17 14:27:00 executor-started
-   2020/03/17 14:26:54 downloader-started
-   2020/03/17 14:26:54 Installing dependencies
-   2020/03/17 14:26:58 downloader-done
-   -----> Java Buildpack v4.26 | https://github.com/cloudfoundry/java-buildpack.git#e06e00b
-   -----> Downloading Jvmkill Agent 1.16.0_RELEASE from https://java-buildpack.cloudfoundry.org/jvmkill/bionic/x86_64/jvmkill-1.16.0-RELEASE.so (0.0s)
-   -----> Downloading Open Jdk JRE 1.8.0_242 from https://java-buildpack.cloudfoundry.org/openjdk/bionic/x86_64/openjdk-jre-1.8.0_242-bionic.tar.gz (2.4s)
-   Expanding Open Jdk JRE to .java-buildpack/open_jdk_jre (1.3s)
-   -----> Downloading Open JDK Like Memory Calculator 3.13.0_RELEASE from https://java-buildpack.cloudfoundry.org/memory-calculator/bionic/x86_64/memory-calculator-3.13.0-RELEASE.tar.gz (0.0s)
-   Loaded Classes: 20114, Threads: 250
-   -----> Downloading Client Certificate Mapper 1.11.0_RELEASE from https://java-buildpack.cloudfoundry.org/client-certificate-mapper/client-certificate-mapper-1.11.0-RELEASE.jar (0.0s)
-   -----> Downloading Container Security Provider 1.16.0_RELEASE from https://java-buildpack.cloudfoundry.org/container-security-provider/container-security-provider-1.16.0-RELEASE.jar (0.1s)
-   2020/03/17 14:27:29 executor-done
-   2020/03/17 14:27:30 uploader-started
-   2020/03/17 14:27:34 uploader-done
-
-Waiting for app to start...
-
-name:                spring-music
-requested state:     started
-isolation segment:   placeholder
-routes:              spring-music.172.17.0.2.nip.io
-last uploaded:       Tue 17 Mar 15:27:32 CET 2020
-stack:               cflinuxfs3
-buildpacks:          client-certificate-mapper=1.11.0_RELEASE container-security-provider=1.16.0_RELEASE
-                     java-buildpack=v4.26-https://github.com/cloudfoundry/java-buildpack.git#e06e00b java-main java-opts java-security jvmkill-agent=1.16.0_RELEASE
-                     open-jdk-like-jr...
-
-type:            web
-instances:       1/1
-memory usage:    1024M
-start command:   JAVA_OPTS="-agentpath:$PWD/.java-buildpack/open_jdk_jre/bin/jvmkill-1.16.0_RELEASE=printHeapHistogram=1 -Djava.io.tmpdir=$TMPDIR -XX:ActiveProcessorCount=$(nproc)
-                 -Djava.ext.dirs=$PWD/.java-buildpack/container_security_provider:$PWD/.java-buildpack/open_jdk_jre/lib/ext
-                 -Djava.security.properties=$PWD/.java-buildpack/java_security/java.security $JAVA_OPTS" &&
-                 CALCULATED_MEMORY=$($PWD/.java-buildpack/open_jdk_jre/bin/java-buildpack-memory-calculator-3.13.0_RELEASE -totMemory=$MEMORY_LIMIT -loadedClasses=20232
-                 -poolType=metaspace -stackThreads=250 -vmOptions="$JAVA_OPTS") && echo JVM Memory Configuration: $CALCULATED_MEMORY && JAVA_OPTS="$JAVA_OPTS $CALCULATED_MEMORY" &&
-                 MALLOC_ARENA_MAX=2 SERVER_PORT=$PORT eval exec $PWD/.java-buildpack/open_jdk_jre/bin/java $JAVA_OPTS -cp $PWD/. org.springframework.boot.loader.JarLauncher
-     state     since                  cpu    memory    disk      details
-#0   running   2020-03-17T14:27:36Z   0.0%   0 of 1G   0 of 1G
 ```
 - Check if the Application is well started, play with it ;-)
