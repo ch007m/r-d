@@ -43,9 +43,10 @@ kc apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/
 ```bash
 ./bin/install-cf.sh /tmp/cf-values.yml
 ```
-- **REMARK**: When using `kind`, please execute the following command to remove istio ingress service and fix health check, cpu/memory
+- **REMARK**: When using `kind`, please execute the following command to use the `nodeport-for-ingress` as kind dont provide a lodbalancer that `istio ingressgateway` can use and fix resource allocations.
 ```bash
-kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/remove-resource-requirements.yml -f config-optional/remove-ingressgateway-service.yml)
+curl https://raw.githubusercontent.com/cloudfoundry/cf-for-k8s/ed4c9ea79025bb4767543cb013d3c854d1cd2b72/config-optional/use-nodeport-for-ingress.yml > config-optional/use-nodeport-for-ingress.yml
+kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/remove-resource-requirements.yml -f config-optional/use-nodeport-for-ingress.yml)
 ```
 - **REMARK**: When the `ingress nginx controller` has been deployed, then scale it down the `ingress nginx`, otherwise cf for k8s will fail to be deployed !!
 ```bash
