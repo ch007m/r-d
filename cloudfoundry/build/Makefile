@@ -1,9 +1,9 @@
 all :: paketo/paketo-builder
 
-paketo/paketo-builder: builder.toml paketo/bellsoft-liberica/buildpack.toml paketo/spring-boot/buildpack.toml
-	pack create-builder paketo-builder --builder-config builder.toml
+paketo/paketo-builder: builder.toml paketo/adopt-openjdk/buildpack.toml paketo/spring-boot/buildpack.toml
+	pack create-builder paketo-spring-boot-builder --builder-config builder.toml
 	mkdir -p paketo
-	touch paketo/paketo-builder
+	touch paketo/paketo-spring-boot-builder
 
 define BUILDPACK
 paketo/$(1)/buildpack.toml:
@@ -13,4 +13,5 @@ paketo/$(1)/buildpack.toml:
 endef
 
 $(eval $(call BUILDPACK,spring-boot,v1.5.1))
-$(eval $(call BUILDPACK,bellsoft-liberica,v2.3.1))
+$(eval $(call BUILDPACK,adopt-openjdk,v2.2.1))
+#$(eval $(call BUILDPACK,bellsoft-liberica,v2.3.1))
