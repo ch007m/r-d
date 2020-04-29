@@ -6,7 +6,6 @@ paketo/paketo-builder: builder.toml paketo/bellsoft-liberica/buildpack.toml pake
     touch paketo/paketo-builder
 
 define BUILDPACK
-
 paketo/$(1)/buildpack.toml:
     mkdir -p paketo/$(1)
     curl -Ls https://github.com/paketo-buildpacks/$(1)/archive/$(2).tar.gz | tar -x --strip-components=1 -C paketo/$(1) -z -f -
