@@ -1,0 +1,35 @@
+---
+apiVersion: v1
+data:
+  .dockerconfigjson: ewoJImF1dGhzIjogewoJCSJodHRwczovL2luZGV4LmRvY2tlci5pby92MS8iOiB7CgkJCSJhdXRoIjogIlkyMXZkV3hzYVdGeVpEcENkWGxyWlhKek9Ua2giCgkJfSwKCQkicmVnaXN0cnkucGl2b3RhbC5pbyI6IHsKCQkJImF1dGgiOiAiWTIxdmRXeHNhV0Z5WkVCeVpXUm9ZWFF1WTI5dE9rSlZlV3RsY25NNU9TRT0iCgkJfQoJfSwKCSJIdHRwSGVhZGVycyI6IHsKCQkiVXNlci1BZ2VudCI6ICJEb2NrZXItQ2xpZW50LzE4LjA2LjItY2UgKGxpbnV4KSIKCX0KfQ==
+kind: Secret
+metadata:
+  name: my-docker-cred
+type: kubernetes.io/dockerconfigjson
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-build-sa
+secrets:
+  - name: my-docker-cred
+---
+apiVersion: build.pivotal.io/v1alpha1
+kind: Build
+metadata:
+  name: springboot-build
+spec:
+  tags:
+    - cmoulliard/spring-boot
+  serviceAccount: my-build-sa
+  builder:
+    image: gcr.io/paketo-buildpacks/builder:base
+    imagePullSecrets:
+      - name: my-docker-cred
+  source:
+    git:
+      url: https://github.com/cmoulliard/spring-music.git
+      revision: master
+  #env:
+  #  - name: "BP_BUILT_ARTIFACT"
+  #    value: "build/libs/spring-music-*.jar"
