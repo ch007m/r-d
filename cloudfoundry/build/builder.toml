@@ -1,60 +1,58 @@
 description = "Bionic base image with the Java, Node.js, and .NET Core buildpacks"
-  ​
+
 [[buildpacks]]
 id = "paketo-buildpacks/go-mod"
 version = "v0.0.105"
 uri = "https://github.com/paketo-buildpacks/go-mod/releases/download/v0.0.105/go-mod-v0.0.105.tgz"
-​
+
 [[buildpacks]]
 id = "paketo-buildpacks/npm"
 version = "0.1.20"
 uri = "https://github.com/paketo-buildpacks/npm/releases/download/v0.1.20/npm-cnb-0.1.20.tgz"
-​
+
 [[buildpacks]]
 id = "paketo-buildpacks/bellsoft-liberica"
 version = "v2.3.1"
-uri = "paketo/bellsoft-liberica"
-​
+​uri = "paketo/bellsoft-liberica"
+
 [[buildpacks]]
 id = "paketo-buildpacks/nginx"
 version = "0.0.120"
 uri = "https://github.com/paketo-buildpacks/nginx/releases/download/v0.0.120/nginx-cnb-0.0.120.tgz"
-  ​
+
 [[buildpacks]]
 id = "paketo-buildpacks/spring-boot"
 version = "v1.5.1"
 uri = "paketo/spring-boot"
 ​
-​
 [[orders]]
-​
-[[orders.group]]
-id = "paketo-buildpacks/go-mod"
-​
-[[orders.group]]
-id = "paketo-buildpacks/npm"
-​
-[[orders.group]]
-id = "paketo-buildpacks/bellsoft-liberica"
-​
-[[orders.group]]
-id = "paketo-buildpacks/nginx"
-​
-[[orders.group]]
-id = "paketo-buildpacks/spring-boot"
-​
-[[order]]
-group = [
-  { id = "paketo-buildpacks/go-mod" },
-  { id = "paketo-buildpacks/npm" },
-  { id = "paketo-buildpacks/bellsoft-liberica" },
-  { id = "paketo-buildpacks/nginx" },
-  { id = "paketo-buildpacks/spring-boot" },
-]
+  [[orders.group]]
+  id = "paketo-buildpacks/go-mod"
   ​
+  [[orders.group]]
+  id = "paketo-buildpacks/npm"
+  ​
+  [[orders.group]]
+  id = "paketo-buildpacks/bellsoft-liberica"
+  ​
+  [[orders.group]]
+  id = "paketo-buildpacks/nginx"
+  ​
+  [[orders.group]]
+  id = "paketo-buildpacks/spring-boot"
+  ​
+  [[order]]
+  group = [
+    { id = "paketo-buildpacks/go-mod" },
+    { id = "paketo-buildpacks/npm" },
+    { id = "paketo-buildpacks/bellsoft-liberica" },
+    { id = "paketo-buildpacks/nginx" },
+    { id = "paketo-buildpacks/spring-boot" },
+  ]
+​
 [lifecycle]
 version = "0.4.0"
-​
+
 [stack]
 build-image = "cloudfoundry/build:full-cnb"
 id = "org.cloudfoundry.stacks.cflinuxfs3"
