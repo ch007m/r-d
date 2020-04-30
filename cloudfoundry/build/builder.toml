@@ -21,6 +21,6 @@ uri = "paketo/spring-boot"
 version = "0.4.0"
 
 [stack]
-build-image = "cloudfoundry/build:full-cnb"
 id = "org.cloudfoundry.stacks.cflinuxfs3"
+build-image = "cloudfoundry/build:full-cnb"
 run-image = "cloudfoundry/run:full-cnb"
