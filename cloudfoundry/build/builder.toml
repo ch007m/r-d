@@ -3,24 +3,34 @@ description = "Builder containing: Java (jdk,jre) and Spring boot buildpacks"
 [[buildpacks]]
 id = "paketo-buildpacks/adopt-openjdk"
 version = "v2.2.1"
-uri = "paketo/adopt-openjdk"
+#uri = "paketo/adopt-openjdk"
+image = "gcr.io/paketo-buildpacks/adopt-openjdk"
 
 [[buildpacks]]
 id = "paketo-buildpacks/spring-boot"
 version = "v1.5.1"
-uri = "paketo/spring-boot"
+#uri = "paketo/spring-boot"
+image = "gcr.io/paketo-buildpacks/spring-boot"
+
+[[buildpacks]]
+id = "paketo-buildpacks/gradle"
+version = "v1.1.1"
+image = "gcr.io/paketo-buildpacks/gradle"
 
 [[order]]
   [[order.group]]
   id = "paketo-buildpacks/adopt-openjdk"
 
   [[order.group]]
+  id = "paketo-buildpacks/gradle"
+
+  [[order.group]]
   id = "paketo-buildpacks/spring-boot"
 
-[lifecycle]
-version = "0.4.0"
+#[lifecycle]
+#version = "0.4.0"
 
 [stack]
 id = "org.cloudfoundry.stacks.cflinuxfs3"
-build-image = "cloudfoundry/build:full-cnb"
-run-image = "cloudfoundry/run:full-cnb"
+build-image = "gcr.io/paketo-buildpacks/build:full-cnb-cf"
+run-image = "gcr.io/paketo-buildpacks/run:full-cnb-cf"
