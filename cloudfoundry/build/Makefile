@@ -10,7 +10,7 @@ paketo/$(1)/buildpack.toml:
 	mkdir -p paketo/$(1)
 	curl -Ls https://github.com/paketo-buildpacks/$(1)/archive/$(2).tar.gz | tar -x --strip-components=1 -C paketo/$(1) -z -f -
 	sed -i'' -e 's/{{\s*\.version}}/$(2)/g' paketo/$(1)/buildpack.toml
-	./paketo/$(1)/scripts/build.sh
+	#./paketo/$(1)/scripts/build.sh
 endef
 
 $(eval $(call BUILDPACK,spring-boot,v1.5.1))
