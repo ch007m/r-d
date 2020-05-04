@@ -17,6 +17,11 @@ id = "paketo-buildpacks/gradle"
 version = "v1.1.1"
 image = "gcr.io/paketo-buildpacks/gradle"
 
+[[buildpacks]]
+id = "paketo-buildpacks/executable-jar"
+version = "v1.2.1"
+image = "gcr.io/paketo-buildpacks/executable-jar"
+
 [[order]]
   [[order.group]]
   id = "paketo-buildpacks/adopt-openjdk"
@@ -26,6 +31,9 @@ image = "gcr.io/paketo-buildpacks/gradle"
 
   [[order.group]]
   id = "paketo-buildpacks/spring-boot"
+
+  [[order.group]]
+  id = "paketo-buildpacks/executable-jar"
 
 #[lifecycle]
 #version = "0.4.0"
