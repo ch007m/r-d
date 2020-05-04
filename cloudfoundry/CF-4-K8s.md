@@ -29,17 +29,20 @@ sudo mv ./bosh /usr/local/bin/bosh
 IP=<VM_ETH0_IP_ADDRESS>
 ./hack/generate-values.sh -d ${IP}.nip.io > /tmp/cf-values.yml
 ```
-- Append end of the /tmp/cf-values.yml file your registry credentials
+- Append, end of the `/tmp/cf-values.yml` file, your container registry credential.
 ```bash
 echo -e '\napp_registry:\n  hostname: https://index.docker.io/v1/\n  repository: <repo>\n  username: <username>\n  password: <password>' >> /tmp/cf-values.yml
 ```
-
+- Use the `Spring Boot` builder which don t include the `Autoreconfiguration` pack as it will fail with applications using the Pivotal `CfEnv` project
+```bash
+echo -e '\nimages:\n  cf_autodetect_builder: cmoulliard/paketo-spring-boot-builder@sha256:f0fe222b06fd54e580a1366646f31e7b5b59047c3112b8416c06994e4109cd30' >> /tmp/cf-values.yml
+```
 - Deploy the Kubernetes metrics server needed by the `metrics-proxy` pod
 ```bash
 kc apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml
 ```
 
-- Next, deploy `cf-4-k8s` using the `kapp` tool and some additional files
+- Next, deploy `cf-4-k8s` using the `kapp` tool, and some additional files
 ```bash
 ./bin/install-cf.sh /tmp/cf-values.yml
 ```
