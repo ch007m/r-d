@@ -2,7 +2,7 @@
 
 - Deploy it with the help of a helm chart on kind
 ```bash
-cat << EOF > stratos.yaml
+cat << EOF > stratos.yml
 console:
   service:
     type: NodePort
