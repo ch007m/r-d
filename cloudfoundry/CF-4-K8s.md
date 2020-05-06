@@ -48,8 +48,8 @@ kc apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/
 ```
 - **REMARK**: When using `kind`, please execute the following command to use the `nodeport-for-ingress` as kind don't provide a loadbalancer that `istio ingressgateway` can use and fix resource allocations.
 ```bash
-curl https://raw.githubusercontent.com/cloudfoundry/cf-for-k8s/ed4c9ea79025bb4767543cb013d3c854d1cd2b72/config-optional/use-nodeport-for-ingress.yml > config-optional/use-nodeport-for-ingress.yml
-kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/remove-resource-requirements.yml -f config-optional/use-nodeport-for-ingress.yml)
+ytt -f config -f config-optional/remove-resource-requirements.yml -f config-optional/remove-ingressgateway-service.yml -f config-optional/use-nodeport-for-ingress.yml -f /tmp/cf-values.yml > /tmp/cf-for-k8s-rendered.yml
+kapp deploy -a cf -f /tmp/cf-for-k8s-rendered.yml -y
 ```
 - **REMARK**: When the `ingress nginx controller` has been deployed on kubernetes created using by example `kubeadm, kubelet`, then scale it down the `ingress nginx`, otherwise cf for k8s will fail to be deployed !!
 ```bash
