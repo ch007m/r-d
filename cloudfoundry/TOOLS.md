@@ -51,3 +51,7 @@ brew install httpie
 brew tap buildpack/tap
 brew install pack
 ```
+- Deploy `cfssl` tool to generate cert/pem and request to be signed
+```bash
+brew install cfssl
+```

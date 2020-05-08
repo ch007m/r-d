@@ -134,6 +134,7 @@ helm uninstall kubecf -n kubecf
 ```bash
 brew tap k14s/tap
 brew install ytt kbld kapp imgpkg kwt vendir
+brew install cfssl
 ```
 
 - Install bosh client
@@ -324,6 +325,65 @@ kubectl get secret $(kubectl get serviceaccount kubeapps-operator -n kubeapps -o
 - Modify the service created to define the externalIP address `http://95.217.161.67/#/login`
 
 ## Optional 
+
+- Generate self-signed certificate
+```bash
+mkdir certs && cd certs/
+cat <<EOF | cfssl genkey - | cfssljson -bare server
+{
+  "hosts": [
+    "95.217.161.67"
+  ],
+  "CN": "95.217.161.67",
+  "key": {
+    "algo": "ecdsa",
+    "size": 256
+  },
+  "names": [{
+    "C": "BE",
+    "ST": "Namur",
+    "L": "Florennes",
+    "O": "Red Hat Middleware",
+    "OU": "Snowdrop"
+  }]
+}
+EOF
+
+cat <<EOF | kubectl apply -f -
+apiVersion: certificates.k8s.io/v1beta1
+kind: CertificateSigningRequest
+metadata:
+  name: kubernetes-dashboard
+spec:
+  request: $(cat server.csr | base64 | tr -d '\n')
+  usages:
+  - digital signature
+  - key encipherment
+  - server auth
+EOF
+
+cat <<EOF | kubectl apply -f -
+apiVersion: certificates.k8s.io/v1beta1
+kind: CertificateSigningRequest
+metadata:
+  name: kubernetes-dashboard
+spec:
+  request: $(cat server.csr | base64 | tr -d '\n')
+  usages:
+  - digital signature
+  - key encipherment
+  - server auth
+EOF
+
+kc describe csr kubernetes-dashboard
+kc certificate approve kubernetes-dashboard
+
+kc get csr kubernetes-dashboard -o jsonpath='{.status.certificate}' \
+    | base64 --decode > server.crt
+
+kc delete secret/kubernetes-dashboard-certs -n kubernetes-dashboard
+kc create secret tls  kubernetes-dashboard-certs -n kubernetes-dashboard --cert=server.crt --key=server-key.pem
+```
 
 - Install kind
 ```bash
