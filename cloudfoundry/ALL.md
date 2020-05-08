@@ -34,117 +34,35 @@ ssh-hetznerc ${VM_NAME}
 
 - Add missing PV
 ```bash
-cat << _EOF_ > pv006.yml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv006
-spec:
-  accessModes:
-  - ReadWriteOnce
-  capacity:
-    storage: 20Gi
-  hostPath:
-    path: /tmp/pv006
-    type: ""
-  persistentVolumeReclaimPolicy: Recycle
-  volumeMode: Filesystem
-_EOF_
-
-cat << _EOF_ > pv007.yml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv007
-spec:
-  accessModes:
-  - ReadWriteOnce
-  capacity:
-    storage: 20Gi
-  hostPath:
-    path: /tmp/pv007
-    type: ""
-  persistentVolumeReclaimPolicy: Recycle
-  volumeMode: Filesystem
-_EOF_
-
-cat << _EOF_ > pv008.yml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv008
-spec:
-  accessModes:
-  - ReadWriteOnce
-  capacity:
-    storage: 100Gi
-  hostPath:
-    path: /tmp/pv008
-    type: ""
-  persistentVolumeReclaimPolicy: Recycle
-  volumeMode: Filesystem
-_EOF_
-
-cat << _EOF_ > pv009.yml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv009
-spec:
-  accessModes:
-  - ReadWriteOnce
-  capacity:
-    storage: 20Gi
-  hostPath:
-    path: /tmp/pv009
-    type: ""
-  persistentVolumeReclaimPolicy: Recycle
-  volumeMode: Filesystem
-_EOF_
-
-cat << _EOF_ > pv010.yml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv010
-spec:
-  accessModes:
-  - ReadWriteOnce
-  capacity:
-    storage: 8Gi
-  hostPath:
-    path: /tmp/pv010
-    type: ""
-  persistentVolumeReclaimPolicy: Recycle
-  volumeMode: Filesystem
-_EOF_
-
-cat << _EOF_ > pv011.yml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv011
-spec:
-  accessModes:
-  - ReadWriteOnce
-  capacity:
-    storage: 8Gi
-  hostPath:
-    path: /tmp/pv011
-    type: ""
-  persistentVolumeReclaimPolicy: Recycle
-  volumeMode: Filesystem
-_EOF_
-
-kc apply -f pv006.yml
-kc apply -f pv007.yml
-kc apply -f pv008.yml
-kc apply -f pv009.yml
-kc apply -f pv010.yml
-kc apply -f pv011.yml
 mkdir /tmp/pv00{6,7,8,9,10,11}
 sudo chown -R snowdrop:snowdrop /tmp
 sudo chown -R 777 /tmp
+
+create_pv() {
+cat << EOF | kubectl apply -f -
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0$1
+spec:
+  accessModes:
+  - ReadWriteOnce
+  capacity:
+    storage: $2Gi
+  hostPath:
+    path: /tmp/pv0$1
+    type: ""
+  persistentVolumeReclaimPolicy: Recycle
+  volumeMode: Filesystem
+EOF
+}
+
+create_pv 06 20
+create_pv 07 20
+create_pv 08 20
+create_pv 09 100
+create_pv 10 8
+create_pv 11 8
 ```
 
 # Install tools
