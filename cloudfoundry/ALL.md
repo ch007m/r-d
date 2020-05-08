@@ -1,7 +1,21 @@
 # Create VM and k8s cluster using Ansible
 
-Test done the 31 of March
+## Table of content
 
+ * [Create K8s cluster using Ansible](#create-k8s-cluster-using-ansible)
+   * [Install tools](#install-tools)
+   * [Install CloudFoundry](#install-cloudfoundry)
+      * [Deploy KubeCF](#deploy-kubecf)
+      * [Deploy cf-4-k8s](#deploy-cf-4-k8s)
+      * [Install cf, Stratos](#install-cf-stratos)
+      * [Service catalog](#service-catalog)
+      * [Optional](#optional)
+         * [Kubernetes dashboard](#kubernetes-dashboard)
+         * [Install kind](#install-kind)
+
+## Create K8s cluster using Ansible
+
+- Test done the 31th of March successfully
 - Create VM and deploy a k8s cluster
 ```bash
 export k8s_version=116
@@ -65,7 +79,7 @@ create_pv 10 8
 create_pv 11 8
 ```
 
-# Install tools
+## Install tools
 
 - Install wget, helm, jq, brew, maven, k9s
 ```bash
@@ -90,8 +104,9 @@ eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 
 alias sudo='sudo env PATH=$PATH'
 ```
+## Install CloudFoundry
 
-## Deploy KubeCF
+### Deploy KubeCF
 
 - Install Quarks CRD + Operator
 ```bash
@@ -128,7 +143,7 @@ helm install kubecf --namespace kubecf --values values.yaml kubecf-v1.0.1.tgz
 helm uninstall kubecf -n kubecf
 ```
 
-## Deploy cf-4-k8s
+### Deploy cf-4-k8s
 
 - Install ytt, kapp tools
 ```bash
@@ -167,7 +182,7 @@ $ kc scale --replicas=0 deployment.apps/nginx-ingress-controller -n kube-system
 ``` 
 **REMARK**: This step is only needed when ingress has been deployed on a kubernetes cluster
 
-## Install cf, Stratos
+### Install cf, Stratos
 
 ```bash
 export node_ip=95.217.161.67
@@ -239,7 +254,7 @@ cd spring-music/
 cf push spring-music
 ```
 
-## Service catalog
+### Service catalog
 
 - Create a helm config file
 ```bash
@@ -252,7 +267,7 @@ frontend:
     type: LoadBalancer
 _EOF_
 ```  
-- Install the bitnami service catalog
+- Install the `bitnami` service catalog
 ```bash
 helm repo add bitnami https://charts.bitnami.com/bitnami
 kubectl create ns kubeapps
@@ -324,7 +339,9 @@ kubectl get secret $(kubectl get serviceaccount kubeapps-operator -n kubeapps -o
 
 - Modify the service created to define the externalIP address `http://95.217.161.67/#/login`
 
-## Optional 
+### Optional 
+
+#### Kubernetes dashboard
 
 - Deploy the Kubernetes dashboard and expose it using the NodePort - `30080`
 ```bash
@@ -499,7 +516,7 @@ kc scale --replicas=1 deployment/kubernetes-dashboard -n kubernetes-dashboard
 kubectl port-forward service/kubernetes-dashboard-nodeport --address localhost,${IP} 30080:443 -n kubernetes-dashboard & 
 ```
 
-- Install kind
+#### Install kind
 ```bash
 curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64
 chmod +x ./kind
