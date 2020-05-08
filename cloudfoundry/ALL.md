@@ -326,13 +326,74 @@ kubectl get secret $(kubectl get serviceaccount kubeapps-operator -n kubeapps -o
 
 ## Optional 
 
-- Generate self-signed certificate
+- Deploy the Kubernetes dashboard and expose it using the NodePort - `30080`
+```bash
+kc apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
+kc delete svc/kubernetes-dashboard -n kubernetes-dashboard
+
+cat << EOF | kc apply -f -
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-nodeport
+  namespace: kubernetes-dashboard
+spec:
+  type: NodePort
+  ports:
+    - port: 443
+      targetPort: 8443
+      nodePort: 30080
+  selector:
+    k8s-app: kubernetes-dashboard
+EOF
+
+cat <<EOF | kubectl apply -f -
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cluster-admin-for-bootstrappers
+subjects:
+- kind: Group
+  name: system:bootstrappers
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bootstrap-token-n0iqpx
+  namespace: kube-system
+
+type: bootstrap.kubernetes.io/token
+stringData:
+  # Human readable description. Optional.
+  description: dashboard-admin-user
+
+  # Token ID and secret. Required.
+  token-id: n0iqpx
+  token-secret: t63ia1aluwe8f8iw
+
+  # Allowed usages.
+  usage-bootstrap-authentication: "true"
+  usage-bootstrap-signing: "true"
+  auth-extra-groups: system:bootstrappers:worker
+EOF
+```
+- Generate a self-signed certificate trusted using CA authority of the cluster
 ```bash
 mkdir certs && cd certs/
 cat <<EOF | cfssl genkey - | cfssljson -bare server
 {
   "hosts": [
-    "95.217.161.67"
+    "95.217.161.67",
+    "95.217.161.67:30080"
   ],
   "CN": "95.217.161.67",
   "key": {
@@ -375,7 +436,6 @@ spec:
   - server auth
 EOF
 
-kc describe csr kubernetes-dashboard
 kc certificate approve kubernetes-dashboard
 
 kc get csr kubernetes-dashboard -o jsonpath='{.status.certificate}' \
@@ -383,6 +443,60 @@ kc get csr kubernetes-dashboard -o jsonpath='{.status.certificate}' \
 
 kc delete secret/kubernetes-dashboard-certs -n kubernetes-dashboard
 kc create secret tls  kubernetes-dashboard-certs -n kubernetes-dashboard --cert=server.crt --key=server-key.pem
+
+cd ${current}
+mkdir certs && cd ../certs/
+pkill kubectl
+rm server*
+cat <<EOF | cfssl genkey - | cfssljson -bare server
+{
+  "hosts": [
+    "95.217.161.67",
+    "95.217.161.67:30080"
+  ],
+  "CN": "95.217.161.67",
+  "key": {
+    "algo": "ecdsa",
+    "size": 256
+  },
+  "names": [{
+    "C": "BE",
+    "ST": "Namur",
+    "L": "Florennes",
+    "O": "Red Hat Middleware",
+    "OU": "Snowdrop"
+  }]
+}
+EOF
+
+kc delete csr kubernetes-dashboard
+cat <<EOF | kubectl apply -f -
+apiVersion: certificates.k8s.io/v1beta1
+kind: CertificateSigningRequest
+metadata:
+  name: kubernetes-dashboard
+spec:
+  request: $(cat server.csr | base64 | tr -d '\n')
+  usages:
+  - digital signature
+  - key encipherment
+  - server auth
+EOF
+
+kc certificate approve kubernetes-dashboard
+
+kc get csr kubernetes-dashboard -o jsonpath='{.status.certificate}' \
+    | base64 --decode > server.crt
+
+kc delete secret/kubernetes-dashboard-certs -n kubernetes-dashboard
+kc create secret tls kubernetes-dashboard-certs -n kubernetes-dashboard --cert=server.crt --key=server-key.pem 
+kc scale --replicas=0 deployment/kubernetes-dashboard -n kubernetes-dashboard
+kc scale --replicas=1 deployment/kubernetes-dashboard -n kubernetes-dashboard 
+```
+
+- Launch the dashboard
+```bash
+kubectl port-forward service/kubernetes-dashboard-nodeport --address localhost,${IP} 30080:443 -n kubernetes-dashboard & 
 ```
 
 - Install kind
