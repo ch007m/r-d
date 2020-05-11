@@ -93,7 +93,7 @@ wget https://get.helm.sh/helm-v3.1.2-linux-amd64.tar.gz
 tar -vxf helm-v3.1.2-linux-amd64.tar.gz
 sudo mv linux-amd64/helm /usr/local/bin
 
-wget https://github.com/derailed/k9s/releases/download/v0.17.7/k9s_Linux_x86_64.tar.gz
+wget https://github.com/derailed/k9s/releases/download/v0.19.4/k9s_Linux_x86_64.tar.gz
 tar -vxf k9s_Linux_x86_64.tar.gz
 sudo mv k9s /usr/local/bin
 
