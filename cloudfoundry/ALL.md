@@ -409,10 +409,10 @@ mkdir certs && cd certs/
 cat <<EOF | cfssl genkey - | cfssljson -bare server
 {
   "hosts": [
-    "95.217.161.67",
-    "95.217.161.67:30080"
+    "${IP}",
+    "${IP}:30080"
   ],
-  "CN": "95.217.161.67",
+  "CN": "${IP}",
   "key": {
     "algo": "ecdsa",
     "size": 256
@@ -440,73 +440,17 @@ spec:
   - server auth
 EOF
 
-cat <<EOF | kubectl apply -f -
-apiVersion: certificates.k8s.io/v1beta1
-kind: CertificateSigningRequest
-metadata:
-  name: kubernetes-dashboard
-spec:
-  request: $(cat server.csr | base64 | tr -d '\n')
-  usages:
-  - digital signature
-  - key encipherment
-  - server auth
-EOF
-
-kc certificate approve kubernetes-dashboard
-
 kc get csr kubernetes-dashboard -o jsonpath='{.status.certificate}' \
     | base64 --decode > server.crt
+```
 
+- Recreate the secret to use the `certificate` and `key` generated
+```bash
 kc delete secret/kubernetes-dashboard-certs -n kubernetes-dashboard
 kc create secret tls  kubernetes-dashboard-certs -n kubernetes-dashboard --cert=server.crt --key=server-key.pem
-
-cd ${current}
-mkdir certs && cd ../certs/
-pkill kubectl
-rm server*
-cat <<EOF | cfssl genkey - | cfssljson -bare server
-{
-  "hosts": [
-    "95.217.161.67",
-    "95.217.161.67:30080"
-  ],
-  "CN": "95.217.161.67",
-  "key": {
-    "algo": "ecdsa",
-    "size": 256
-  },
-  "names": [{
-    "C": "BE",
-    "ST": "Namur",
-    "L": "Florennes",
-    "O": "Red Hat Middleware",
-    "OU": "Snowdrop"
-  }]
-}
-EOF
-
-kc delete csr kubernetes-dashboard
-cat <<EOF | kubectl apply -f -
-apiVersion: certificates.k8s.io/v1beta1
-kind: CertificateSigningRequest
-metadata:
-  name: kubernetes-dashboard
-spec:
-  request: $(cat server.csr | base64 | tr -d '\n')
-  usages:
-  - digital signature
-  - key encipherment
-  - server auth
-EOF
-
-kc certificate approve kubernetes-dashboard
-
-kc get csr kubernetes-dashboard -o jsonpath='{.status.certificate}' \
-    | base64 --decode > server.crt
-
-kc delete secret/kubernetes-dashboard-certs -n kubernetes-dashboard
-kc create secret tls kubernetes-dashboard-certs -n kubernetes-dashboard --cert=server.crt --key=server-key.pem 
+```
+- Redeploy the dashboard
+```bash
 kc scale --replicas=0 deployment/kubernetes-dashboard -n kubernetes-dashboard
 kc scale --replicas=1 deployment/kubernetes-dashboard -n kubernetes-dashboard 
 ```
