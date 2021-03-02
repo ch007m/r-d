@@ -136,4 +136,4 @@ which is then processed by [`fissile or Buildpack`](https://github.com/cloudfoun
 
 ## For the Developers
 
-To play with CloudFoundry on K8s, move to the [developer page](DEVELOPER.md)
+To play with CloudFoundry on K8s, move to the [developer page](developer.md)

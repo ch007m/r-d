@@ -6,11 +6,11 @@ Additional information about how to install/configure is available with the proj
 ```bash
 git clone https://github.com/cloudfoundry/cf-for-k8s.git && cd cf-for-k8s
 ```
-- Create a k8s cluster using `kind`. See how to install `kind` tool - [here](KIND.md)
+- Create a k8s cluster using `kind`. See how to install `kind` tool - [here](kind.md)
 ```bash
-kind create cluster --name cf-k8s --config=./deploy/kind/cluster.yml --image kindest/node:v1.16.4
+kind create cluster --name cf-k8s --config=./deploy/kind/cluster.yml
 ```
-- Install the needed [tools](TOOLS.md) like also the tools only used by cf-4-k8s project and able to populate the kubernetes resources using `ytt`, `kapp`
+- Install the needed [tools](tools.md) like also the tools only used by cf-4-k8s project and able to populate the kubernetes resources using `ytt`, `kapp`
 ```bash
 brew tap k14s/tap
 brew install ytt kbld kapp imgpkg kwt vendir
@@ -18,10 +18,12 @@ brew install ytt kbld kapp imgpkg kwt vendir
 
 - Deploy the `bosh` client as it will be used during the next step to generate k8s resources
 ```bash
-wget https://github.com/cloudfoundry/bosh-cli/releases/download/v6.2.1/bosh-cli-6.2.1-linux-amd64
-mv bosh-cli-6.2.1-linux-amd64 bosh
+ostype=$(uname)
+osname=${(L)ostype}
+wget https://github.com/cloudfoundry/bosh-cli/releases/download/v6.3.0/bosh-cli-6.3.0-${osname}-amd64
+mv bosh-cli-6.3.0-${osname}-amd64 bosh
 chmod +x ./bosh
-sudo mv ./bosh /usr/local/bin/bosh
+mv ./bosh /usr/local/bin/bosh
 ```
 
 - Generate the `installation` values such as the `domain name`, `app domain`, `certificates`, `registry` ... using the bosh client 
@@ -58,5 +60,5 @@ $ kc scale --replicas=0 deployment.apps/nginx-ingress-controller -n kube-system
 
 ### Stratos console 
 
-See [instructions](OTHERS.md)
+See [instructions](others.md)
 

@@ -28,7 +28,7 @@ release [1.2.0](https://github.com/cloudfoundry-incubator/kubecf/issues?q=is%3Ao
 ssh -i ~/.ssh/id_rsa_snowdrop_hetzner_k03-k116 snowdrop@95.217.134.196 -p 47286
 ```
 
-- Install common [tools](TOOLS.md)
+- Install common [tools](tools.md)
 
 - Create a namespace for the cf-operator and install it
 ```bash
@@ -70,7 +70,7 @@ kubectl -n kubecf get pods -w
 
 ### Using Kind
 
-- See [instructions](KIND.md) and [kubecf](https://kubecf.suse.dev/docs/tutorials/deploy-kind/) documentation
+- See [instructions](kind.md) and [kubecf](https://kubecf.suse.dev/docs/tutorials/deploy-kind/) documentation
 - Create a [kind config file](https://kind.sigs.k8s.io/docs/user/ingress/#ingress) mapping and exposing additional ports and configuring ingress
 ```bash
 cat << _EOF_  > cfg.yml
@@ -165,4 +165,4 @@ sudo kind delete cluster --name kubecf
 
 ### Stratos console (Optinal)
 
-See [instructions](OTHERS.md)
+See [instructions](others.md)

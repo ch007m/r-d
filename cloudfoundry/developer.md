@@ -11,7 +11,7 @@
 ## Prerequisites
 
 To play with Cloud Foundry on Kubernetes, it is required to have :
-- A Kubernetes cluster (>= 1.14)
+- A Kubernetes cluster (>= 1.15)
 - The Helm tool (>= 1.13)
 - The kubectl client installed
 - A docker daemon
@@ -22,8 +22,8 @@ To play with Cloud Foundry on Kubernetes, it is required to have :
 2 projects have been created to install Cloud Foundry on Kubernetes but the one which is currently packaged, as commercial
 product, by VMWare for their product `Tanzu application Service` is `cf-for-k8s`.
 
-- [cf-for-k8s](https://github.com/cloudfoundry/cf-for-k8s) - see [intructions](CF-4-K8s.md)
-- [KubeCf](https://kubecf.suse.dev/) - see [intructions](KUBECF.md)
+- [cf-for-k8s](https://github.com/cloudfoundry/cf-for-k8s) - see [instructions](cf-for-k8s.md)
+- [KubeCf](https://kubecf.suse.dev/) - see [instructions](kube_cf.md)
 
 **REMARK**: `cf-for-k8` leverages Kubernetes native features such as `Controller, Secret, ConfigMap,...` and is built top of Kubernetes ecosystem projects: `istio`, `fluentd`, `kpack`, .... then `KubeCf`
 

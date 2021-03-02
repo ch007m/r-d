@@ -2,11 +2,11 @@
 
 ## Table of content
 
- * [Create K8s cluster using Ansible](#create-k8s-cluster-using-ansible)
+   * [Create K8s cluster using Ansible](#create-k8s-cluster-using-ansible)
    * [Install tools](#install-tools)
    * [Install CloudFoundry](#install-cloudfoundry)
-      * [Deploy KubeCF](#deploy-kubecf)
       * [Deploy cf-4-k8s](#deploy-cf-4-k8s)
+      * [Deploy KubeCF](#deploy-kubecf)
       * [Install cf, Stratos](#install-cf-stratos)
       * [Service catalog](#service-catalog)
       * [Optional](#optional)
@@ -15,28 +15,37 @@
 
 ## Create K8s cluster using Ansible
 
-- Test done the 31th of March successfully
-- Create VM and deploy a k8s cluster
+### Prerequisite
+- `hcloud` client is needed
+  `brew install hcloud`
+- Configure the `snowdrop` context
+  ```bash
+  hcloud context create snowdrop
+  $token: <HETZNER_API_TOKEN>
+  ```
+
+### How to create the VM
+- Create a VM on Hetzner & deploy a k8s cluster
 ```bash
-export k8s_version=116
+pushd ~/code/snowdrop/infra-jobs-productization/k8s-infra
+export k8s_version=118
 export VM_NAME=h01-${k8s_version}
 export PASSWORD_STORE_DIR=~/.password-store-snowdrop
-
 ansible-playbook hetzner/ansible/hetzner-delete-server.yml -e vm_name=${VM_NAME} -e hetzner_context_name=snowdrop
-ansible-playbook ansible/playbook/passstore_controller_inventory_remove.yml -e vm_name=${VM_NAME}  -e pass_provider=hetzner
-ansible-playbook ansible/playbook/passstore_controller_inventory.yml -e vm_name=${VM_NAME}  -e pass_provider=hetzner -e k8s_type=masters -e k8s_version=${k8s_version} -e operation=create
+ansible-playbook ansible/playbook/passstore_controller_inventory_remove.yml -e vm_name=${VM_NAME} -e pass_provider=hetzner
+ansible-playbook ansible/playbook/passstore_controller_inventory.yml -e vm_name=${VM_NAME} -e pass_provider=hetzner -e k8s_type=masters -e k8s_version=${k8s_version} -e operation=create
 ansible-playbook hetzner/ansible/hetzner-create-server.yml -e vm_name=${VM_NAME} -e salt_text=$(gpg --gen-random --armor 1 20) -e hetzner_context_name=snowdrop -e pass_provider=hetzner -e k8s_type=masters -e k8s_version=${k8s_version}
 ansible-playbook ansible/playbook/sec_host.yml -e vm_name=${VM_NAME} -e provider=hetzner
-
 ansible-playbook kubernetes/ansible/k8s.yml --limit ${VM_NAME}
+popd
 
-ok: [h01-116] => {
+ok: [h01-118] => {
     "msg": [
         "You can also view the kubernetes dashboard at",
-        "https://k8s-console.95.217.161.67.nip.io/",
+        "https://k8s-console.65.21.55.223.nip.io/",
         "",
         "Using the Boot Token: ",
-        "43qo7d.l7iwyyrw1g2tblrl"
+        "v6vzdy.wogsaankymdxsfrb"
     ]
 }
 ```
@@ -81,30 +90,96 @@ create_pv 11 8
 
 ## Install tools
 
-- Install wget, helm, jq, brew, maven, k9s
+- Install wget, helm, jq, brew, maven, k9s and upgrade curl
 ```bash
-sudo yum install wget -y
-sudo yum install epel-release -y
-sudo yum install jq -y 
-sudo yum install maven -y
+sudo yum install -y wget epel-release jq maven
+
+sudo rpm -Uvh http://www.city-fan.org/ftp/contrib/yum-repo/rhel7/x86_64/city-fan.org-release-2-1.rhel7.noarch.rpm
+sudo yum -y --enablerepo=city-fan.org install libcurl libcurl-devel
+
+helm_version=3.5.2
+k9s_version=0.24.2
 
 mkdir temp && cd temp
-wget https://get.helm.sh/helm-v3.1.2-linux-amd64.tar.gz
-tar -vxf helm-v3.1.2-linux-amd64.tar.gz
+wget https://get.helm.sh/helm-v$helm_version-linux-amd64.tar.gz
+tar -vxf helm-v$helm_version-linux-amd64.tar.gz
 sudo mv linux-amd64/helm /usr/local/bin
 
-wget https://github.com/derailed/k9s/releases/download/v0.19.4/k9s_Linux_x86_64.tar.gz
+wget https://github.com/derailed/k9s/releases/download/v$k9s_version/k9s_Linux_x86_64.tar.gz
 tar -vxf k9s_Linux_x86_64.tar.gz
 sudo mv k9s /usr/local/bin
 
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-sudo yum groupinstall 'Development Tools' -y
+yum groupinstall 'Development Tools' -y
 echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)' >> /home/snowdrop/.bash_profile
 eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 
 alias sudo='sudo env PATH=$PATH'
 ```
+- Deploy docker if not yet there
+```bash
+sudo yum install -y yum-utils
+sudo yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+sudo yum install -y docker-ce docker-ce-cli containerd.io 
+sudo systemctl start docker   
+```
 ## Install CloudFoundry
+
+### Deploy cf-4-k8s
+
+- Install cfssl, gcc
+```bash
+brew install gcc cfssl 
+```
+- Install vmware tools such as : ytt, kapp and bosh tools
+```bash
+brew tap vmware-tanzu/carvel
+brew install ytt kbld kapp imgpkg kwt vendir
+
+brew install cloudfoundry/tap/bosh-cli
+```
+- Git clone the project
+```bash
+git clone https://github.com/cloudfoundry/cf-for-k8s.git && cd cf-for-k8s
+```
+- Generate the `install` values such as domain name, app domain, certificates, ... using the bosh client 
+```bash
+IP=95.217.161.67
+./hack/generate-values.sh -d ${IP}.nip.io > /tmp/cf-values.yml
+```
+- Pass your credentials to access the docker registry
+```bash
+cat << EOF >> /tmp/cf-values.yml
+app_registry:
+  hostname: https://index.docker.io/v1/
+  repository_prefix: "cmoulliard"
+  username: "cmoulliard"
+  password: "aGxecQquG7"
+
+add_metrics_server_components: true
+enable_automount_service_account_token: true
+load_balancer:
+  enable: false
+metrics_server_prefer_internal_kubelet_address: true
+remove_resource_requirements: true
+use_first_party_jwt_tokens: true
+EOF
+```  
+- Next, deploy `cf-4-k8s` using the `kapp` tool
+```bash
+kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml)
+```
+- **REMARK**: When using `kind`, please execute the following command to remove istio ingress service and fix healthcheck, cpu/memory
+```bash
+kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/remove-resource-requirements.yml -f config-optional/remove-ingressgateway-service.yml)
+```
+- Scale down the `ingress nginx` application deployed within the kube-system namespace, otherwise cf for k8s will fail to be deployed
+```bash
+$ kc scale --replicas=0 deployment.apps/nginx-ingress-controller -n kube-system
+``` 
+**REMARK**: This step is only needed when ingress has been deployed on a kubernetes cluster
 
 ### Deploy KubeCF
 
@@ -138,49 +213,10 @@ _EOF_
 wget https://github.com/cloudfoundry-incubator/kubecf/releases/download/v1.0.1/kubecf-v1.0.1.tgz
 helm install kubecf --namespace kubecf --values values.yaml kubecf-v1.0.1.tgz
 ```
-- To uninstall it 
+- To uninstall it
 ```bash
 helm uninstall kubecf -n kubecf
 ```
-
-### Deploy cf-4-k8s
-
-- Install ytt, kapp tools
-```bash
-brew tap k14s/tap
-brew install ytt kbld kapp imgpkg kwt vendir
-brew install cfssl
-```
-
-- Install bosh client
-```bash
-wget https://github.com/cloudfoundry/bosh-cli/releases/download/v6.2.1/bosh-cli-6.2.1-linux-amd64
-mv bosh-cli-6.2.1-linux-amd64 bosh
-chmod +x ./bosh
-sudo mv ./bosh /usr/local/bin/bosh
-```
-- Git clone the project
-```bash
-git clone https://github.com/cloudfoundry/cf-for-k8s.git && cd cf-for-k8s
-```
-- Generate the `install` values such as domain name, app domain, certificates, ... using the bosh client 
-```bash
-IP=95.217.161.67
-./hack/generate-values.sh -d ${IP}.nip.io > /tmp/cf-values.yml
-```
-- Next, deploy `cf-4-k8s` using the `kapp` tool and some additional files
-```bash
-./bin/install-cf.sh /tmp/cf-values.yml
-```
-- **REMARK**: When using `kind`, please execute the following command to remove istio ingress service and fix healthcheck, cpu/memory
-```bash
-kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/remove-resource-requirements.yml -f config-optional/remove-ingressgateway-service.yml)
-```
-- Scale down the `ingress nginx` application deployed within the kube-system namespace, otherwise cf for k8s will failt to be deployed
-```bash
-$ kc scale --replicas=0 deployment.apps/nginx-ingress-controller -n kube-system
-``` 
-**REMARK**: This step is only needed when ingress has been deployed on a kubernetes cluster
 
 ### Install cf, Stratos
 
