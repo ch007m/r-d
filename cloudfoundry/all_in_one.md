@@ -88,6 +88,11 @@ create_pv 09 100
 create_pv 10 8
 create_pv 11 8
 ```
+- Patch the dashboard service to use the external IP address
+```bash
+IP=<IP_ADDRESS_OF_THE_VM>
+kubectl patch svc kubernetes-dashboard -n kubernetes-dashboard -p '{"spec":{"externalIPs":["$IP"]}}'
+```
 
 ## Install tools
 
@@ -151,9 +156,9 @@ EOF
 ```bash
 kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml)
 ```
-- **REMARK**: When using `kind`, please execute the following command to remove istio ingress service and fix healthcheck, cpu/memory
+- **REMARK**: When using `kind`, please execute the following command to remove istio ingress service and fix health check, cpu/memory
 ```bash
-kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config-optional/remove-resource-requirements.yml -f config-optional/remove-ingressgateway-service.yml)
+kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config/remove-resource-requirements.yml -f config/istio/ingressgateway-service-nodeport.yml)
 ```
 - Scale down the `ingress nginx` application deployed within the kube-system namespace, otherwise cf for k8s will fail to be deployed
 ```bash
