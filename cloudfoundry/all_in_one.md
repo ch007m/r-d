@@ -42,12 +42,13 @@ popd
 ok: [h01-118] => {
     "msg": [
         "You can also view the kubernetes dashboard at",
-        "https://k8s-console.65.21.55.223.nip.io/",
+        "https://k8s-console.95.217.159.244.nip.io/",
         "",
         "Using the Boot Token: ",
-        "v6vzdy.wogsaankymdxsfrb"
+        "k3hxzh.p5kiogsey4hnccpv"
     ]
 }
+
 ```
 
 - SSH to the VM
@@ -97,46 +98,25 @@ sudo yum install -y wget epel-release jq maven
 sudo rpm -Uvh http://www.city-fan.org/ftp/contrib/yum-repo/rhel7/x86_64/city-fan.org-release-2-1.rhel7.noarch.rpm
 sudo yum -y --enablerepo=city-fan.org install libcurl libcurl-devel
 
-helm_version=3.5.2
-k9s_version=0.24.2
-
-mkdir temp && cd temp
-wget https://get.helm.sh/helm-v$helm_version-linux-amd64.tar.gz
-tar -vxf helm-v$helm_version-linux-amd64.tar.gz
-sudo mv linux-amd64/helm /usr/local/bin
-
-wget https://github.com/derailed/k9s/releases/download/v$k9s_version/k9s_Linux_x86_64.tar.gz
-tar -vxf k9s_Linux_x86_64.tar.gz
-sudo mv k9s /usr/local/bin
-
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-yum groupinstall 'Development Tools' -y
 echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)' >> /home/snowdrop/.bash_profile
 eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 
 alias sudo='sudo env PATH=$PATH'
 ```
-- Deploy docker if not yet there
-```bash
-sudo yum install -y yum-utils
-sudo yum-config-manager \
-    --add-repo \
-    https://download.docker.com/linux/centos/docker-ce.repo
-sudo yum install -y docker-ce docker-ce-cli containerd.io 
-sudo systemctl start docker   
-```
+
 ## Install CloudFoundry
 
 ### Deploy cf-4-k8s
 
-- Install cfssl, gcc
+- Install gcc (needed to install ytt)
 ```bash
-brew install gcc cfssl 
+brew install gcc 
 ```
 - Install vmware tools such as : ytt, kapp and bosh tools
 ```bash
 brew tap vmware-tanzu/carvel
-brew install ytt kbld kapp imgpkg kwt vendir
+brew install ytt kbld kapp imgpkg kwt vendir yq
 
 brew install cloudfoundry/tap/bosh-cli
 ```
@@ -146,17 +126,17 @@ git clone https://github.com/cloudfoundry/cf-for-k8s.git && cd cf-for-k8s
 ```
 - Generate the `install` values such as domain name, app domain, certificates, ... using the bosh client 
 ```bash
-IP=95.217.161.67
+IP=95.217.159.244
 ./hack/generate-values.sh -d ${IP}.nip.io > /tmp/cf-values.yml
 ```
 - Pass your credentials to access the docker registry
 ```bash
 cat << EOF >> /tmp/cf-values.yml
 app_registry:
-  hostname: https://index.docker.io/v1/
+  hostname: https://quay.io/
   repository_prefix: "cmoulliard"
   username: "cmoulliard"
-  password: "aGxecQquG7"
+  password: "xxxxx"
 
 add_metrics_server_components: true
 enable_automount_service_account_token: true
