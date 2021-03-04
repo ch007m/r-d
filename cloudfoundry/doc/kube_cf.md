@@ -165,4 +165,4 @@ sudo kind delete cluster --name kubecf
 
 ### Stratos console (Optinal)
 
-See [instructions](others.md)
+See [instructions](stratos.md)

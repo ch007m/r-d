@@ -120,7 +120,7 @@ Move to the [developer page](doc/developer.md) to play with the `Spring Music` a
 
 #### Install Stratos
 
-See [others](doc/others.md)
+See [others](doc/stratos.md)
 
 #### Bitnami Service catalog
 
