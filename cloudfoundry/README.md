@@ -16,7 +16,7 @@ This project has been created to collect information about the Kubernetes offeri
 
 ### For the Developers
 
-To play with CloudFoundry on K8s, move to the [developer page](developer.md)
+To play with CloudFoundry on K8s, move to the [developer page](doc/developer.md)
 
 ### VMware Tanzu 
 

@@ -11,7 +11,7 @@
 ## Prerequisites
 
 To play with Cloud Foundry on Kubernetes, it is required to have :
-- A Kubernetes cluster (>= 1.18) - [see](all_in_one.md#create-a-k8s-cluster)
+- A Kubernetes cluster (>= 1.18) - [see](../all_in_one.md#create-a-k8s-cluster)
 - The Helm tool (>= 1.13)
 - The kubectl client installed
 - A docker daemon

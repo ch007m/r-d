@@ -16,12 +16,12 @@
 
 ## Create a K8s cluster
 
-- Using a Centos7 [vm](k8s-vm.md) created on hetzner cloud provider
-- or locally with [kind](kind.md)
+- Using a Centos7 [vm](doc/k8s-vm.md) created on hetzner cloud provider
+- or locally with [kind](doc/kind.md)
 
 ## Install tools
 
-See [tools](tools.md)
+See [tools](doc/tools.md)
 
 ## Install CloudFoundry - cf-4-k8s
 
@@ -114,13 +114,13 @@ curl -k  https://test-app2-meditating-nyala-ea.apps.95.217.159.244.nip.io/env
 
 ### What about using Spring Music ;-)
 
-Move to the [developer page](developer.md) to play with the `Spring Music` application and a database
+Move to the [developer page](doc/developer.md) to play with the `Spring Music` application and a database
 
 ## Optional 
 
 #### Install Stratos
 
-See [others](others.md)
+See [others](doc/others.md)
 
 #### Bitnami Service catalog
 
