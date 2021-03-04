@@ -15,9 +15,9 @@ To play with Cloud Foundry on Kubernetes, it is required to have :
 - The Helm tool (>= 1.13)
 - The kubectl client installed
 - A docker daemon
-- Homebrew
+- Some [tools](tools.md)
 
-## Deploy an application using cf
+## Deploy an application using cf client
 
 - Configure the `cf` client to access the API and be authenticated
 ```bash

@@ -2,44 +2,41 @@
 
 - Install wget, helm, jq, brew, maven, k9s
 ```bash
-sudo yum install wget -y
-sudo yum install epel-release -y
-sudo yum install jq -y 
-sudo yum install maven -y
+sudo yum install -y wget epel-release jq maven
+```
+- Upgrade curl otherwise brew will complaint
+```bash
+sudo rpm -Uvh http://www.city-fan.org/ftp/contrib/yum-repo/rhel7/x86_64/city-fan.org-release-2-1.rhel7.noarch.rpm
+sudo yum -y --enablerepo=city-fan.org install libcurl libcurl-devel
+```  
+- Install `brew` tool on the linux box
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)' >> /home/snowdrop/.bash_profile
+eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+alias sudo='sudo env PATH=$PATH'
+```
+
+- Install the tools needed to deploy `cf-for-k8s` such as :
+```bash
+brew install gcc 
+brew tap vmware-tanzu/carvel
+brew install ytt kbld kapp imgpkg kwt vendir yq
 ```
 
 - Deploy helm3
 ```bash
-mkdir temp && cd temp
-wget https://get.helm.sh/helm-v3.1.2-linux-amd64.tar.gz
-tar -vxf helm-v3.1.2-linux-amd64.tar.gz
-sudo mv linux-amd64/helm /usr/local/bin
-```
-- Install `brew` tool on the linux box
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-sudo yum groupinstall 'Development Tools'
-echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)' >> /home/snowdrop/.bash_profile
-eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+brew install helm
 ```
 
-- Install the `cf` client as documented [here](https://github.com/cloudfoundry/cli#downloads)
+- To install the client supporting CF API `v7`, execute this brew command
 ```bash
-cd temp
-curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github" | tar -zx
-sudo mv cf /usr/local/bin
-```
-
-- To install the client supporting the API `v7`, execute this brew command
-```bash
-brew install cloudfoundry/tap/cf7-cli
+brew install cloudfoundry/tap/bosh-cli
 ```
 
 - Deploy the `k9s` user tool
 ```bash
-wget https://github.com/derailed/k9s/releases/download/v0.17.7/k9s_Linux_x86_64.tar.gz
-tar -vxf k9s_Linux_x86_64.tar.gz
-sudo mv k9s /usr/local/bin
+brew install k9s
 ```
 
 - Install the `httpie` tool showing better json responses than curl

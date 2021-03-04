@@ -100,19 +100,7 @@ kubectl patch svc kubernetes-dashboard -n kubernetes-dashboard -p '{"spec":{"ext
 
 ## Install tools
 
-- Install wget, helm, jq, brew, maven, k9s and upgrade curl
-```bash
-sudo yum install -y wget epel-release jq maven
-
-sudo rpm -Uvh http://www.city-fan.org/ftp/contrib/yum-repo/rhel7/x86_64/city-fan.org-release-2-1.rhel7.noarch.rpm
-sudo yum -y --enablerepo=city-fan.org install libcurl libcurl-devel
-
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)' >> /home/snowdrop/.bash_profile
-eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-
-alias sudo='sudo env PATH=$PATH'
-```
+See [tools](tools.md)
 
 ## Install CloudFoundry
 
