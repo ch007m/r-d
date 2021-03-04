@@ -4,17 +4,16 @@
 
   * [Create a K8s cluster](#create-a-k8s-cluster)
   * [Install tools](#install-tools)
-  * [Install CloudFoundry](#install-cloudfoundry)
-      * [Deploy cf-4-k8s](#deploy-cf-4-k8s)
+  * [Install CloudFoundry - cf-4-k8s](#install-cloudfoundry---cf-4-k8s)
       * [Access CAPI](#access-capi)
-        * [Push an application using an existing container image](#push-an-application-using-an-existing-container-image)
-        * [Push an application using buildpack](#push-an-application-using-buildpack)
+      * [Push an application using an existing container image](#push-an-application-using-an-existing-container-image)
+      * [Push an application using buildpack](#push-an-application-using-buildpack)
       * [What about using Spring Music ;-)](#what-about-using-spring-music--)
-      * [Optional](#optional)
-        * [Install Stratos](#install-stratos)
-        * [Bitnami Service catalog](#bitnami-service-catalog)
-        * [Kubernetes dashboard](#kubernetes-dashboard)
-    
+  * [Optional](#optional)
+    * [Install Stratos](#install-stratos)
+    * [Bitnami Service catalog](#bitnami-service-catalog)
+    * [Kubernetes dashboard](#kubernetes-dashboard)
+
 ## Create a K8s cluster
 
 - Using a Centos7 [vm](k8s-vm.md) created on hetzner cloud provider
@@ -24,9 +23,7 @@
 
 See [tools](tools.md)
 
-## Install CloudFoundry
-
-### Deploy cf-4-k8s
+## Install CloudFoundry - cf-4-k8s
 
 - Git clone the project
 ```bash
@@ -94,14 +91,14 @@ cf create-user developer password
 cf target -o redhat.com -s demo
 ```
 
-#### Push an application using an existing container image
+### Push an application using an existing container image
 
 - Push the docker image of an application
 ```bash
 cf push test-app1 -o cloudfoundry/diego-docker-app
 ```
 
-#### Push an application using buildpack
+### Push an application using buildpack
 
 - Test an application compiled locally and pushed to a container registry
 ```bash
@@ -119,7 +116,7 @@ curl -k  https://test-app2-meditating-nyala-ea.apps.95.217.159.244.nip.io/env
 
 Move to the [developer page](developer.md) to play with the `Spring Music` application and a database
 
-### Optional 
+## Optional 
 
 #### Install Stratos
 
