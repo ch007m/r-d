@@ -50,8 +50,8 @@ cf enable-feature-flag diego_docker
 
 ## Deploy a Spring application accessing a Database
 
-In order to play with this scenario, it is needed to install the `buildpack` client and `minibroker` project able to create a service such as a database
-from a helm chart
+In order to play with this scenario, it is needed to install the `buildpack` client (aka `pack`) and `minibroker` project able to create a service such as a database
+from a helm chart/service catalog.
 
 - Install `pack` client using the command: 
 ```bash
