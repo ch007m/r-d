@@ -14,8 +14,7 @@
         * [Install Stratos](#install-stratos)
         * [Bitnami Service catalog](#bitnami-service-catalog)
         * [Kubernetes dashboard](#kubernetes-dashboard)
-
-
+    
 ## Create a K8s cluster
 
 - Using a Centos7 [vm](k8s-vm.md) on hetzner
