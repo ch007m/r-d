@@ -256,7 +256,14 @@ cf target -o redhat.com -s demo
 - Deploy an app based using `pre-built` Docker image
 ```bash
 cf push test-app-build -o cloudfoundry/diego-docker-app
-```  
+``` 
+
+- Test an application compiled locally and pushed to a container registry
+```bash
+git clone https://github.com/cloudfoundry-samples/test-app.git
+cd test-app
+cf push test-app
+```
 
 - Deploy a Spring example and `build` it
 ```bash
