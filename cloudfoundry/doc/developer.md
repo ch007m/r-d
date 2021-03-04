@@ -20,7 +20,7 @@ To play with Cloud Foundry on Kubernetes, it is required to have :
 
 ## Set up Cloudfoundry using cf-for-k8s
 
-See [instructions](../cf-for-k8s.md)
+See [instructions](./doc/cf-for-k8s.md)
 
 ## Deploy an application using the cf client
 
