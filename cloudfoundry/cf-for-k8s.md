@@ -12,18 +12,13 @@ kind create cluster --name cf-k8s --config=./deploy/kind/cluster.yml
 ```
 - Install the needed [tools](tools.md) like also the tools only used by cf-4-k8s project and able to populate the kubernetes resources using `ytt`, `kapp`
 ```bash
-brew tap k14s/tap
-brew install ytt kbld kapp imgpkg kwt vendir
+brew tap vmware-tanzu/carvel
+brew install ytt kbld kapp imgpkg kwt vendir yq
 ```
 
 - Deploy the `bosh` client as it will be used during the next step to generate k8s resources
 ```bash
-ostype=$(uname)
-osname=${(L)ostype}
-wget https://github.com/cloudfoundry/bosh-cli/releases/download/v6.3.0/bosh-cli-6.3.0-${osname}-amd64
-mv bosh-cli-6.3.0-${osname}-amd64 bosh
-chmod +x ./bosh
-mv ./bosh /usr/local/bin/bosh
+brew install cloudfoundry/tap/bosh-cli
 ```
 
 - Generate the `installation` values such as the `domain name`, `app domain`, `certificates`, `registry` ... using the bosh client 
