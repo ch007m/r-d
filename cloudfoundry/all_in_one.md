@@ -1,4 +1,4 @@
-# Create VM and k8s cluster using Ansible
+# Create a k8s cluster and play with CF
 
 ## Table of content
 
