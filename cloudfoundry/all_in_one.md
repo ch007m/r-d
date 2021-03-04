@@ -59,8 +59,8 @@ ssh-hetznerc ${VM_NAME}
 - Add missing PV
 ```bash
 mkdir /tmp/pv00{6,7,8,9,10,11}
-sudo chown -R snowdrop:snowdrop /tmp
-sudo chown -R 777 /tmp
+sudo chown -R 1001:1001 /tmp
+sudo chmod -R 700 /tmp
 
 create_pv() {
 cat << EOF | kubectl apply -f -
@@ -139,7 +139,7 @@ IP=95.217.159.244
 cat << EOF >> /tmp/cf-values.yml
 app_registry:
   hostname: https://quay.io/
-  repository_prefix: "cmoulliard"
+  repository_prefix: "quay.io/cmoulliard"
   username: "cmoulliard"
   password: "xxxxx"
 
@@ -221,20 +221,10 @@ helm install stratos --namespace stratos --values ./stratos.yml suse/console
 
 - Install CF Client
 ```bash
-curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github" | tar -zx
-sudo mv cf /usr/local/bin
-```
-- Get secret
-```bash
-kubectl get secret \
->         --namespace kubecf kubecf.var-cf-admin-password \
->         -o jsonpath='{.data.password}' \
->         | base64 --decode
-
-WOg8sCzuhZBJaLs6BhWBJ0bkc4iAxRg3kanbTBXrPVUbtBRMcXAOrm6KAQiJyYY0
+brew install cloudfoundry/tap/cf-cli@7
 ```
 
-- Access the API and log on
+- Access the API and log on using the secret created by KubeCF
 
 ```bash
 cf api --skip-ssl-validation https://api.95.217.161.67.nip.io
@@ -245,9 +235,10 @@ acp=$(kubectl get secret \
 
 cf auth admin "${acp}"
 ```
-- Login using the admin credentials for key cf_admin_password in /tmp/cf-values.yml
+- Log in using the admin credentials created using `cf-for-k8s` and key `cf_admin_password`  in /tmp/cf-values.yml
 ```bash
-cf auth admin <cf-values.yml.cf_admin_password>
+pwd=<cf-values.yml.cf_admin_password>
+cf auth admin $pwd
 ```  
 
 - Enable docker feature (needed when using cf-4-k8s)
