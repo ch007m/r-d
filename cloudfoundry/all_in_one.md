@@ -2,101 +2,22 @@
 
 ## Table of content
 
-  * [Create K8s cluster using Ansible](#create-k8s-cluster-using-ansible)
-      * [Prerequisite](#prerequisite)
-      * [How to create the VM](#how-to-create-the-vm)
+  * [Create a K8s cluster](#create-a-k8s-cluster)
   * [Install tools](#install-tools)
   * [Install CloudFoundry](#install-cloudfoundry)
       * [Deploy cf-4-k8s](#deploy-cf-4-k8s)
       * [Install cf, Stratos](#install-cf-stratos)
       * [Push an application using an existing container image](#push-an-application-using-an-existing-container-image)
       * [Push an application using buildpack](#push-an-application-using-buildpack)
-      * [What about using Spring Music ;-)](#what-about-using-spring-music--)  
+      * [What about using Spring Music ;-)](#what-about-using-spring-music--)
       * [Optional](#optional)
           * [Bitnami Service catalog](#bitnami-service-catalog)
           * [Kubernetes dashboard](#kubernetes-dashboard)
-          * [Install kind](#install-kind)
-    
-## Create K8s cluster using Ansible
 
-### Prerequisite
-- `hcloud` client is needed
-  `brew install hcloud`
-- Configure the `snowdrop` context
-  ```bash
-  hcloud context create snowdrop
-  $token: <HETZNER_API_TOKEN>
-  ```
+## Create a K8s cluster
 
-### How to create the VM
-- Create a VM on Hetzner & deploy a k8s cluster
-```bash
-pushd ~/code/snowdrop/infra-jobs-productization/k8s-infra
-export k8s_version=118
-export VM_NAME=h01-${k8s_version}
-export PASSWORD_STORE_DIR=~/.password-store-snowdrop
-ansible-playbook hetzner/ansible/hetzner-delete-server.yml -e vm_name=${VM_NAME} -e hetzner_context_name=snowdrop
-ansible-playbook ansible/playbook/passstore_controller_inventory_remove.yml -e vm_name=${VM_NAME} -e pass_provider=hetzner
-ansible-playbook ansible/playbook/passstore_controller_inventory.yml -e vm_name=${VM_NAME} -e pass_provider=hetzner -e k8s_type=masters -e k8s_version=${k8s_version} -e operation=create
-ansible-playbook hetzner/ansible/hetzner-create-server.yml -e vm_name=${VM_NAME} -e salt_text=$(gpg --gen-random --armor 1 20) -e hetzner_context_name=snowdrop -e pass_provider=hetzner -e k8s_type=masters -e k8s_version=${k8s_version}
-ansible-playbook ansible/playbook/sec_host.yml -e vm_name=${VM_NAME} -e provider=hetzner
-ansible-playbook kubernetes/ansible/k8s.yml --limit ${VM_NAME}
-popd
-
-ok: [h01-118] => {
-    "msg": [
-        "You can also view the kubernetes dashboard at",
-        "https://k8s-console.95.217.159.244.nip.io/",
-        "",
-        "Using the Boot Token: ",
-        "k3hxzh.p5kiogsey4hnccpv"
-    ]
-}
-
-```
-
-- SSH to the VM
-```bash
-ssh-hetznerc ${VM_NAME}
-```
-
-- Add missing PV
-```bash
-mkdir /tmp/pv00{6,7,8,9,10,11}
-sudo chown -R 1001:1001 /tmp
-sudo chmod -R 700 /tmp
-
-create_pv() {
-cat << EOF | kubectl apply -f -
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv0$1
-spec:
-  accessModes:
-  - ReadWriteOnce
-  capacity:
-    storage: $2Gi
-  hostPath:
-    path: /tmp/pv0$1
-    type: ""
-  persistentVolumeReclaimPolicy: Recycle
-  volumeMode: Filesystem
-EOF
-}
-
-create_pv 06 20
-create_pv 07 20
-create_pv 08 20
-create_pv 09 100
-create_pv 10 8
-create_pv 11 8
-```
-- Patch the dashboard service to use the external IP address
-```bash
-IP=<IP_ADDRESS_OF_THE_VM>
-kubectl patch svc kubernetes-dashboard -n kubernetes-dashboard -p '{"spec":{"externalIPs":["$IP"]}}'
-```
+- Using a Centos7 [vm](k8s-vm.md) on hetzner
+- And [kind](kind.md)
 
 ## Install tools
 
@@ -418,39 +339,4 @@ kc scale --replicas=1 deployment/kubernetes-dashboard -n kubernetes-dashboard
 - Launch the dashboard
 ```bash
 kubectl port-forward service/kubernetes-dashboard-nodeport --address localhost,${IP} 30080:443 -n kubernetes-dashboard & 
-```
-
-#### Install kind
-```bash
-curl -Lo ./kind https://github.com/kubernetes-sigs/kind/releases/download/v0.7.0/kind-$(uname)-amd64
-chmod +x ./kind
-sudo mv  ./kind /usr/local/bin
-
-sudo kind create cluster --name kubecf --config=cfg.yml
-sudo kind get kubeconfig --name kubecf > .kubeconfig
-export KUBECONFIG=.kubeconfig
-sudo docker exec -it "kubecf-control-plane" bash -c 'cp /etc/kubernetes/pki/ca.crt /etc/ssl/certs/ && update-ca-certificates && (systemctl list-units | grep containerd > /dev/null && systemctl restart containerd)'
-```
-- Create kind cluster
-```bash
-cat << _EOF_ > cfg.yml
-kind: Cluster
-apiVersion: kind.x-k8s.io/v1alpha4
-nodes:
-- role: control-plane
-  kubeadmConfigPatches:
-  - |
-    kind: InitConfiguration
-    nodeRegistration:
-      kubeletExtraArgs:
-        node-labels: "ingress-ready=true"
-        authorization-mode: "AlwaysAllow"
-  extraPortMappings:
-  - containerPort: 80
-    hostPort: 80
-    protocol: TCP
-  - containerPort: 443
-    hostPort: 443
-    protocol: TCP
-_EOF_
 ```
