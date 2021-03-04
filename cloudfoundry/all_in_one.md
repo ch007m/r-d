@@ -106,17 +106,6 @@ See [tools](tools.md)
 
 ### Deploy cf-4-k8s
 
-- Install gcc (needed to install ytt)
-```bash
-brew install gcc 
-```
-- Install vmware tools such as : ytt, kapp and bosh tools
-```bash
-brew tap vmware-tanzu/carvel
-brew install ytt kbld kapp imgpkg kwt vendir yq
-
-brew install cloudfoundry/tap/bosh-cli
-```
 - Git clone the project
 ```bash
 git clone https://github.com/cloudfoundry/cf-for-k8s.git && cd cf-for-k8s
