@@ -2,17 +2,20 @@
 
 ## Table of content
 
-   * [Create K8s cluster using Ansible](#create-k8s-cluster-using-ansible)
-   * [Install tools](#install-tools)
-   * [Install CloudFoundry](#install-cloudfoundry)
+  * [Create K8s cluster using Ansible](#create-k8s-cluster-using-ansible)
+      * [Prerequisite](#prerequisite)
+      * [How to create the VM](#how-to-create-the-vm)
+  * [Install tools](#install-tools)
+  * [Install CloudFoundry](#install-cloudfoundry)
       * [Deploy cf-4-k8s](#deploy-cf-4-k8s)
-      * [Deploy KubeCF](#deploy-kubecf)
       * [Install cf, Stratos](#install-cf-stratos)
-      * [Service catalog](#service-catalog)
+      * [Push an application using an existing container image](#push-an-application-using-an-existing-container-image)
+      * [Push an application using buildpack](#push-an-application-using-buildpack)
       * [Optional](#optional)
-         * [Kubernetes dashboard](#kubernetes-dashboard)
-         * [Install kind](#install-kind)
-
+          * [Bitnami Service catalog](#bitnami-service-catalog)
+          * [Kubernetes dashboard](#kubernetes-dashboard)
+          * [Install kind](#install-kind)
+    
 ## Create K8s cluster using Ansible
 
 ### Prerequisite
@@ -166,43 +169,6 @@ $ kc scale --replicas=0 deployment.apps/nginx-ingress-controller -n kube-system
 ``` 
 **REMARK**: This step is only needed when ingress has been deployed on a kubernetes cluster
 
-### Deploy KubeCF
-
-- Install Quarks CRD + Operator
-```bash
-kc create ns cf-operator
-helm repo add quarks https://cloudfoundry-incubator.github.io/quarks-helm/
-helm install cf-operator quarks/cf-operator --namespace cf-operator --set "global.operator.watchNamespace=kubecf"
-kc -n cf-operator get pods
-```
-
-- Deploy kubecf
-```bash
-NODE_NAME=h01-116
-node_ip=$(kubectl get node ${NODE_NAME} \
-  --output jsonpath='{ .status.addresses[?(@.type == "InternalIP")].address }') 
-cat << _EOF_  > values.yaml
-system_domain: ${node_ip}.nip.io
-services:
-  router:
-    externalIPs:
-    - ${node_ip}
-features:
-  eirini:
-    enabled: true
-kube:
-  service_cluster_ip_range: 0.0.0.0/0
-  pod_cluster_ip_range: 0.0.0.0/0
-_EOF_
-
-wget https://github.com/cloudfoundry-incubator/kubecf/releases/download/v1.0.1/kubecf-v1.0.1.tgz
-helm install kubecf --namespace kubecf --values values.yaml kubecf-v1.0.1.tgz
-```
-- To uninstall it
-```bash
-helm uninstall kubecf -n kubecf
-```
-
 ### Install cf, Stratos
 
 ```bash
@@ -224,23 +190,16 @@ helm install stratos --namespace stratos --values ./stratos.yml suse/console
 brew install cloudfoundry/tap/cf-cli@7
 ```
 
-- Access the API and log on using the secret created by KubeCF
-
+- Access the CF API using the IP address of the VM
 ```bash
-cf api --skip-ssl-validation https://api.95.217.161.67.nip.io
-acp=$(kubectl get secret \
->         --namespace kubecf kubecf.var-cf-admin-password \
->         -o jsonpath='{.data.password}' \
->         | base64 --decode)
-
-cf auth admin "${acp}"
+IP=<IP_ADDRESS_VM>
+cf api --skip-ssl-validation https://api.$IP.nip.io
 ```
-- Log in using the admin credentials created using `cf-for-k8s` and key `cf_admin_password`  in /tmp/cf-values.yml
+- Log in using the `admin` user and password `cf_admin_password` as defined under /tmp/cf-values.yml
 ```bash
 pwd=<cf-values.yml.cf_admin_password>
 cf auth admin $pwd
-```  
-
+```
 - Enable docker feature (needed when using cf-4-k8s)
 ```bash
 cf enable-feature-flag diego_docker
@@ -253,27 +212,33 @@ cf create-space demo -o redhat.com
 cf create-user developer password
 cf target -o redhat.com -s demo
 ```
-- Deploy an app based using `pre-built` Docker image
+
+### Push an application using an existing container image
+
+- Push the docker image of an application
 ```bash
-cf push test-app-build -o cloudfoundry/diego-docker-app
-``` 
+cf push test-app1 -o cloudfoundry/diego-docker-app
+```
+
+### Push an application using buildpack
 
 - Test an application compiled locally and pushed to a container registry
 ```bash
 git clone https://github.com/cloudfoundry-samples/test-app.git
 cd test-app
-cf push test-app
+cf push test-app2
 ```
-
-- Deploy a Spring example and `build` it
+- Validate if the `test-app2` is reachable
 ```bash
-git clone https://github.com/cloudfoundry-samples/spring-music
-cd spring-music/
-./gradlew assemble
-cf push spring-music
+curl http://test-app2.${IP}.nip.io/env
+{"BAD_QUOTE":"'","BAD_SHELL":"$1","CF_INSTANCE_ADDR":"0.0.0.0:8080","CF_INSTANCE_INTERNAL_IP":"10.244.0.32","CF_INSTANCE_IP":"10.244.0.32","CF_INSTANCE_PORT":"8080","CF_INSTANCE_PORTS":"[{\"external\":8080,\"internal\":8080}]","HOME":"/home/some_docker_user","HOSTNAME":"diego-docker-app-demo-3c087bf83d-0","KUBERNETES_PORT":"tcp://10.96.0.1:443","KUBERNETES_PORT_443_TCP":"tcp://10.96.0.1:443","KUBERNETES_PORT_443_TCP_ADDR":"10.96.0.1","KUBERNETES_PORT_443_TCP_PORT":"443","KUBERNETES_PORT_443_TCP_PROTO":"tcp","KUBERNETES_SERVICE_HOST":"10.96.0.1","KUBERNETES_SERVICE_PORT":"443","KUBERNETES_SERVICE_PORT_HTTPS":"443","LANG":"en_US.UTF-8","MEMORY_LIMIT":"1024m","PATH":"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/myapp/bin","POD_NAME":"diego-docker-app-demo-3c087bf83d-0","PORT":"8080","SOME_VAR":"some_docker_value","S_CD8A51EC_F591_488B_B98D_5884B15C156B_PORT":"tcp://10.100.236.5:8080","S_CD8A51EC_F591_488B_B98D_5884B15C156B_PORT_8080_TCP":"tcp://10.100.236.5:8080","S_CD8A51EC_F591_488B_B98D_5884B15C156B_PORT_8080_TCP_ADDR":"10.100.236.5","S_CD8A51EC_F591_488B_B98D_5884B15C156B_PORT_8080_TCP_PORT":"8080","S_CD8A51EC_F591_488B_B98D_5884B15C156B_PORT_8080_TCP_PROTO":"tcp","S_CD8A51EC_F591_488B_B98D_5884B15C156B_SERVICE_HOST":"10.100.236.5","S_CD8A51EC_F591_488B_B98D_5884B15C156B_SERVICE_PORT":"8080","S_CD8A51EC_F591_488B_B98D_5884B15C156B_SERVICE_PORT_HTTP":"8080","VCAP_APPLICATION":"{\"cf_api\":\"https://api.95.217.134.196.nip.io\",\"limits\":{\"fds\":16384,\"mem\":1024,\"disk\":1024},\"application_name\":\"diego-docker-app\",\"application_uris\":[\"diego-docker-app.95.217.134.196.nip.io\"],\"name\":\"diego-docker-app\",\"space_name\":\"demo\",\"space_id\":\"f148f02d-fcf3-4657-a3ea-f3f8cae530ad\",\"organization_id\":\"c4f7aa9b-18cf-4687-8073-719f61cc4168\",\"organization_name\":\"redhat.com\",\"uris\":[\"diego-docker-app.95.217.134.196.nip.io\"],\"process_id\":\"7e52ed45-3a98-41ca-ac94-21b69cf06f9f\",\"process_type\":\"web\",\"application_id\":\"7e52ed45-3a98-41ca-ac94-21b69cf06f9f\",\"version\":\"63884c6e-3e6d-45a9-b16a-40cc3e3d5c48\",\"application_version\":\"63884c6e-3e6d-45a9-b16a-40cc3e3d5c48\"}","VCAP_APP_HOST":"0.0.0.0","VCAP_APP_PORT":"8080","VCAP_SERVICES":"{}"}[snowdrop@k03-k116 cf-for-k8s]$
 ```
 
-### Service catalog
+- Move to the [developer page](developer.md) to play with the `Spring Music` application and a database
+
+### Optional 
+
+#### Bitnami Service catalog
 
 - Create a helm config file
 ```bash
@@ -355,10 +320,6 @@ kubectl create clusterrolebinding kubeapps-operator --clusterrole=cluster-admin 
 ```bash
 kubectl get secret $(kubectl get serviceaccount kubeapps-operator -n kubeapps -o jsonpath='{range .secrets[*]}{.name}{"\n"}{end}' | grep kubeapps-operator-token) -o jsonpath='{.data.token}' -o go-template='{{.data.token | base64decode}}' -n kubeapps && echo
 ```
-
-- Modify the service created to define the externalIP address `http://95.217.161.67/#/login`
-
-### Optional 
 
 #### Kubernetes dashboard
 

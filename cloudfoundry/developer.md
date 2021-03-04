@@ -11,45 +11,24 @@
 ## Prerequisites
 
 To play with Cloud Foundry on Kubernetes, it is required to have :
-- A Kubernetes cluster (>= 1.15)
+- A Kubernetes cluster (>= 1.18)
 - The Helm tool (>= 1.13)
 - The kubectl client installed
 - A docker daemon
 - Homebrew
 
-## Deployment of Cloud Foundry
-
-2 projects have been created to install Cloud Foundry on Kubernetes but the one which is currently packaged, as commercial
-product, by VMWare for their product `Tanzu application Service` is `cf-for-k8s`.
-
-- [cf-for-k8s](https://github.com/cloudfoundry/cf-for-k8s) - see [instructions](cf-for-k8s.md)
-- [KubeCf](https://kubecf.suse.dev/) - see [instructions](kube_cf.md)
-
-**REMARK**: `cf-for-k8` leverages Kubernetes native features such as `Controller, Secret, ConfigMap,...` and is built top of Kubernetes ecosystem projects: `istio`, `fluentd`, `kpack`, .... then `KubeCf`
-
-The following sections of this documentation will rely on `cf-for-k8s` installation.
-
 ## Deploy an application using cf
 
-- Setup the `cf` client to access the API and be authenticated
+- Configure the `cf` client to access the API and be authenticated
 ```bash
 IP=<VM_ETH0_IP_ADDRESS>
 cf api --skip-ssl-validation https://api.${IP}.nip.io
 ```
-**Remarks**: 
 
 - The admin password has been generated within the `/tmp/cf-values.yml` and is available under the variable: `cf_admin_password`
 ```bash
-export admin_pass=$(yq r /tmp/cf-values.yml 'cf_admin_password')
+export admin_pass=$(cat /tmp/cf-values.yml | yq e '.cf_admin_password' -)
 ```
-**REMARK**: For `kubecf`, we can fetch the random generated credentials for the default `admin user` using the secret created: 
-```bash
-export admin_pass=$(kubectl get secret \
-          --namespace kubecf kubecf.var-cf-admin-password \
-          -o jsonpath='{.data.password}' \
-          | base64 --decode)
-```
-
 - We authenticate using those credentials
 ```bash
 cf auth admin "${admin_pass}"
@@ -69,25 +48,7 @@ cf target -o "redhat.com" -s "demo"
 cf enable-feature-flag diego_docker
 ```
 
-### Push a docker image
-
-- Push the docker image of an application
-```bash
-cf push test-app -o cloudfoundry/diego-docker-app
-```
-- Validate the `app` is reachable
-```bash
-curl http://test-app.${IP}.nip.io/env
-{"BAD_QUOTE":"'","BAD_SHELL":"$1","CF_INSTANCE_ADDR":"0.0.0.0:8080","CF_INSTANCE_INTERNAL_IP":"10.244.0.32","CF_INSTANCE_IP":"10.244.0.32","CF_INSTANCE_PORT":"8080","CF_INSTANCE_PORTS":"[{\"external\":8080,\"internal\":8080}]","HOME":"/home/some_docker_user","HOSTNAME":"diego-docker-app-demo-3c087bf83d-0","KUBERNETES_PORT":"tcp://10.96.0.1:443","KUBERNETES_PORT_443_TCP":"tcp://10.96.0.1:443","KUBERNETES_PORT_443_TCP_ADDR":"10.96.0.1","KUBERNETES_PORT_443_TCP_PORT":"443","KUBERNETES_PORT_443_TCP_PROTO":"tcp","KUBERNETES_SERVICE_HOST":"10.96.0.1","KUBERNETES_SERVICE_PORT":"443","KUBERNETES_SERVICE_PORT_HTTPS":"443","LANG":"en_US.UTF-8","MEMORY_LIMIT":"1024m","PATH":"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/myapp/bin","POD_NAME":"diego-docker-app-demo-3c087bf83d-0","PORT":"8080","SOME_VAR":"some_docker_value","S_CD8A51EC_F591_488B_B98D_5884B15C156B_PORT":"tcp://10.100.236.5:8080","S_CD8A51EC_F591_488B_B98D_5884B15C156B_PORT_8080_TCP":"tcp://10.100.236.5:8080","S_CD8A51EC_F591_488B_B98D_5884B15C156B_PORT_8080_TCP_ADDR":"10.100.236.5","S_CD8A51EC_F591_488B_B98D_5884B15C156B_PORT_8080_TCP_PORT":"8080","S_CD8A51EC_F591_488B_B98D_5884B15C156B_PORT_8080_TCP_PROTO":"tcp","S_CD8A51EC_F591_488B_B98D_5884B15C156B_SERVICE_HOST":"10.100.236.5","S_CD8A51EC_F591_488B_B98D_5884B15C156B_SERVICE_PORT":"8080","S_CD8A51EC_F591_488B_B98D_5884B15C156B_SERVICE_PORT_HTTP":"8080","VCAP_APPLICATION":"{\"cf_api\":\"https://api.95.217.134.196.nip.io\",\"limits\":{\"fds\":16384,\"mem\":1024,\"disk\":1024},\"application_name\":\"diego-docker-app\",\"application_uris\":[\"diego-docker-app.95.217.134.196.nip.io\"],\"name\":\"diego-docker-app\",\"space_name\":\"demo\",\"space_id\":\"f148f02d-fcf3-4657-a3ea-f3f8cae530ad\",\"organization_id\":\"c4f7aa9b-18cf-4687-8073-719f61cc4168\",\"organization_name\":\"redhat.com\",\"uris\":[\"diego-docker-app.95.217.134.196.nip.io\"],\"process_id\":\"7e52ed45-3a98-41ca-ac94-21b69cf06f9f\",\"process_type\":\"web\",\"application_id\":\"7e52ed45-3a98-41ca-ac94-21b69cf06f9f\",\"version\":\"63884c6e-3e6d-45a9-b16a-40cc3e3d5c48\",\"application_version\":\"63884c6e-3e6d-45a9-b16a-40cc3e3d5c48\"}","VCAP_APP_HOST":"0.0.0.0","VCAP_APP_PORT":"8080","VCAP_SERVICES":"{}"}[snowdrop@k03-k116 cf-for-k8s]$
-```
-- Test an application compiled locally and pushed to a container registry
-```bash
-git clone https://github.com/cloudfoundry-samples/test-app.git
-cd test-app
-cf push test-app
-```
-
-### Deploy a Spring application accessing a Database
+## Deploy a Spring application accessing a Database
 
 In order to play with this scenario, it is needed to install the `buildpack` client and `minibroker` project able to create a service such as a database
 from a helm chart
