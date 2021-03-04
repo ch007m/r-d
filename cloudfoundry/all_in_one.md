@@ -5,7 +5,7 @@
   * [Create a K8s cluster](#create-a-k8s-cluster)
   * [Install tools](#install-tools)
   * [Install CloudFoundry - cf-4-k8s](#install-cloudfoundry---cf-4-k8s)
-      * [Access CAPI](#access-capi)
+  * [Access CAPI](#access-capi)
       * [Push an application using an existing container image](#push-an-application-using-an-existing-container-image)
       * [Push an application using buildpack](#push-an-application-using-buildpack)
       * [What about using Spring Music ;-)](#what-about-using-spring-music--)
@@ -66,7 +66,7 @@ $ kc scale --replicas=0 deployment.apps/nginx-ingress-controller -n kube-system
 ``` 
 **REMARK**: This step is only needed when ingress has been deployed on a kubernetes cluster
 
-### Access CAPI
+## Access CAPI
 
 - Access the CF API using the IP address of the VM
 ```bash
