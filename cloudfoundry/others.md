@@ -10,15 +10,23 @@ console:
 EOF
 
 kubectl create ns console
-helm install stratos -n console --values ./stratos.yml stratos/console
-kubectl port-forward stratos-0 --address localhost,<EXTERNAL_IP_ADDRESS> 30000:443 -n console
-Next, open your browser at the address
-
-https://<EXTERNAL_IP_ADDRESS>:30000
+helm install stratos stratos/console -n console --values ./stratos.yml 
 ```
 
-- An alternative is to run the console using locally stratos
+- To access Stratos: Get the URL by running these commands in the same shell:
+```bash
+export NODE_PORT=$(kubectl get --namespace console -o jsonpath="{.spec.ports[0].nodePort}" services stratos-ui-ext)
+export NODE_IP=$(kubectl get nodes --namespace console -o jsonpath="{.items[0].status.addresses[0].address}")
+echo https://$NODE_IP:$NODE_PORT
+```
+
+- An alternative is to run the console using locally stratos (optional)
 ```bash
 docker run -p 8444:443 splatform/stratos:latest
+```
+- Next register the API endpoint :-) and use as credential `admin` as user and pwd as defined within the cf-values.yml file
+```bash
+https://api.95.217.159.244.nip.io
+
 ```
 
