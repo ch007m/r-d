@@ -6,13 +6,15 @@
   * [Install tools](#install-tools)
   * [Install CloudFoundry](#install-cloudfoundry)
       * [Deploy cf-4-k8s](#deploy-cf-4-k8s)
-      * [Install cf, Stratos](#install-cf-stratos)
-      * [Push an application using an existing container image](#push-an-application-using-an-existing-container-image)
-      * [Push an application using buildpack](#push-an-application-using-buildpack)
+      * [Access CAPI](#access-capi)
+        * [Push an application using an existing container image](#push-an-application-using-an-existing-container-image)
+        * [Push an application using buildpack](#push-an-application-using-buildpack)
       * [What about using Spring Music ;-)](#what-about-using-spring-music--)
       * [Optional](#optional)
-          * [Bitnami Service catalog](#bitnami-service-catalog)
-          * [Kubernetes dashboard](#kubernetes-dashboard)
+        * [Install Stratos](#install-stratos)
+        * [Bitnami Service catalog](#bitnami-service-catalog)
+        * [Kubernetes dashboard](#kubernetes-dashboard)
+
 
 ## Create a K8s cluster
 
