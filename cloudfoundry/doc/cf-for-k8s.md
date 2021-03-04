@@ -34,11 +34,7 @@ EOF
 ```bash
 echo -e '\nimages:\n  cf_autodetect_builder: cmoulliard/paketo-spring-boot-builder@sha256:f0fe222b06fd54e580a1366646f31e7b5b59047c3112b8416c06994e4109cd30' >> /tmp/cf-values.yml
 ```
-- Deploy the Kubernetes metrics server needed by the `metrics-proxy` pod
-```bash
-kc apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml
-```
-- Next, deploy `cf-4-k8s` using the `kapp` tool
+- Next, deploy `cf-for-k8s` using the `kapp` tool
 ```bash
 kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml)
 ```
