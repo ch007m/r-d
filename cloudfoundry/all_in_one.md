@@ -134,12 +134,12 @@ git clone https://github.com/cloudfoundry/cf-for-k8s.git && cd cf-for-k8s
 IP=95.217.159.244
 ./hack/generate-values.sh -d ${IP}.nip.io > /tmp/cf-values.yml
 ```
-- Pass your credentials to access the docker registry
+- Pass your credentials to access the container registry (quay.io, docker, or local)
 ```bash
 cat << EOF >> /tmp/cf-values.yml
 app_registry:
   hostname: https://quay.io/
-  repository_prefix: "quay.io/cmoulliard"
+  repository_prefix: quay.io/cmoulliard
   username: "cmoulliard"
   password: "xxxxx"
 
@@ -317,7 +317,7 @@ To access Kubeapps from outside your K8s cluster, follow the steps below:
 
 2. Open a browser and access Kubeapps using the obtained URL.
 ```
-- Modify the service created to define the externalIP address
+- Modify the service created to define the `externalIP` address
 ```bash
 apiVersion: v1
 kind: Service
