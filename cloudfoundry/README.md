@@ -2,18 +2,22 @@
 
 ## Table of Contents
 
-   * [Introduction](#introduction)
-      * [VMware Tanzu](#vmware-tanzu)
-      * [Cloudfoundry](#cloudfoundry)
-         * [Kubernetes projects](#kubernetes-projects)
-   * [DevExp on k8s](#devexp-on-k8s)
-   * [Interesting references](#interesting-references)
-   * [For the Developers](#for-the-developers)
-
+  * [Introduction](#introduction)
+  * [For the Developers](#for-the-developers)
+  * [VMware Tanzu](#vmware-tanzu)
+  * [Cloudfoundry](#cloudfoundry)
+  * [Kubernetes projects](#kubernetes-projects)
+    * [DevExp on k8s](#devexp-on-k8s)
+    * [Interesting references](#interesting-references)
+    
 ## Introduction
 
 This project has been created to collect information about the Kubernetes offering of [VMWare Tanzu](https://github.com/vmware-tanzu) and [Cloudfoundry](https://www.cloudfoundry.org/).
- 
+
+### For the Developers
+
+To play with CloudFoundry on K8s, move to the [developer page](developer.md)
+
 ### VMware Tanzu 
 
 VMware Tanzu is a new brand from VMware that encompasses many application-platform products, and now that Pivotal is part of VMware 
@@ -133,7 +137,3 @@ which is then processed by [`fissile or Buildpack`](https://github.com/cloudfoun
 - Deploy cloudfoundry on a local k8s: https://medium.com/@jmpinto/deploying-cloudfoundry-on-a-local-kubernetes-9103a57bf713
 - kubecf doc: https://kubecf.suse.dev/docs/getting-started/kubernetes-deploy/
 - cf-operator: https://github.com/cloudfoundry-incubator/cf-operator
-
-## For the Developers
-
-To play with CloudFoundry on K8s, move to the [developer page](developer.md)
