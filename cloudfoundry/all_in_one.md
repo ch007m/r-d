@@ -68,26 +68,7 @@ $ kc scale --replicas=0 deployment.apps/nginx-ingress-controller -n kube-system
 ``` 
 **REMARK**: This step is only needed when ingress has been deployed on a kubernetes cluster
 
-### Install cf, Stratos
-
-```bash
-export node_ip=95.217.161.67
-kc create ns stratos
-cat << _EOF_ > stratos.yml
-console:
-  service:
-    externalIPs: ["${node_ip}"]
-    servicePort: 8444
-_EOF_
-
-helm repo add suse https://kubernetes-charts.suse.com/
-helm install stratos --namespace stratos --values ./stratos.yml suse/console
-```
-
-- Install CF Client
-```bash
-brew install cloudfoundry/tap/cf-cli@7
-```
+### Access CAPI
 
 - Access the CF API using the IP address of the VM
 ```bash
@@ -112,14 +93,14 @@ cf create-user developer password
 cf target -o redhat.com -s demo
 ```
 
-### Push an application using an existing container image
+#### Push an application using an existing container image
 
 - Push the docker image of an application
 ```bash
 cf push test-app1 -o cloudfoundry/diego-docker-app
 ```
 
-### Push an application using buildpack
+#### Push an application using buildpack
 
 - Test an application compiled locally and pushed to a container registry
 ```bash
@@ -138,6 +119,10 @@ curl -k  https://test-app2-meditating-nyala-ea.apps.95.217.159.244.nip.io/env
 Move to the [developer page](developer.md) to play with the `Spring Music` application and a database
 
 ### Optional 
+
+#### Install Stratos
+
+See [others](others.md)
 
 #### Bitnami Service catalog
 
