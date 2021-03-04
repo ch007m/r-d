@@ -18,7 +18,7 @@
 ## Create a K8s cluster
 
 - Using a Centos7 [vm](k8s-vm.md) created on hetzner cloud provider
-- or [kind](kind.md)
+- or locally with [kind](kind.md)
 
 ## Install tools
 
