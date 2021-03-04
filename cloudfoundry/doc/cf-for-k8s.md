@@ -38,17 +38,11 @@ echo -e '\nimages:\n  cf_autodetect_builder: cmoulliard/paketo-spring-boot-build
 ```bash
 kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml)
 ```
-- **REMARK**: When using `kind`, please execute the following command to use the `nodeport-for-ingress` as kind don't provide a loadbalancer that `istio ingressgateway` can use and fix resource allocations.
+- **REMARK**: When using `kind`, please execute the following command to remove istio ingress service and fix health check, cpu/memory
 ```bash
-ytt -f config -f config-optional/remove-resource-requirements.yml -f config-optional/remove-ingressgateway-service.yml -f config-optional/use-nodeport-for-ingress.yml -f /tmp/cf-values.yml > /tmp/cf-for-k8s-rendered.yml
-kapp deploy -a cf -f /tmp/cf-for-k8s-rendered.yml -y
+kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config/remove-resource-requirements.yml -f config/istio/ingressgateway-service-nodeport.yml)
 ```
 - **REMARK**: When the `ingress nginx controller` has been deployed on kubernetes created using by example `kubeadm, kubelet`, then scale it down the `ingress nginx`, otherwise cf for k8s will fail to be deployed !!
 ```bash
 $ kc scale --replicas=0 deployment.apps/nginx-ingress-controller -n kube-system
-```
-
-- **REMARK**: When using `kind`, please execute the following command to remove istio ingress service and fix health check, cpu/memory
-```bash
-kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config/remove-resource-requirements.yml -f config/istio/ingressgateway-service-nodeport.yml)
 ```
