@@ -4,9 +4,9 @@
 
   * [Prerequisites](#prerequisites)
   * [Set up Cloudfoundry using cf-for-k8s](#set-up-cloudfoundry-using-cf-for-k8s)
-    * [Deploy an application using the cf client](#deploy-an-application-using-the-cf-client)
-      * [Push an application using an existing container image](#push-an-application-using-an-existing-container-image)
-      * [Push an application using buildpack](#push-an-application-using-buildpack)
+  * [Deploy an application using the cf client](#deploy-an-application-using-the-cf-client)
+    * [Push an application using an existing container image](#push-an-application-using-an-existing-container-image)
+    * [Push an application using buildpack](#push-an-application-using-buildpack)
   * [Deploy a Spring application accessing a Database](#deploy-a-spring-application-accessing-a-database)
 
 ## Prerequisites
