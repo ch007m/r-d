@@ -3,7 +3,8 @@
 ## Table of Contents
 
   * [Prerequisites](#prerequisites)
-  * [Deploy an application using the cf client](#deploy-an-application-using-the-cf-client)
+  * [Set up Cloudfoundry using cf-for-k8s](#set-up-cloudfoundry-using-cf-for-k8s)
+    * [Deploy an application using the cf client](#deploy-an-application-using-the-cf-client)
       * [Push an application using an existing container image](#push-an-application-using-an-existing-container-image)
       * [Push an application using buildpack](#push-an-application-using-buildpack)
   * [Deploy a Spring application accessing a Database](#deploy-a-spring-application-accessing-a-database)
@@ -16,6 +17,10 @@ To play with Cloud Foundry on Kubernetes, it is required to have :
 - The kubectl client installed
 - A docker daemon
 - Some [tools](tools.md)
+
+## Set up Cloudfoundry using cf-for-k8s
+
+See [instructions](../cf-for-k8s.md)
 
 ## Deploy an application using the cf client
 
