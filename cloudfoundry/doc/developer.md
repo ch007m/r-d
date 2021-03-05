@@ -77,16 +77,9 @@ curl -k  https://test-app2-meditating-nyala-ea.apps.95.217.159.244.nip.io/env
 
 ### Deploy a Spring application accessing a Database
 
-In order to play with this scenario, it is needed to install the `buildpack` client (aka `pack`) and `minibroker` project able to create a service such as a database
-from a helm chart/service catalog.
+In order to play with this scenario, it is needed to install `minibroker` which is a service catalog able to create a service such as a database from a helm chart.
 
-- Install `pack` client using the command: 
-```bash
-brew tap buildpack/tap
-brew install pack
-```
-
-- Deploy the minibroker project which provides a collection of services as a `ServiceCatalog`. More information is available [here](https://svc-cat.io/docs/walkthrough/). 
+- Deploy first the minibroker. More information is available [here](https://svc-cat.io/docs/walkthrough/). 
  
 ```bash
 helm repo add minibroker https://minibroker.blob.core.windows.net/charts
@@ -121,16 +114,6 @@ git clone https://github.com/cmoulliard/spring-music.git && cd spring-music
 ./gradlew clean assemble
 ```
 
-- Package the container image using the `buildpack` tool and push it to your images registry
-```bash
-podman pull gcr.io/paketo-buildpacks/builder:base
-pack build spring-music-app -p ./ --builder gcr.io/paketo-buildpacks/builder:base --env 'BP_BUILT_ARTIFACT=build/libs/spring-music-*.jar'
-podman tag spring-music-app cmoulliard/spring-music-app
-podman push cmoulliard/spring-music-app
-```
-**REMARK**: We build manually the image instead of using `kpack` on cf-for-k8s as the release `v0.1.0` injects a wrong Spring Cloud library within the image which conflicts with the project `Pivotal CfEnv` 
-when the spring boot application starts !
-
 - Push and create the `spring music` application
 ```bash
 cf push spring-music -o cmoulliard/spring-music-app
@@ -159,3 +142,21 @@ cf bind-service spring-music mysql-svc
 cf restage spring-music
 ```
 - Check if the Application is well started, play with it ;-)
+
+## Create a new Build image
+
+To build locally a new `buildpack` image, it is needed to install the `pack` client
+```bash
+brew tap buildpack/tap
+brew install pack
+```
+Next, we can package the container using the `pack` client and push it to a registry (docker.io, quay.io, ...)
+```bash
+docker pull gcr.io/paketo-buildpacks/builder:base
+pack build spring-music-app -p ./ --builder gcr.io/paketo-buildpacks/builder:base --env 'BP_BUILT_ARTIFACT=build/libs/spring-music-*.jar'
+docker tag spring-music-app cmoulliard/spring-music-app
+docker push cmoulliard/spring-music-app
+```
+**REMARKS**:
+- We build the Spring music image instead of using the default builder image used by `cf-for-k8s` as it injects a wrong Spring Cloud library within the image
+which conflicts with the project `Pivotal CfEnv` when the spring boot application starts !
