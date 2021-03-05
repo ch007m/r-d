@@ -17,7 +17,7 @@
 ## Create a K8s cluster
 
 - Using a Centos7 [vm](doc/k8s-vm.md) created on hetzner cloud provider
-- or locally with [kind](doc/kind.md)
+- or locally with [kind](https://github.com/cloudfoundry/cf-for-k8s/blob/develop/docs/deploy-local.md#steps-to-deploy-on-kind)
 
 ## Install tools
 
