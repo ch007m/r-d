@@ -1,5 +1,7 @@
 ## Common tools
 
+See official [page](https://github.com/cloudfoundry/cf-for-k8s/blob/develop/docs/getting-started-tutorial.md#tooling)
+
 - Install wget, helm, jq, brew, maven, k9s
 ```bash
 sudo yum install -y wget epel-release jq maven
@@ -29,9 +31,14 @@ brew install ytt kbld kapp imgpkg kwt vendir yq
 brew install helm
 ```
 
-- To install the client supporting CF API `v7`, execute this brew command
+- To install the BOSH client 
 ```bash
 brew install cloudfoundry/tap/bosh-cli
+```  
+
+- The CF client `v7`
+```bash
+brew install cloudfoundry/tap/cf-cli@7
 ```
 
 - Deploy the `k9s` user tool
