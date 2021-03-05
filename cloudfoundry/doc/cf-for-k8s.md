@@ -44,5 +44,8 @@ $ kc scale --replicas=0 deployment.apps/nginx-ingress-controller -n kube-system
   We created this new `Spring Boot` builder which don t include the `Autoreconfiguration` pack as it will fail
   with applications using the Pivotal `CfEnv` project as this is the case with `Spring Music` app
 ```bash
-echo -e '\nimages:\n  cf_autodetect_builder: cmoulliard/paketo-spring-boot-builder@sha256:f0fe222b06fd54e580a1366646f31e7b5b59047c3112b8416c06994e4109cd30' >> /tmp/cf-values.yml
+cat << EOF >> /tmp/cf-values.yml
+images:
+  cf_autodetect_builder: cmoulliard/paketo-spring-boot-builder@sha256:f0fe222b06fd54e580a1366646f31e7b5b59047c3112b8416c06994e4109cd30
+EOF
 ```
