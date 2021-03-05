@@ -8,6 +8,7 @@
     * [Push an application using an existing container image](#push-an-application-using-an-existing-container-image)
     * [Push an application using buildpack](#push-an-application-using-buildpack)
     * [Deploy a Spring application accessing a Database](#deploy-a-spring-application-accessing-a-database)
+  * [Create a new Build image](#create-a-new-build-image)
 
 ## Prerequisites
 
