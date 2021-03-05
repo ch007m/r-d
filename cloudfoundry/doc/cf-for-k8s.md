@@ -33,10 +33,6 @@ EOF
 ```bash
 kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml)
 ```
-- **REMARK**: When using `kind`, please execute the following command to remove istio ingress service and fix health check, cpu/memory
-```bash
-kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml -f config/remove-resource-requirements.yml -f config/istio/ingressgateway-service-nodeport.yml)
-```
 **REMARKS**:
 
 - When the `ingress nginx controller` has been deployed on kubernetes created using by example `kubeadm, kubelet`, then scale it down the `ingress nginx`, otherwise cf for k8s will fail to be deployed !!
