@@ -39,7 +39,7 @@ kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml)
 ```bash
 $ kc scale --replicas=0 deployment.apps/nginx-ingress-controller -n kube-system
 ```
-- If you plan to use another `builder` builkdpack image, execute then this command (TO BE VERIFIED)
+- If you plan to use another `builder` to build the image using `builddpack`, execute then this command (TO BE VERIFIED)
   We created this new `Spring Boot` builder which don t include the `Autoreconfiguration` pack as it will fail
   with applications using the Pivotal `CfEnv` project as this is the case with `Spring Music` app
 ```bash
