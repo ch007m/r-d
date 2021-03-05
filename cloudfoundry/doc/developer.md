@@ -37,6 +37,8 @@ export admin_pass=$(cat /tmp/cf-values.yml | yq e '.cf_admin_password' -)
 - We authenticate using those credentials
 ```bash
 cf auth admin "${admin_pass}"
+or
+cf auth admin "$(grep cf_admin_password /tmp/cf-values.yml | cut -d" " -f2)"
 ```
 - Let’s create a `demo` organization and a `redhat.com` space
 ```bash
