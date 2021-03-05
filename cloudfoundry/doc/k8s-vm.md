@@ -73,7 +73,8 @@ create_pv 09 100
 create_pv 10 8
 create_pv 11 8
 ```
-- Patch the dashboard service to use the external IP address
+- Patch the dashboard service to use the `external IP` address. This step is only needed when there is no LoadBalancer created
+  top of the cluster. 
 ```bash
 IP=<IP_ADDRESS_OF_THE_VM>
 kubectl patch svc kubernetes-dashboard -n kubernetes-dashboard -p '{"spec":{"externalIPs":["$IP"]}}'
