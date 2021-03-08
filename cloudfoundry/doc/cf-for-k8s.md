@@ -29,6 +29,15 @@ load_balancer:
   enable: false
 EOF
 ```
+**REMARK**: If a local registry exists, then pass the following `hostname` and `repository_prefix`
+```yaml
+app_registry:
+  hostname: http://kind-registry:5000
+  repository_prefix: kind-registry:5000
+  username: "cmoulliard"
+  password: "xxxxx"
+...
+```
 - Next, deploy `cf-for-k8s` using the `kapp` tool
 ```bash
 kapp deploy -a cf -f <(ytt -f config -f /tmp/cf-values.yml)

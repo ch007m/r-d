@@ -1,0 +1,87 @@
+#
+# Command Not used which consume data from configmap
+# command:
+#    - /bin/registry
+#    - serve
+#    - /etc/docker/registry/config.yml
+#   configMap:
+#        defaultMode: 420
+#        name: registry-docker-registry-config
+#      name: registry-docker-registry-config
+# - mountPath: /etc/docker/registry
+#              name: registry-docker-registry-config
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  generation: 1
+  labels:
+    app: registry
+  name: registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: registry
+  template:
+    metadata:
+      labels:
+        app: registry
+    spec:
+      containers:
+        - name: registry
+          image: registry:2.7.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+          env:
+            - name: REGISTRY_AUTH
+              value: htpasswd
+            - name: REGISTRY_AUTH_HTPASSWD_REALM
+              value: Registry Realm
+            - name: REGISTRY_AUTH_HTPASSWD_PATH
+              value: /auth/htpasswd
+            - name: REGISTRY_HTTP_TLS_CERTIFICATE
+              value: /certs/registry.crt
+            - name: REGISTRY_HTTP_TLS_KEY
+              value: /certs/registry.key
+            - name: REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY
+              value: /var/lib/registry
+          volumeMounts:
+            - mountPath: /auth
+              name: auth
+            - mountPath: /certs
+              name: certs
+            - mountPath: /var/lib/registry/
+              name: data
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 5000
+              scheme: HTTPS
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 5000
+              scheme: HTTPS
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: certs
+          secret:
+            secretName: cert-key
+        - name: auth
+          secret:
+            secretName: htpasswd
+        - emptyDir: {}
+          name: data

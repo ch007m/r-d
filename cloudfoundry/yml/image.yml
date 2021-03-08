@@ -1,0 +1,14 @@
+apiVersion: kpack.io/v1alpha1
+kind: Image
+metadata:
+  name: tutorial-image
+  namespace: cf-staging
+spec:
+  tag: kube-registry.kube-system.svc:5000/spring-petclinic
+  serviceAccount: cc-kpack-registry-service-account
+  builder:
+    name: my-builder
+    kind: Builder
+  source:
+    git:
+      url: https://github.com/spring-projects/spring-petclinic

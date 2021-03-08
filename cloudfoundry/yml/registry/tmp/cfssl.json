@@ -1,0 +1,20 @@
+{
+  "hosts": [
+    "registry.kube-public.svc",
+    "registry.kube-public.svc.cluster",
+    "registry.kube-public.svc.cluster.local",
+    "192.168.1.90"
+  ],
+  "CN": "registry-svc",
+  "key": {
+    "algo": "ecdsa",
+    "size": 256
+  },
+  "names": [{
+    "C": "BE",
+    "ST": "Namur",
+    "L": "Florennes",
+    "O": "Red Hat Middleware",
+    "OU": "Snowdrop"
+  }]
+}

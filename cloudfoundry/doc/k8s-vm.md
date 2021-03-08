@@ -30,10 +30,9 @@ ok: [h01-118] => {
         "https://k8s-console.95.217.159.244.nip.io/",
         "",
         "Using the Boot Token: ",
-        "k3hxzh.p5kiogsey4hnccpv"
+        "j9yqt1.jxe5a8rdrxjb9kim"
     ]
 }
-
 ```
 
 - SSH to the VM
@@ -73,9 +72,20 @@ create_pv 09 100
 create_pv 10 8
 create_pv 11 8
 ```
+
 - Patch the dashboard service to use the `external IP` address. This step is only needed when there is no LoadBalancer created
   top of the cluster. 
 ```bash
 IP=<IP_ADDRESS_OF_THE_VM>
 kubectl patch svc kubernetes-dashboard -n kubernetes-dashboard -p '{"spec":{"externalIPs":["$IP"]}}'
+```
+
+### Missing stuffs
+```bash
+sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sudo yum install docker-ce docker-ce-cli containerd.io
+sudo systemctl enable docker
+sudo usermod -aG docker snowdrop
+sudo systemctl start docker
+sudo systemctl status docker
 ```
