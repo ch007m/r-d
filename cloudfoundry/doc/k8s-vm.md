@@ -37,6 +37,7 @@ ok: [h01-118] => {
 
 - SSH to the VM
 ```bash
+VM_NAME=h01-118
 ssh-hetznerc ${VM_NAME}
 ```
 
