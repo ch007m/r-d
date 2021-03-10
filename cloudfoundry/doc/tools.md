@@ -11,6 +11,12 @@ sudo yum install -y wget epel-release jq maven
 sudo rpm -Uvh http://www.city-fan.org/ftp/contrib/yum-repo/rhel7/x86_64/city-fan.org-release-2-1.rhel7.noarch.rpm
 sudo yum -y --enablerepo=city-fan.org install libcurl libcurl-devel
 ```  
+- Install git 2
+```bash
+sudo yum remove git*
+sudo yum -y install https://packages.endpoint.com/rhel/7/os/x86_64/endpoint-repo-1.7-1.x86_64.rpm
+sudo yum install git
+```  
 - Install `brew` tool on the linux box
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
@@ -40,6 +46,8 @@ brew install cloudfoundry/tap/bosh-cli
 ```bash
 brew install cloudfoundry/tap/cf-cli@7
 ```
+
+### Nice to have (optional)
 
 - Deploy the `k9s` user tool
 ```bash
