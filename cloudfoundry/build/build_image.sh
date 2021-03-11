@@ -170,7 +170,7 @@ kubectl delete secret/tutorial-registry-credentials -n demo
 kubectl create secret docker-registry tutorial-registry-credentials \
      --docker-username=$USER \
      --docker-password=$PASSWORD\
-     --docker-server=$REGISTRY_PROTOCOL://$REGISTRY_ADDRESS:$REGISTRY_PORT/\
+     --docker-server=$REGISTRY_ADDRESS:$REGISTRY_PORT/\
      -n demo
 
 kubectl delete builder/my-builder -n demo
