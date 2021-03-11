@@ -212,5 +212,5 @@ spec:
   source:
     git:
       url: https://github.com/spring-projects/spring-petclinic
-      revision: master
+      revision: main
 EOF
