@@ -1,12 +1,11 @@
 #@ load("@ytt:overlay", "overlay")
 
-#@overlay/match by=overlay.subset({"kind":"Deployment"})
-#@overlay/match by=overlay.subset({"metadata":{"name":"kpack-controller"}})
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"kpack-controller"}}),expects=1
 ---
 spec:
   template:
     spec:
-      #@overlay/append
+      #@overlay/match missing_ok=True
       volumes:
         - name: custom-certs
           secret:
