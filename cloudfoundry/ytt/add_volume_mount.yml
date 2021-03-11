@@ -7,6 +7,8 @@ spec:
     spec:
       containers:
         #@overlay/match by=overlay.subset({"name": "controller"})
-        volumeMounts:
-        - name: custom-certs
-          mountPath: /certs
+        -
+          #@overlay/match missing_ok=True
+          volumeMounts:
+            - name: custom-certs
+              mountPath: /certs
