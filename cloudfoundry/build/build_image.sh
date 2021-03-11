@@ -1,4 +1,5 @@
-REGISTRY_ADDRESS=kube-registry.infra.svc
+REGISTRY_ADDRESS=95.217.159.244
+REGISTRY_PORT=31000
 REGISTRY_PROTOCOL=https
 REGISTRY_PREFIX=cmoulliard
 USER=admin
@@ -169,7 +170,7 @@ kubectl delete secret/tutorial-registry-credentials -n demo
 kubectl create secret docker-registry tutorial-registry-credentials \
      --docker-username=$USER \
      --docker-password=$PASSWORD\
-     --docker-server=$REGISTRY_PROTOCOL://$REGISTRY_ADDRESS:5000/\
+     --docker-server=$REGISTRY_PROTOCOL://$REGISTRY_ADDRESS:$REGISTRY_PORT/\
      -n demo
 
 kubectl delete builder/my-builder -n demo
@@ -182,7 +183,7 @@ metadata:
   name: my-builder
 spec:
   serviceAccount: tutorial-service-account
-  tag: $REGISTRY_ADDRESS:5000/demo/default-builder
+  tag: $REGISTRY_ADDRESS:$REGISTRY_PORT/demo/default-builder
   stack:
     name: base
     kind: ClusterStack
@@ -203,7 +204,7 @@ metadata:
     kpack.io/build: cert
   name: tutorial-image
 spec:
-  tag: $REGISTRY_ADDRESS:5000/tutorial
+  tag: $REGISTRY_ADDRESS:$REGISTRY_PORT/demo/spring-petclinic
   serviceAccount: tutorial-service-account
   builder:
     name: my-builder
