@@ -9,7 +9,9 @@ CERTIFICATE_FILE=../server.crt
 
 pushd tmp/cert-injection-webhook
 
+echo "######################################"
 echo "Build cert-webhook images: $buildImage"
+echo "######################################"
 if $buildImage
 then
   pack build $REGISTRY_PREFIX/my-setup-ca-certs  \
@@ -29,7 +31,9 @@ if [ -f "$CERTIFICATE_FILE" ]; then
       --data-value-yaml labels="[app]" \
       --data-value-yaml annotations="[kpack.io/build]" \
       > manifest.yaml
-
+    echo "######################################"
+    echo "Install cert-injection-webhook"
+    echo "######################################"
     kapp delete -a cert-injection-webhook -y
     kapp deploy -a cert-injection-webhook -f ./manifest.yaml -y
 else
@@ -45,11 +49,15 @@ popd
 echo "Download kpack release yaml file"
 rm -f release-0.2.2.yaml && wget https://github.com/pivotal/kpack/releases/download/v0.2.2/release-0.2.2.yaml
 
+echo "######################################"
 echo "Install kpack"
-kubectl delete -f release-0.2.2.yaml
+echo "######################################"
+kubectl delete --wait=true -f release-0.2.2.yaml
 kubectl apply -f release-0.2.2.yaml --validate=false
 
+echo "###########################################################"
 echo "Create the clusterStore, clusterStack, Builder for the demo"
+echo "###########################################################"
 # cat <<EOF | kubectl apply -n kpack -f -
 # apiVersion: v1
 # kind: Secret
@@ -169,7 +177,7 @@ spec:
     image: "paketobuildpacks/run:base-cnb"
 EOF
 
-kubectl delete ns demo
+kubectl delete --wait=true ns demo
 kubectl create ns demo
 
 kubectl delete sa/tutorial-service-account -n demo
