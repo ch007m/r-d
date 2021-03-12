@@ -10,6 +10,7 @@ console:
 EOF
 
 kubectl create ns console
+helm repo add stratos https://cloudfoundry.github.io/stratos
 helm install stratos stratos/console -n console --values ./stratos.yml 
 ```
 
