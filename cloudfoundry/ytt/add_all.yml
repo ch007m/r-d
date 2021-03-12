@@ -1,0 +1,24 @@
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.subset({"kind":"Deployment"})
+#@overlay/match by=overlay.subset({"metadata":{"name":"kpack-controller"}})
+---
+spec:
+  template:
+    spec:
+      #@overlay/match missing_ok=True
+      volumes:
+        - name: custom-certs
+          secret:
+            secretName: cert-key
+      containers:
+        #@overlay/match by=overlay.subset({"name": "controller"})
+        -
+          #@overlay/match missing_ok=True
+          volumeMounts:
+            - name: custom-certs
+              mountPath: /certs
+          env:
+            #@overlay/append
+            - name: SSL_CERT_DIR
+              value: /certs
