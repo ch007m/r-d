@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 rm -rf paketo
-curent_dir=$(pwd)
 
+pushd
 buildpack=spring-boot
 version=v1.5.1
 mkdir -p paketo/${buildpack}
@@ -10,9 +10,9 @@ curl -Ls https://github.com/paketo-buildpacks/${buildpack}/archive/${version}.ta
 sed -i -e "s/{{\s*\.version}}/${version}/g" paketo/${buildpack}/buildpack.toml
 cd paketo/${buildpack}
 ./scripts/build.sh
+popd
 
-cd ${curent_dir}
-
+pushd
 buildpack=adopt-openjdk
 version=v2.2.1
 
@@ -21,5 +21,6 @@ curl -Ls https://github.com/paketo-buildpacks/${buildpack}/archive/${version}.ta
 sed -i -e "s/{{\s*\.version}}/${version}/g" paketo/${buildpack}/buildpack.toml
 cd paketo/${buildpack}
 ./scripts/build.sh
+popd
 
-#pack create-builder cmoulliard/paketo-spring-boot-builder --builder-config builder.toml --publish
+pack create-builder cmoulliard/snowdrop-spring-boot-builder --builder-config builder.toml --publish
