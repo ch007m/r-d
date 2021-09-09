@@ -5,8 +5,8 @@ Tanzu Application Platform - https://docs.vmware.com/en/VMware-Tanzu-Application
 | Name | Description | System(s) | Version |
 | --- | --- | --- | --- |
 | [Tanzu Build Service](https://docs.pivotal.io/build-service/1-2/) | Service building Container images using buildpacks spec | kpack | 1.2.2 |
-| [Cloud Native runtimes](https://docs.vmware.com/en/Cloud-Native-Runtimes-for-VMware-Tanzu/index.html) | | | 1.0.2 |
-| [Application Live](https://docs.vmware.com/en/Application-Live-View-for-VMware-Tanzu/index.html) | | | 0.1.0 |
+| [Cloud Native runtimes](https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/0.1/tap-0-1/GUID-overview.html) | Serverless application runtime for Kubernetes that is based on Knative and runs on a single Kubernetes cluster | | 1.0.2 |
+| [Application Live](https://docs.vmware.com/en/Application-Live-View-for-VMware-Tanzu/0.1/docs/GUID-index.html) |  lightweight insights and troubleshooting tool that helps application developers and application operators to look inside running applications. It is based on the concept of Spring Boot Actuators | AppLive controler/server | 0.1.0 |
 | [Application Accelerator](https://docs.vmware.com/en/Application-Accelerator-for-VMware-Tanzu/index.html) | Controller reconciling accelerator CRD (= developer project definition) | accelerator, source controllers | 0.2.0 |
 | [Flux2](https://github.com/fluxcd/flux2#flux-version-2) | Sync k8s resources and config up to date from Git repositories | Flux2 | 0.17.0 |
 | [Kapp](https://carvel.dev/kapp-controller/)| Deploy and view groups of Kubernetes resources as "applications" controller | kapp | 0.39.0 |
@@ -30,11 +30,12 @@ tanzu documentation guide.
 
 The tanzu client version `0.1.0` has been downloaded from the tanzu product site - https://network.pivotal.io/products/tanzu-application-platform
 
+
+
 ```bash
 docker login registry.tanzu.vmware.com -u cmoulliard@redhat.com
 docker pull registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:0.1.0
 
-kind-reg-ingress.sh
 kapp deploy -a kc -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/latest/download/release.yml
 kapp deploy -a flux -f https://github.com/fluxcd/flux2/releases/download/v0.17.0/install.yaml
 
