@@ -11,7 +11,7 @@ Tanzu Application Platform - https://docs.vmware.com/en/VMware-Tanzu-Application
 | [Flux2](https://github.com/fluxcd/flux2#flux-version-2) | Sync k8s resources and config up to date from Git repositories | Flux2 | 0.17.0 |
 | [Kapp](https://carvel.dev/kapp-controller/)| Deploy and view groups of Kubernetes resources as "applications" controller | kapp | 0.39.0 |
 
-## Prerequesites
+## Prerequisites
 
 The following tools are required to install App Accelerator: 
 - 
@@ -69,8 +69,10 @@ tanzu package installed update cloud-native-runtimes -p cnrs.tanzu.vmware.com -v
 
 ### Clean
 
+```bash
 kc delete clusterrole/cloud-native-runtimes-tap-install-cluster-role
 kc delete clusterrolebinding/cloud-native-runtimes-tap-install-cluster-rolebinding
 kc delete sa/cloud-native-runtimes-tap-install-sa -n tap-install
 kc delete -n tap-install secrets/cloud-native-runtimes-tap-install-values
+```
 
