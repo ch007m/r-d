@@ -1,0 +1,19 @@
+---
+registry:
+  server: "registry.pivotal.io"
+  username: "cmoulliard@redhat.com"
+  password: ".P?V9yM^e3vsVH9"
+
+provider: local
+pdb:
+  enable: "true"
+
+ingress:
+  reuse_crds:
+  external:
+    namespace:
+  internal:
+    namespace:
+
+local_dns:
+  enable: "false"
