@@ -9,10 +9,14 @@ CF_URL=https://github.com/cloudfoundry/cf-for-k8s.git
 CF_FOLDER=cf-for-k8s
 CF_VALUES_FILE=new-cf-values.yml
 
+
+#REGISTRY_ADDRESS="kube-registry.infra.svc.cluster.local"
+#REGISTRY_PORT=5000
+
 REGISTRY_ADDRESS=$IP_ADDR
-REGISTRY_PROTOCOL=https
-REGISTRY_PREFIX=cmoulliard
 REGISTRY_PORT=31000
+
+REGISTRY_PREFIX=cmoulliard
 REGISTRY_USERNAME=admin
 REGISTRY_PASSWORD=snowdrop
 
