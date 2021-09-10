@@ -14,7 +14,8 @@ Tanzu Application Platform - https://docs.vmware.com/en/VMware-Tanzu-Application
 ## Prerequisites
 
 The following tools are required to install App Accelerator: 
-- 
+
+- shasum binary (for linux OS) using `yum install perl-Digest-SHA -y`
 - Carvel [tools](https://carvel.dev/#whole-suite)
   - ytt version v0.34.0 or later.
   - kbld version v0.30.0 or later. 
@@ -30,27 +31,43 @@ tanzu documentation guide.
 
 The tanzu client version `0.1.0` has been downloaded from the tanzu product site - https://network.pivotal.io/products/tanzu-application-platform
 
-
-
 ```bash
 docker login registry.tanzu.vmware.com -u cmoulliard@redhat.com
 docker pull registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:0.1.0
 
-kapp deploy -a kc -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/latest/download/release.yml
-kapp deploy -a flux -f https://github.com/fluxcd/flux2/releases/download/v0.17.0/install.yaml
+or using containerd and crictl
+export USERNAME="<VMWARE_USERNAME>"
+export PASSWORD="<VMWARE_PWD>"
+sudo crictl pull --creds $USERNAME:$PASSWORD registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:0.1.0
 
+# Macos installation
 mkdir ~/temp/tanzu && cd ~/temp/tanzu
 mv ~/Downloads/tanzu-cli-bundle-darwin-amd64.tar .
 tar -vxf tanzu-cli-bundle-darwin-amd64.tar
 cp core/v1.4.0-rc.5/tanzu-core-darwin_amd64 /usr/local/bin/tanzu
 
+# Linux installation
+# To auth the user, use the API legacy token which is available here : https://network.pivotal.io/users/dashboard/edit-profile
+pivnet login --api-token=$LEGACY_API_TOKEN
+pivnet download-product-files --product-slug='tanzu-application-platform' --release-version='0.1.0' --product-file-id=1030933
+tar -vxf tanzu-cli-bundle-linux-amd64.tar
+cp cli/package/v1.4.0-rc.5/tanzu-package-linux_amd64 $HOME/bin/tanzu
+
 tanzu plugin clean
 tanzu plugin install -v v1.4.0-rc.5 --local cli package
 tanzu package version
 
-kc create ns tap-install
-kc create secret docker-registry tap-registry \\n-n tap-install \\n--docker-server='registry.pivotal.io' \\n--docker-username="cmoulliard@redhat.com" \\n--docker-password=".P?V9yM^e3vsVH9"
+alias kc=kubectl
 
+kapp deploy -a flux -f https://github.com/fluxcd/flux2/releases/download/v0.17.0/install.yaml
+kapp deploy -a kc -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/latest/download/release.yml
+
+kc create ns tap-install
+kc create secret docker-registry tap-registry -n tap-install --docker-server='registry.pivotal.io' --docker-username=$VMWARE_USERNAME --docker-password=$VMWARE_PWD
+
+pivnet download-product-files --product-slug='tanzu-application-platform' --release-version='0.1.0' --product-file-id=1029762
+kapp deploy -a tap-package-repo -n tap-install -f ./tap-package-repo.yaml -y
+# Macos installation
 kapp deploy -a tap-package-repo -n tap-install -f ./files/tap-package-repo.yaml -y
 
 tanzu package repository list -n tap-install
@@ -75,5 +92,15 @@ kc delete clusterrole/cloud-native-runtimes-tap-install-cluster-role
 kc delete clusterrolebinding/cloud-native-runtimes-tap-install-cluster-rolebinding
 kc delete sa/cloud-native-runtimes-tap-install-sa -n tap-install
 kc delete -n tap-install secrets/cloud-native-runtimes-tap-install-values
+```
+
+### Additional tools
+
+To download the VMWare products from the Network Pivotal web site, as wget/curl cannot be used, we must install the `pivnet` client.
+
+```bash
+wget https://github.com/pivotal-cf/pivnet-cli/releases/download/v3.0.1/pivnet-linux-amd64-3.0.1
+cp pivnet-linux-amd64-3.0.1 $HOME/bin/pivnet
+chmod +x $HOME/bin/pivnet
 ```
 
