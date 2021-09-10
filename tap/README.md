@@ -57,7 +57,7 @@ cp core/v1.4.0-rc.5/tanzu-core-darwin_amd64 /usr/local/bin/tanzu
 pivnet login --api-token=$LEGACY_API_TOKEN
 pivnet download-product-files --product-slug='tanzu-application-platform' --release-version='0.1.0' --product-file-id=1030933
 tar -vxf tanzu-cli-bundle-linux-amd64.tar
-cp cli/package/v1.4.0-rc.5/tanzu-package-linux_amd64 $HOME/bin/tanzu
+cp cli/core/v1.4.0-rc.5/tanzu-core-linux_amd64 $HOME/bin/tanzu
 
 tanzu plugin clean
 tanzu plugin install -v v1.4.0-rc.5 --local cli package
@@ -80,13 +80,25 @@ tanzu package repository list -n tap-install
 tanzu package available list -n tap-install
 tanzu package available list cnrs.tanzu.vmware.com -n tap-install
 tanzu package available get cnrs.tanzu.vmware.com/1.0.1 --values-schema -n tap-install
+| Retrieving package details for cnrs.tanzu.vmware.com/1.0.1...
+  KEY                         DEFAULT  TYPE     DESCRIPTION
+  ingress.reuse_crds          false    boolean  set true to reuse existing Contour instance
+  ingress.external.namespace  <nil>    string   external namespace
+  ingress.internal.namespace  <nil>    string   internal namespace
+  local_dns.domain            <nil>    string   domain name
+  local_dns.enable            false    boolean  specify true if local DNS needs to be enabled
+  pdb.enable                  true     boolean  <nil>
+  provider                    <nil>    string   Kubernetes cluster provider
+  registry.password           <nil>    string   registry password
+  registry.server             <nil>    string   registry server
+  registry.username           <nil>    string   registry username
 
 cat <<EOF > cnr.yml
 ---
 registry:
   server: "registry.pivotal.io"
   username: "$VMWARE_USERNAME"
-  password: "$VMWARE_PASSWORD>"
+  password: "$VMWARE_PASSWORD"
 
 provider: local
 pdb:
@@ -104,12 +116,23 @@ local_dns:
 EOF
 
 tanzu package install cloud-native-runtimes -p cnrs.tanzu.vmware.com -v 1.0.1 -n tap-install -f ./cnr.yml
-
+\ Installing package 'cnrs.tanzu.vmware.com'
+| Getting namespace 'tap-install'
+| Getting package metadata for 'cnrs.tanzu.vmware.com'
+| Creating service account 'cloud-native-runtimes-tap-install-sa'
+| Creating cluster admin role 'cloud-native-runtimes-tap-install-cluster-role'
+| Creating cluster role binding 'cloud-native-runtimes-tap-install-cluster-rolebinding'
+| Creating secret 'cloud-native-runtimes-tap-install-values'
+- Creating package resource
+- Package install status: Reconciling
+...
+Added installed package 'cloud-native-runtimes' in namespace 'tap-install'
+ 
 cat <<EOF > app-accelerator.yml
 registry:
   server: "registry.pivotal.io"
   username: "$VMWARE_USERNAME"
-  password: "$VMWARE_PASSWORD>"
+  password: "$VMWARE_PASSWORD"
 server:
   # Set this service_type to "NodePort" for local clusters like minikube.
   service_type: "NodePort"
@@ -119,7 +142,18 @@ engine:
   service_type: "ClusterIP"
 EOF
 
-tanzu package install app-accelerator -p accelerator.apps.tanzu.vmware.com -v 0.2.0 -n tap-install -f ./app-accelerator.yml
+tanzu package install app-accelerator -p accelerator.apps.tanzu.vmware.com -v 0.2.0 -n tap-install -f app-accelerator.yml
+- Installing package 'accelerator.apps.tanzu.vmware.com'
+| Getting namespace 'tap-install'
+| Getting package metadata for 'accelerator.apps.tanzu.vmware.com'
+| Creating service account 'app-accelerator-tap-install-sa'
+| Creating cluster admin role 'app-accelerator-tap-install-cluster-role'
+| Creating cluster role binding 'app-accelerator-tap-install-cluster-rolebinding'
+| Creating secret 'app-accelerator-tap-install-values'
+- Creating package resource
+/ Package install status: Reconciling
+...
+
 
 cat <<EOF > sample-accelerators-0-2.yaml
 ---
@@ -192,6 +226,11 @@ spec:
 EOF
 
 kc apply -f ./sample-accelerators-0-2.yaml
+accelerator.accelerator.apps.tanzu.vmware.com/hello-fun created
+accelerator.accelerator.apps.tanzu.vmware.com/hello-ytt created
+accelerator.accelerator.apps.tanzu.vmware.com/spring-petclinic created
+accelerator.accelerator.apps.tanzu.vmware.com/spring-sql-jpa created
+accelerator.accelerator.apps.tanzu.vmware.com/node-accelerator created
 
 cat <<EOF > app-live-view.yml
 ---
@@ -203,10 +242,28 @@ registry:
 EOF
 
 tanzu package install app-live-view -p appliveview.tanzu.vmware.com -v 0.1.0 -n tap-install -f ./app-live-view.yml
+\ Installing package 'appliveview.tanzu.vmware.com'
+| Getting namespace 'tap-install'
+| Getting package metadata for 'appliveview.tanzu.vmware.com'
+| Creating service account 'app-live-view-tap-install-sa'
+| Creating cluster admin role 'app-live-view-tap-install-cluster-role'
+| Creating cluster role binding 'app-live-view-tap-install-cluster-rolebinding'
+| Creating secret 'app-live-view-tap-install-values'
+- Creating package resource
+/ Package install status: Reconciling
+
+# To check the packages installed
 tanzu package installed list -n tap-install
 
-tanzu package installed get cloud-native-runtimes -n tap-install
-tanzu package installed update cloud-native-runtimes -p cnrs.tanzu.vmware.com -v 1.0.1 -n tap-install
+# To check the status of each package
+tanzu package installed get -n tap-install cloud-native-runtimes
+tanzu package installed get -n tap-install app-live-view
+tanzu package installed get -n tap-install app-accelerator
+
+# To update a package if some errors are reported
+tanzu package installed update cloud-native-runtimes -v 1.0.1 -n tap-install -f cnr.yml
+tanzu package installed update app-accelerator -v 0.2.0 -n tap-install -f app-accelerator.yml
+tanzu package installed update app-live-view -v 0.1.0 -n tap-install -f app-live-view.yml
 ```
 
 ### Clean
@@ -216,6 +273,10 @@ kc delete clusterrole/cloud-native-runtimes-tap-install-cluster-role
 kc delete clusterrolebinding/cloud-native-runtimes-tap-install-cluster-rolebinding
 kc delete sa/cloud-native-runtimes-tap-install-sa -n tap-install
 kc delete -n tap-install secrets/cloud-native-runtimes-tap-install-values
+
+kc delete -n tap-install sa/app-accelerator-tap-install-sa
+kc delete clusterrole/app-accelerator-tap-install-cluster-role
+kc delete clusterrolebinding/app-accelerator-tap-install-cluster-rolebinding
 ```
 
 ### Additional tools
