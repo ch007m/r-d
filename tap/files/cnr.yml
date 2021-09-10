@@ -1,8 +1,8 @@
 ---
 registry:
   server: "registry.pivotal.io"
-  username: "cmoulliard@redhat.com"
-  password: ".P?V9yM^e3vsVH9"
+  username: "<VMWARE_USERNAME>"
+  password: "<VMWARE_PASSWORD>"
 
 provider: local
 pdb:

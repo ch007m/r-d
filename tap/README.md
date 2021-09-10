@@ -42,9 +42,9 @@ docker login registry.tanzu.vmware.com -u cmoulliard@redhat.com
 docker pull registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:0.1.0
 
 # or using containerd and crictl
-export USERNAME="<VMWARE_USERNAME>"
-export PASSWORD="<VMWARE_PWD>"
-sudo crictl pull --creds $USERNAME:$PASSWORD registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:0.1.0
+export VMWARE_USERNAME="<VMWARE_USERNAME>"
+export VMWARE_PASSWORD="<VMWARE_PASSWORD>"
+sudo crictl pull --creds $VMWARE_USERNAME:$VMWARE_PASSWORD registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:0.1.0
 
 # Macos installation
 mkdir ~/temp/tanzu && cd ~/temp/tanzu
@@ -81,10 +81,128 @@ tanzu package available list -n tap-install
 tanzu package available list cnrs.tanzu.vmware.com -n tap-install
 tanzu package available get cnrs.tanzu.vmware.com/1.0.1 --values-schema -n tap-install
 
-tanzu package install cloud-native-runtimes -p cnrs.tanzu.vmware.com -v 1.0.1 -n tap-install -f ./files/cnr.yml
-tanzu package install app-accelerator -p accelerator.apps.tanzu.vmware.com -v 0.2.0 -n tap-install -f ./files/app-accelerator.yml
-kc apply -f ./files/sample-accelerators-0-2.yaml
-tanzu package install app-live-view -p appliveview.tanzu.vmware.com -v 0.1.0 -n tap-install -f ./files/app-live-view.yml
+cat <<EOF > cnr.yml
+---
+registry:
+  server: "registry.pivotal.io"
+  username: "$VMWARE_USERNAME"
+  password: "$VMWARE_PASSWORD>"
+
+provider: local
+pdb:
+  enable: "true"
+
+ingress:
+  reuse_crds:
+  external:
+    namespace:
+  internal:
+    namespace:
+
+local_dns:
+  enable: "false"
+EOF
+
+tanzu package install cloud-native-runtimes -p cnrs.tanzu.vmware.com -v 1.0.1 -n tap-install -f ./cnr.yml
+
+cat <<EOF > app-accelerator.yml
+registry:
+  server: "registry.pivotal.io"
+  username: "$VMWARE_USERNAME"
+  password: "$VMWARE_PASSWORD>"
+server:
+  # Set this service_type to "NodePort" for local clusters like minikube.
+  service_type: "NodePort"
+  watched_namespace: "default"
+  engine_invocation_url: "http://acc-engine.accelerator-system.svc.cluster.local/invocations"
+engine:
+  service_type: "ClusterIP"
+EOF
+
+tanzu package install app-accelerator -p accelerator.apps.tanzu.vmware.com -v 0.2.0 -n tap-install -f ./app-accelerator.yml
+
+cat <<EOF > sample-accelerators-0-2.yaml
+---
+apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
+kind: Accelerator
+metadata:
+  name: new-accelerator
+spec:
+  git:
+    url: https://github.com/sample-accelerators/new-accelerator
+    ref:
+      branch: main
+      tag: v0.2.x
+---
+apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
+kind: Accelerator
+metadata:
+  name: hello-fun
+spec:
+  git:
+    url: https://github.com/sample-accelerators/hello-fun
+    ref:
+      branch: main
+      tag: v0.2.x
+---
+apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
+kind: Accelerator
+metadata:
+  name: hello-ytt
+spec:
+  git:
+    url: https://github.com/sample-accelerators/hello-ytt
+    ref:
+      branch: main
+      tag: v0.2.x
+---
+apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
+kind: Accelerator
+metadata:
+  name: spring-petclinic
+spec:
+  git:
+    ignore: ".git"
+    url: https://github.com/sample-accelerators/spring-petclinic
+    ref:
+      branch: main
+      tag: v0.2.x
+---
+apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
+kind: Accelerator
+metadata:
+  name: spring-sql-jpa
+spec:
+  git:
+    url: https://github.com/sample-accelerators/spring-sql-jpa
+    ref:
+      branch: main
+      tag: v0.2.x
+---
+apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
+kind: Accelerator
+metadata:
+  name: node-accelerator
+spec:
+  git:
+    url: https://github.com/sample-accelerators/node-accelerator
+    ref:
+      branch: main
+      tag: v0.2.x
+EOF
+
+kc apply -f ./sample-accelerators-0-2.yaml
+
+cat <<EOF > app-live-view.yml
+---
+registry:
+  server: "registry.pivotal.io"
+  username: "$VMWARE_USERNAME"
+  password: "$VMWARE_PASSWORD"
+
+EOF
+
+tanzu package install app-live-view -p appliveview.tanzu.vmware.com -v 0.1.0 -n tap-install -f ./app-live-view.yml
 tanzu package installed list -n tap-install
 
 tanzu package installed get cloud-native-runtimes -n tap-install
