@@ -21,8 +21,8 @@ It packages different technology such as:
 
 The following tools are required to install App Accelerator: 
 
-- shasum binary (for linux OS) using `yum install perl-Digest-SHA -y`
-- Carvel [tools](https://carvel.dev/#whole-suite)
+- `shasum` binary (for linux OS) using `yum install perl-Digest-SHA -y`
+- Carvel [tools](https://carvel.dev/#whole-suite) - `curl -L https://carvel.dev/install.sh | sudo bash`
   - ytt version v0.34.0 or later.
   - kbld version v0.30.0 or later. 
   - imgpkg version v0.12.0 or later. 
@@ -111,8 +111,8 @@ chmod +x $HOME/bin/pivnet
 ```
 
 As `shasum` binary is not installed by default on centos7, we must deploy it using the following perl package
+as it will be used by `carvel`
 ```bash
 sudo yum install perl-Digest-SHA -y
-curl -L https://carvel.dev/install.sh | sudo bash
 ```
 
