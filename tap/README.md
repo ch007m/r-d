@@ -1,6 +1,12 @@
 ## Platform
 
-Tanzu Application Platform - https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/index.html is a solution designed to be deployed top of K8s. It packages different technology such as:
+Tanzu Application Platform - https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/index.html is a solution designed to be deployed top of K8s. 
+
+The problem they would like to solve is presented within this video: https://www.youtube.com/watch?v=9oupRtKT_JM
+
+Short summary about what is TAP is available here: http://i-programmer.cloudapp.net/news/90-tools/9503-vmware-announces-tanzu-application-platform-.html
+
+It packages different technology such as:
 
 | Name | Description | System(s) | Version |
 | --- | --- | --- | --- |
@@ -35,7 +41,7 @@ The tanzu client version `0.1.0` has been downloaded from the tanzu product site
 docker login registry.tanzu.vmware.com -u cmoulliard@redhat.com
 docker pull registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:0.1.0
 
-or using containerd and crictl
+# or using containerd and crictl
 export USERNAME="<VMWARE_USERNAME>"
 export PASSWORD="<VMWARE_PWD>"
 sudo crictl pull --creds $USERNAME:$PASSWORD registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:0.1.0
@@ -102,5 +108,11 @@ To download the VMWare products from the Network Pivotal web site, as wget/curl 
 wget https://github.com/pivotal-cf/pivnet-cli/releases/download/v3.0.1/pivnet-linux-amd64-3.0.1
 cp pivnet-linux-amd64-3.0.1 $HOME/bin/pivnet
 chmod +x $HOME/bin/pivnet
+```
+
+As `shasum` binary is not installed by default on centos7, we must deploy it using the following perl package
+```bash
+sudo yum install perl-Digest-SHA -y
+sudo ./carvel.sh
 ```
 
