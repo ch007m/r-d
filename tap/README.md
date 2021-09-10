@@ -113,6 +113,6 @@ chmod +x $HOME/bin/pivnet
 As `shasum` binary is not installed by default on centos7, we must deploy it using the following perl package
 ```bash
 sudo yum install perl-Digest-SHA -y
-sudo ./carvel.sh
+curl -L https://carvel.dev/install.sh | sudo bash
 ```
 
