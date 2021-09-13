@@ -29,6 +29,7 @@ The following tools are required to install App Accelerator:
   - kapp version v0.37.0 or later. 
 - kubectl and Kubernetes v1.17 and later. 
 - [Flux2](https://github.com/fluxcd/flux2#flux-version-2).
+- [Tanzu Build Service](#TAS)
 
 ## Instructions
 
@@ -265,6 +266,207 @@ tanzu package installed update cloud-native-runtimes -v 1.0.1 -n tap-install -f 
 tanzu package installed update app-accelerator -v 0.2.0 -n tap-install -f app-accelerator.yml
 tanzu package installed update app-live-view -v 0.1.0 -n tap-install -f app-live-view.yml
 ```
+As the documentation is missing the steps to install `kpacck`, then follow my instructions.
+**REMARK**: Be sure that you have accepted the needed EULAs - https://network.tanzu.vmware.com/users/dashboard/eulas
+
+```bash
+# Install kp client
+pivnet download-product-files --product-slug='build-service' --release-version='1.2.2' --product-file-id=1000629
+chmod +x kp-linux-0.3.1
+cp kp-linux-0.3.1 ~/bin/kp
+# download the list of the images to be installed 
+pivnet download-product-files --product-slug='tbs-dependencies' --release-version='100.0.155' --product-file-id=1036685
+```
+
+## Testing
+
+- Access the UI
+- Download the spring petclinic example by clicking on the `Generate project`
+- scp the file to the VM
+- unzip the spring petclinic app
+- Create a new github repo and pushthe code to this repo
+- Create a sa/clusterrole/clusterrolebinding to be used to build the image
+```bash
+cat <<EOF | kc apply -f -
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tap-service-account
+  namespace: tap-install
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cluster-admin-cluster-role
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cluster-admin-cluster-role-binding
+subjects:
+- kind: ServiceAccount
+  name: tap-service-account
+  namespace: tap-install
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin-cluster-role
+EOF
+```
+- Patch the SA created to set the `imagePullSecrets`
+```bash
+kubectl patch serviceaccount tap-service-account -p "{\"imagePullSecrets\": [{\"name\": \"tap-registry\"}]}" -n tap-install
+serviceaccount/tap-service-account patched
+```
+- Create an `image` kubernetes resource to let `Kpack` to perform a buildpacks build
+```bash
+export GITHUB_USER="<GITHUB_USER>"
+cat <<EOF | kubectl apply -f -
+apiVersion: kpack.io/v1alpha1
+kind: Image
+metadata:
+  name: spring-petclinic-image
+  namespace: tap-install
+spec:
+  tag: dev.registry.pivotal.io/tanzu-advanced-edition/vdesikan/spring-petclinic-eks
+  serviceAccount: default
+  builder:
+    kind: ClusterBuilder
+    name: default
+  source:
+    git:
+      url: https://github.com/$GITHUB_USER/spring-pet-clinic-eks
+      revision: main
+EOF
+```
+- Deploy the image you generated as a service with Cloud Native Runtimes. Deploy the image in the namespace where Application Live View is running with the labels tanzu.app.live.view=true and tanzu.app.live.view.application.name=<app_name>. Add the appropriate DNS entries using /etc/hosts.
+  tap-install % more kapp-deploy-spring-petclinic.yaml
+```bash
+cat <<EOF | kubectl apply -f - 
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: spring-petclinic
+  namespace: tap-install
+spec:
+  serviceAccountName: tap-service-account
+  fetch:
+    - inline:
+        paths:
+          manifest.yml: |
+            ---
+            apiVersion: kapp.k14s.io/v1alpha1
+            kind: Config
+            rebaseRules:
+              - path: [metadata, annotations, serving.knative.dev/creator]
+                type: copy
+                sources: [new, existing]
+                resourceMatchers: &matchers
+                  - apiVersionKindMatcher: {apiVersion: serving.knative.dev/v1, kind: Service}
+              - path: [metadata, annotations, serving.knative.dev/lastModifier]
+                type: copy
+                sources: [new, existing]
+                resourceMatchers: *matchers
+            ---
+            apiVersion: serving.knative.dev/v1
+            kind: Service
+            metadata:
+              name: petclinic
+            spec:
+              template:
+                metadata:
+                  annotations:
+                    client.knative.dev/user-image: ""
+                  labels:
+                    tanzu.app.live.view: "true"
+                    tanzu.app.live.view.application.name: "spring-petclinic"
+                spec:
+                  containers:
+                  - image: dev.registry.pivotal.io/tanzu-advanced-edition/vdesikan/spring-petclinic-eks@sha256:be889cf313016eb4fc168556493c2b1672c8e2af725e33696bf461b8212f9872
+                    securityContext:
+                      runAsUser: 1000
+  template:
+    - ytt: {}
+  deploy:
+    - kapp: {}
+EOF
+```  
+
+## TAS
+
+- As this is easier to use the `docker client tool`, than `ctr, ctictl, ..` we will install it
+```bash
+sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sudo yum install docker-ce-cli
+```
+- Login in to `registry.pivotal.io` and your public registry (e.g. quay.io)
+```bash
+export REG_USER="<REG_USER>"
+export REG_PWD="<REG_PWD>"
+docker login -u=$REG_USER -p=$REG_PWD quay.io
+
+export PIVOTAL_REG_USER="<TANZUNET_USERNAME>"
+export PIVOTAL_REG_PWD="<TANZUNET_PWD>"
+docker login -u=$PIVOTAL_REG_USER -p=$PIVOTAL_REG_PWD registry.pivotal.io
+```
+- Copy the TAS image to your `<REGISTRY>`/build-service
+```bash
+export IMAGE_REPOSITORY="<YOUR_IMAGE_REPOSITORY"
+imgpkg copy -b "registry.pivotal.io/build-service/bundle:1.2.2" --to-repo $IMAGE_REPOSITORY
+copy | exporting 17 images...
+copy | will export registry.pivotal.io/build-service/bundle@sha256:e03765dbce254a1266a8bba026a71ec908854681bd12bf69cd7d55d407bbca95
+copy | will export registry.pivotal.io/build-service/dependency-updater@sha256:9f71c2fa6f7779924a95d9bcdedc248b4623c4d446ecddf950a21117e1cebd76
+copy | will export registry.pivotal.io/build-service/kpack-build-init-windows@sha256:20758ba22ead903aa4aacaa08a3f89dce0586f938a5d091e6c37bf5b13d632f3
+copy | will export registry.pivotal.io/build-service/kpack-build-init@sha256:31e95adee6d59ac46f5f2ec48208cbd154db0f4f8e6c1de1b8edf0cd9418bba8
+copy | will export registry.pivotal.io/build-service/kpack-completion-windows@sha256:1f8f1d98ea439ba6a25808a29af33259ad926a7054ad8f4b1aea91abf8a8b141
+copy | will export registry.pivotal.io/build-service/kpack-completion@sha256:1c63b9c876b11b7bf5f83095136b690fc07860c80b62a167c41b4c3efd1910bd
+copy | will export registry.pivotal.io/build-service/kpack-controller@sha256:4b3c825d6fb656f137706738058aab59051d753312e75404fc5cdaf49c352867
+copy | will export registry.pivotal.io/build-service/kpack-lifecycle@sha256:c923a81a1c3908122e29a30bae5886646d6ec26429bad4842c67103636041d93
+copy | will export registry.pivotal.io/build-service/kpack-rebase@sha256:79ae0f103bb39d7ef498202d950391c6ef656e06f937b4be4ec2abb6a37ad40a
+copy | will export registry.pivotal.io/build-service/kpack-webhook@sha256:594fe3525a8bc35f99280e31ebc38a3f1f8e02e0c961c35d27b6397c2ad8fa68
+copy | will export registry.pivotal.io/build-service/pod-webhook@sha256:3d8b31e5fba451bb51ccd586b23c439e0cab293007748c546ce79f698968dab8
+copy | will export registry.pivotal.io/build-service/secret-syncer@sha256:77aecf06753ddca717f63e0a6c8b8602381fef7699856fa4741617b965098d57
+copy | will export registry.pivotal.io/build-service/setup-ca-certs@sha256:3f8342b534e3e308188c3d0683c02c941c407a1ddacb086425499ed9cf0888e9
+copy | will export registry.pivotal.io/build-service/sleeper@sha256:0881284ec39f0b0e00c0cfd2551762f14e43580085dce9d0530717c704ade988
+copy | will export registry.pivotal.io/build-service/smart-warmer@sha256:4c8627a7f23d84fc25b409b7864930d27acc6454e3cdaa5e3917b5f252ff65ad
+copy | will export registry.pivotal.io/build-service/stackify@sha256:a40af2d5d569ea8bee8ec1effc43ba0ddf707959b63e7c85587af31f49c4157f
+copy | will export registry.pivotal.io/build-service/stacks-operator@sha256:1daa693bd09a1fcae7a2f82859115dc1688823330464e5b47d8b9b709dee89f1
+copy | exported 17 images
+copy | importing 17 images...
+```
+- Export the content of the image locally
+```bash
+imgpkg pull -b "$IMAGE_REPOSITORY:1.2.2" -o ./bundle
+```
+- Alternatively, we can export the content of the TAS image from the pivotal registry using the following command
+```bash
+imgpkg pull -b "registry.pivotal.io/build-service/bundle:1.2.2" -o ./bundle
+```
+**REMARK**: Currently discussed in order to figure out why we don't use directly the images from the pivotal registry
+
+- Deploy TAS
+```bash
+ytt -f ./bundle/values.yaml \
+    -f ./bundle/config/ \
+    -v docker_repository='<IMAGE-REPOSITORY>' \
+    -v docker_username='<REGISTRY-USERNAME>' \
+    -v docker_password='<REGISTRY-PASSWORD>' \
+    -v tanzunet_username='<TANZUNET_USERNAME>' \
+    -v tanzunet_password='<TANZUNET_PASSWORD>' \
+    | kbld -f ./bundle/.imgpkg/images.yml -f- \
+    | kapp deploy -a tanzu-build-service -f- -y
+```
+
+- Import Tanzu Build Service Dependencies using the `kp` cli and the Dependency Descriptor `descriptor-<version>.yaml` file
+```bash
+kp import -f ./descriptor-<version>.yaml
+
+e.g: kp import -f ./descriptor-100.0.155.yaml
+```
 
 ### Clean
 
@@ -295,3 +497,9 @@ as it will be used by `carvel`
 sudo yum install perl-Digest-SHA -y
 ```
 
+If you plan to use kpack, then install the `kp` client
+```bash
+pivnet download-product-files --product-slug='build-service' --release-version='1.2.2' --product-file-id=1000629
+chmod +x kp-linux-0.3.1
+cp kp-linux-0.3.1 ~/bin/kp
+```
