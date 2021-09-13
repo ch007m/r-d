@@ -398,12 +398,7 @@ EOF
 
 ## TAS
 
-- As this is easier to use the `docker client tool`, than `ctr, ctictl, ..` we will install it
-```bash
-sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-sudo yum install docker-ce-cli
-```
-- Login in to `registry.pivotal.io` and your public registry (e.g. quay.io)
+- Login in first to `registry.pivotal.io` and your public registry (e.g. quay.io).
 ```bash
 export REG_USER="<REG_USER>"
 export REG_PWD="<REG_PWD>"
@@ -413,7 +408,8 @@ export PIVOTAL_REG_USER="<TANZUNET_USERNAME>"
 export PIVOTAL_REG_PWD="<TANZUNET_PWD>"
 docker login -u=$PIVOTAL_REG_USER -p=$PIVOTAL_REG_PWD registry.pivotal.io
 ```
-- Copy the TAS image to your `<REGISTRY>`/build-service
+- Don't forget to create the `build-service` project (e.g. quay.io/<REGISTRY_USER>/build-service) where the `creds` of the user on the registry allows to have read and write access.
+- Copy the TAS image to your `<REGISTRY_USER>`/build-service
 ```bash
 export IMAGE_REPOSITORY="<YOUR_IMAGE_REPOSITORY"
 imgpkg copy -b "registry.pivotal.io/build-service/bundle:1.2.2" --to-repo $IMAGE_REPOSITORY
@@ -502,4 +498,9 @@ If you plan to use kpack, then install the `kp` client
 pivnet download-product-files --product-slug='build-service' --release-version='1.2.2' --product-file-id=1000629
 chmod +x kp-linux-0.3.1
 cp kp-linux-0.3.1 ~/bin/kp
+```
+- As this is easier to use the `docker client tool`, than `ctr, crictl, ..` we will install it on a containerd linux machine
+```bash
+sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sudo yum install docker-ce-cli
 ```
