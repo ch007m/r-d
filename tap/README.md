@@ -280,12 +280,20 @@ pivnet download-product-files --product-slug='tbs-dependencies' --release-versio
 
 ## Testing
 
-- Access the UI
-- Download the spring petclinic example by clicking on the `Generate project`
+- Access the `TAP UI`
+- Download the `spring petclinic example by clicking on the `Generate project`
 - scp the file to the VM
-- unzip the spring petclinic app
-- Create a new github repo and pushthe code to this repo
-- Create a sa/clusterrole/clusterrolebinding to be used to build the image
+- Unzip the spring petclinic app
+- Create a new github repo and push the code to this repo
+- Create a secret containing your docker hub creds
+```bash
+kubectl create secret docker-registry docker-hub-registry \
+    --docker-username=<dockerhub-username> \
+    --docker-password=<dockerhub-password> \
+    --docker-server=https://index.docker.io/v1/ \
+    --namespace tap-install
+```
+- Create a sa using the secret containing your docker registry creds
 ```bash
 cat <<EOF | kc apply -f -
 apiVersion: v1
@@ -293,7 +301,15 @@ kind: ServiceAccount
 metadata:
   name: tap-service-account
   namespace: tap-install
----
+secrets:
+- name: docker-hub-registry
+imagePullSecrets:
+- name: docker-hub-registry
+EOF
+```
+- Create a clusterRole and ClusterRoleBinding to give admin access to the SA
+```bash
+cat <<EOF | kc apply -f -
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -317,14 +333,13 @@ roleRef:
   name: cluster-admin-cluster-role
 EOF
 ```
-- Patch the SA created to set the `imagePullSecrets`
-```bash
-kubectl patch serviceaccount tap-service-account -p "{\"imagePullSecrets\": [{\"name\": \"tap-registry\"}]}" -n tap-install
-serviceaccount/tap-service-account patched
-```
+
 - Create an `image` kubernetes resource to let `Kpack` to perform a buildpacks build
 ```bash
+kc delete images.kpack.io/spring-petclinic-image -n tap-install
 export GITHUB_USER="<GITHUB_USER>"
+export REG_USER="<REGISTRY_USER>"
+
 cat <<EOF | kubectl apply -f -
 apiVersion: kpack.io/v1alpha1
 kind: Image
@@ -332,8 +347,8 @@ metadata:
   name: spring-petclinic-image
   namespace: tap-install
 spec:
-  tag: dev.registry.pivotal.io/tanzu-advanced-edition/vdesikan/spring-petclinic-eks
-  serviceAccount: default
+  tag: docker.io/$REG_USER/spring-petclinic-eks
+  serviceAccount: tap-service-account
   builder:
     kind: ClusterBuilder
     name: default
@@ -343,8 +358,36 @@ spec:
       revision: main
 EOF
 ```
-- Deploy the image you generated as a service with Cloud Native Runtimes. Deploy the image in the namespace where Application Live View is running with the labels tanzu.app.live.view=true and tanzu.app.live.view.application.name=<app_name>. Add the appropriate DNS entries using /etc/hosts.
-  tap-install % more kapp-deploy-spring-petclinic.yaml
+- Check the status of the `build` and/or the `image`
+```bash
+kp image list -n tap-install
+NAME                      READY      LATEST REASON    LATEST IMAGE    NAMESPACE
+spring-petclinic-image    Unknown    CONFIG
+
+kp build list -n tap-install
+BUILD    STATUS      IMAGE    REASON
+1        BUILDING             CONFIG
+```
+- If a problem occurs, then you can check the content of the build's log and/or build's pod
+```bash
+kp build logs spring-petclinic-image -n tap-install 
+...
+kc get build spring-petclinic-image-build-1-bj96l -n tap-install -o yaml
+```
+- After several minutes, image should be pushed to the registry
+```bash
+kp build list -n tap-install
+BUILD    STATUS     IMAGE                                                                                                                      REASON
+1        SUCCESS    index.docker.io/cmoulliard/spring-petclinic-eks@sha256:5f50f9ceb1a41e97f61b4053f5afa749631d869d79d1427fc153d80403cc0fc1    CONFIG
+
+kp image list -n tap-install
+NAME                      READY    LATEST REASON    LATEST IMAGE                                                                                                               NAMESPACE
+spring-petclinic-image    True     CONFIG           index.docker.io/cmoulliard/spring-petclinic-eks@sha256:5f50f9ceb1a41e97f61b4053f5afa749631d869d79d1427fc153d80403cc0fc1    tap-install
+
+```
+- Deploy the `image` generated in the namespace where `Application Live View` is running with the labels `tanzu.app.live.view=true` and `tanzu.app.live.view.application.name=<app_name>`.
+  Add the appropriate DNS entries using /etc/hosts.  
+
 ```bash
 cat <<EOF | kubectl apply -f - 
 apiVersion: kappctrl.k14s.io/v1alpha1
@@ -386,7 +429,7 @@ spec:
                     tanzu.app.live.view.application.name: "spring-petclinic"
                 spec:
                   containers:
-                  - image: dev.registry.pivotal.io/tanzu-advanced-edition/vdesikan/spring-petclinic-eks@sha256:be889cf313016eb4fc168556493c2b1672c8e2af725e33696bf461b8212f9872
+                  - image: <DOCKER_IMAGE_BUILD>
                     securityContext:
                       runAsUser: 1000
   template:
@@ -394,8 +437,25 @@ spec:
   deploy:
     - kapp: {}
 EOF
-```  
+```
+- Wait till the pod is created
+```bash
+kubectl get pods -n tap-install -w
+kubectl get pods -n tap-install -w
+NAME                                                   READY   STATUS              RESTARTS   AGE
+petclinic-00001-deployment-f59c968c6-bfpdt             0/2     ContainerCreating   0          28s
+```
+- Get its service address and `ksvc`
+```bash
+kubectl get service -n tap-install
+NAME                         TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)                                      AGE
+petclinic-00001              ClusterIP      10.109.43.10     <none>        80/TCP                                       2m27s
+petclinic-00001-private      ClusterIP      10.111.248.178   <none>        80/TCP,9090/TCP,9091/TCP,8022/TCP,8012/TCP   2m27s
 
+kubectl get ksvc -n tap-install
+NAME        URL                                        LATESTCREATED     LATESTREADY   READY     REASON
+petclinic   http://petclinic.tap-install.example.com   petclinic-00001                 Unknown   RevisionMissing
+```
 ## TAS
 
 - Login in first to `registry.pivotal.io` and your public registry (e.g. quay.io).
@@ -446,6 +506,7 @@ imgpkg pull -b "registry.pivotal.io/build-service/bundle:1.2.2" -o ./bundle
 
 - Deploy TAS
 ```bash
+export IMAGE-REPOSITORY="quay.io/<REG_USER>/build-service" ## BUT SHOULD BE FOR DOCKER --> "docker.io/<REG_USER>"
 ytt -f ./bundle/values.yaml \
     -f ./bundle/config/ \
     -v docker_repository='<IMAGE-REPOSITORY>' \
@@ -475,6 +536,10 @@ kc delete -n tap-install secrets/cloud-native-runtimes-tap-install-values
 kc delete -n tap-install sa/app-accelerator-tap-install-sa
 kc delete clusterrole/app-accelerator-tap-install-cluster-role
 kc delete clusterrolebinding/app-accelerator-tap-install-cluster-rolebinding
+```
+- To delete the `build-service` using kapp
+```bash
+kapp delete -a tanzu-build-service -n build-service
 ```
 
 ### Additional tools
