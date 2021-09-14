@@ -15,7 +15,9 @@ Table of Contents
 Tanzu Application Platform - https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/0.1/tap-0-1/GUID-overview.html is a packaged set of components that helps developers and
 operators to more easily build, deploy, and manage apps on a Kubernetes platform.
 
-Short summary about what is TAP is available here: http://i-programmer.cloudapp.net/news/90-tools/9503-vmware-announces-tanzu-application-platform-.html
+Short introduction about what is TAP is available here: http://i-programmer.cloudapp.net/news/90-tools/9503-vmware-announces-tanzu-application-platform-.html and could be summarized as such:
+
+TAP is a `Knative` platform + `kpack` (= buildpacks controller) + `Contour` (= ingress) + `kapp` (= kind of helm technology but with more features) + `Application Live and Application Accelerator` (= Where VMWare/Pivotal will try to capture with a great DevExp the Architects and Developers)
 
 Tanzu Application Platform simplifies workflows in both the `inner` loop and `outer` loop of Kubernetes-based app development:
 
