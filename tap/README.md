@@ -17,13 +17,15 @@ operators to more easily build, deploy, and manage apps on a Kubernetes platform
 
 Short summary about what is TAP is available here: http://i-programmer.cloudapp.net/news/90-tools/9503-vmware-announces-tanzu-application-platform-.html
 
-Tanzu Application Platform simplifies workflows in both the inner loop and outer loop of Kubernetes-based app development:
+Tanzu Application Platform simplifies workflows in both the `inner` loop and `outer` loop of Kubernetes-based app development:
 
 - Inner Loop: The inner loop describes a developer’s local development environment where they code and test apps. The activities that take place in the inner loop include writing code, committing to a version control system, deploying to a development or staging environment, testing, and then making additional code changes.
 
 - Outer Loop: The outer loop describes the steps to deploy apps to production and maintain them over time. For example, on a cloud-native platform, the outer loop includes activities such as building container images, adding container security, and configuring continuous integration (CI) and continuous delivery (CD) pipelines.
 
-The problem they would like to solve is presented within this video: https://www.youtube.com/watch?v=9oupRtKT_JM
+**REMARK**: The VMWare Tanzu definition of an inner loop implies an image build while this is not the case using Openshift odo as we push the code within a pod.
+
+**NOTE**: The problem they would like to solve is presented within this video: https://www.youtube.com/watch?v=9oupRtKT_JM
 
 It packages different technology such as:
 
