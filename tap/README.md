@@ -527,17 +527,17 @@ kapp delete -a tanzu-build-service -n build-service
 
 ## Demo
 
-- Access the `TAP UI` at the following address `http://<VM_IP>:<NODEPORT_ACCELERATOR_VIEW>`
+- Access the `TAP Accelerator UI` at the following address `http://<VM_IP>:<NODEPORT_ACCELERATOR_SERVER>`
   ```bash
-  UI_NODE_PORT=$(kc get svc/application-live-view-5112 -n tap-install -o jsonpath='{.spec.ports[0].nodePort}')
+  UI_NODE_PORT=$(kc get svc/acc-ui-server -n accelerator-system -o jsonpath='{.spec.ports[0].nodePort}')
   VM_IP=<VM_IP>
   echo http://$VM_IP:$UI_NODE_PORT
   # Open the address displayed
   ```
-- Download the `spring petclinic example` by clicking on the `Generate project` from the example selected using the UI
-- scp the file to the VM
+- Download the `spring petclinic example` by clicking on the `Generate project` from the example selected using the UI (e.g. `http://95.217.159.244:31052/dashboard/accelerators/spring-petclinic`)
+- scp the file to the VM (optional)
 - Unzip the spring petclinic app
-- Create a new github repo and push the code to this repo using your `GITHUB_USER`
+- Create a new github repo and push the code to this repo using your `GITHUB_USER` (e.g http://github.com/<GITHUB_USER>/spring-pet-clinic-eks)
 - Create a secret containing your docker hub creds
 
 ```bash
@@ -547,6 +547,7 @@ kubectl create secret docker-registry docker-hub-registry \
     --docker-server=https://index.docker.io/v1/ \
     --namespace tap-install
 ```
+**NOTE**: If you use a local private docker registry, change the parameters accordingly !
 
 - Create a `sa` using the secret containing your docker registry creds
 
@@ -564,7 +565,7 @@ imagePullSecrets:
 EOF
 ```
 
-- Create a `ClusterRole` and `ClusterRoleBinding` to give admin access to the `sa`
+- Create a `ClusterRole` and `ClusterRoleBinding` to give `admin` role to the `sa`
 
 ```bash
 cat <<EOF | kc apply -f -
@@ -592,12 +593,12 @@ roleRef:
 EOF
 ```
 
-- Create a kpack `image` CRD resource to let `kpack` to perform a buildpacks build
+- Create a kpack `image` CRD resource to let `kpack` to perform a `buildpack` build. Change the tag name according to the name of the repository where the project
+  image will be pushed (e.g: docker.io/my_user/spring-petclinic-eks)
 
 ```bash
-kc delete images.kpack.io/spring-petclinic-image -n tap-install
 export GITHUB_USER="<GITHUB_USER>"
-export REG_USER="<REGISTRY_USER>"
+export PETCLINIC_IMAGE_TAG="<PETCLINIC_IMAGE_TAG>"
 
 cat <<EOF | kubectl apply -f -
 apiVersion: kpack.io/v1alpha1
@@ -606,7 +607,7 @@ metadata:
   name: spring-petclinic-image
   namespace: tap-install
 spec:
-  tag: docker.io/$REG_USER/spring-petclinic-eks
+  tag: $PETCLINIC_IMAGE_TAG
   serviceAccount: tap-service-account
   builder:
     kind: ClusterBuilder
@@ -617,6 +618,7 @@ spec:
       revision: main
 EOF
 ```
+**NOTE**: To delete the application deployed, do `kc delete images.kpack.io/spring-petclinic-image -n tap-install`
 
 - Check the status of the `build` and/or the `image`
 
