@@ -492,6 +492,9 @@ Importing ClusterStore 'default'...
 	Uploading '95.217.159.244:32500/tanzu-buildpacks_java@sha256:578bccbfc996184ea3181b4b0fa39f98f456db1e2e427ef163db98224cd9ea04'
 ...	
 ```
+
+**WARNING**: This step to import the `buildpacks` will take time !
+
 - When done, play with the [demo](#Demo) :-)
 
 ### Clean
