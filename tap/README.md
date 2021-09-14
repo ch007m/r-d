@@ -602,7 +602,7 @@ pivnet download-product-files --product-slug='build-service' --release-version='
 chmod +x kp-linux-0.3.1
 cp kp-linux-0.3.1 ~/bin/kp
 ```
-- As this is easier to use the `docker client tool`, than `ctr, crictl, ..` we will install it on a containerd linux machine
+- As this is easier to use the `docker client tool` than `ctr, crictl, ..`, please install it on a `containerd` linux machine
 ```bash
 sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 sudo yum install docker-ce-cli
