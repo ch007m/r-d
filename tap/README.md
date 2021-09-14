@@ -5,7 +5,7 @@ Table of Contents
    * [References](#references)
    * [Prerequisites](#prerequisites)
    * [Instructions](#instructions)
-   * [Testing](#testing)
+   * [Demo](#demo)
    * [TAS](#tas)
       * [Clean](#clean)
       * [Additional tools](#additional-tools)
@@ -294,9 +294,15 @@ cp kp-linux-0.3.1 ~/bin/kp
 pivnet download-product-files --product-slug='tbs-dependencies' --release-version='100.0.155' --product-file-id=1036685
 ```
 
-## Testing
+## Demo
 
-- Access the `TAP UI`
+- Access the `TAP UI` at the following address `http://<VM_IP>:<NODEPORT_ACCELERATOR_VIEW>`
+  ```bash
+  UI_NODE_PORT=$(kc get svc/application-live-view-5112 -n tap-install -o jsonpath='{.spec.ports[0].nodePort}')
+  VM_IP=<VM_IP>
+  echo http://$VM_IP:$UI_NODE_PORT
+  # Open the address displayed
+  ```
 - Download the `spring petclinic example by clicking on the `Generate project`
 - scp the file to the VM
 - Unzip the spring petclinic app
