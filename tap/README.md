@@ -63,21 +63,12 @@ The following tools are required to install App Accelerator:
 
 ## Instructions
 
-The commands listed hereafter have been executed top of a k8s 1.21 cluster created using `kind` according to the 
-tanzu documentation guide.
+The commands listed hereafter have been executed top of a `k8s 1.21` cluster and have been reviewed due to some issues discovered using the
+[tanzu installation guide](https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/0.1/tap-0-1/GUID-install.html).
 
-The tanzu client version `0.1.0` has been downloaded from the tanzu product site - https://network.pivotal.io/products/tanzu-application-platform
+- The tanzu client version `0.1.0` has been downloaded from the Tanzu product site - https://network.pivotal.io/products/tanzu-application-platform and installed as such: 
 
 ```bash
-docker login registry.tanzu.vmware.com -u cmoulliard@redhat.com
-docker pull registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:0.1.0
-
-# or using containerd and crictl
-export VMWARE_USERNAME="<VMWARE_USERNAME>"
-export VMWARE_PASSWORD="<VMWARE_PASSWORD>"
-sudo crictl pull --creds $VMWARE_USERNAME:$VMWARE_PASSWORD registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:0.1.0
-
-# Macos installation
 mkdir ~/temp/tanzu && cd ~/temp/tanzu
 mv ~/Downloads/tanzu-cli-bundle-darwin-amd64.tar .
 tar -vxf tanzu-cli-bundle-darwin-amd64.tar
@@ -89,27 +80,55 @@ pivnet login --api-token=$LEGACY_API_TOKEN
 pivnet download-product-files --product-slug='tanzu-application-platform' --release-version='0.1.0' --product-file-id=1030933
 tar -vxf tanzu-cli-bundle-linux-amd64.tar
 cp cli/core/v1.4.0-rc.5/tanzu-core-linux_amd64 $HOME/bin/tanzu
+```
 
+- Next, the Tanzu client has been configured to use the plugin `package` able to download the resources from the Pivotal registry
+```bash
 tanzu plugin clean
 tanzu plugin install -v v1.4.0-rc.5 --local cli package
 tanzu package version
+```
 
-alias kc=kubectl
-
+- Install the needed projects not installed by the Tanzu client
+```bash
 kapp deploy -a flux -f https://github.com/fluxcd/flux2/releases/download/v0.17.0/install.yaml
 kapp deploy -a kc -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/latest/download/release.yml
+```
 
+- Create the `tap install` namespace and the secret containng your pivotal registry credentials:
+```bash
+alias kc=kubectl
 kc create ns tap-install
+
+export VMWARE_USERNAME="<VMWARE_USERNAME>"
+export VMWARE_PASSWORD="<VMWARE_PASSWORD>"
 kc create secret docker-registry tap-registry -n tap-install --docker-server='registry.pivotal.io' --docker-username=$VMWARE_USERNAME --docker-password=$VMWARE_PWD
+```
 
+- Download using `pivnet` client the `PackageRepository` CRD containing the reference of the image to install TAP `registry.pivotal.io/tanzu-application-platform/tap-packages:0.1.0` :
+```bash
 pivnet download-product-files --product-slug='tanzu-application-platform' --release-version='0.1.0' --product-file-id=1029762
+```
+- Deploy the CRD within the `tap-install` namespace using `kapp` and the application name `tap-package-repo`:
+```bash
 kapp deploy -a tap-package-repo -n tap-install -f ./tap-package-repo.yaml -y
-# Macos installation
-kapp deploy -a tap-package-repo -n tap-install -f ./files/tap-package-repo.yaml -y
-
+```
+- You can check what the repository contains like the packages you can install using the following commands:
+```bash
 tanzu package repository list -n tap-install
+/ Retrieving repositories...
+  NAME                  REPOSITORY                                                         STATUS               DETAILS
+  tanzu-tap-repository  registry.pivotal.io/tanzu-application-platform/tap-packages:0.1.0  Reconcile succeeded
+
 tanzu package available list -n tap-install
-tanzu package available list cnrs.tanzu.vmware.com -n tap-install
+/ Retrieving available packages...
+  NAME                               DISPLAY-NAME                              SHORT-DESCRIPTION
+  accelerator.apps.tanzu.vmware.com  Application Accelerator for VMware Tanzu  Used to create new projects and configurations.
+  appliveview.tanzu.vmware.com       Application Live View for VMware Tanzu    App for monitoring and troubleshooting running apps
+  cnrs.tanzu.vmware.com              Cloud Native Runtimes                     Cloud Native Runtimes is a serverless runtime based on Knative
+```
+- To see the detail of the parameters of a package to be installed, execute the command:
+```bash
 tanzu package available get cnrs.tanzu.vmware.com/1.0.1 --values-schema -n tap-install
 | Retrieving package details for cnrs.tanzu.vmware.com/1.0.1...
   KEY                         DEFAULT  TYPE     DESCRIPTION
@@ -123,7 +142,10 @@ tanzu package available get cnrs.tanzu.vmware.com/1.0.1 --values-schema -n tap-i
   registry.password           <nil>    string   registry password
   registry.server             <nil>    string   registry server
   registry.username           <nil>    string   registry username
-
+```
+- In order to install the package `CNR = Cloud Native Runtimes`, we will create a yaml file containing the parameters such as the `creds` to access the registry, the provider, ...
+  **WARNING**: If the k8s cluster that you will use do not run a LB, then configure the field `provider: local`
+```bash
 cat <<EOF > cnr.yml
 ---
 registry:
@@ -158,7 +180,11 @@ tanzu package install cloud-native-runtimes -p cnrs.tanzu.vmware.com -v 1.0.1 -n
 - Package install status: Reconciling
 ...
 Added installed package 'cloud-native-runtimes' in namespace 'tap-install'
- 
+```
+
+- When this is done,we will proceed to the deployment of the `Application accelerator` and create another config yaml file:
+  **WARNING**: If the k8s cluster that you will use do not run a LB, then configure the field `service_type` to use `NodePort`
+```bash
 cat <<EOF > app-accelerator.yml
 registry:
   server: "registry.pivotal.io"
@@ -172,7 +198,10 @@ server:
 engine:
   service_type: "ClusterIP"
 EOF
+```
 
+- Deploy the package: 
+```bash
 tanzu package install app-accelerator -p accelerator.apps.tanzu.vmware.com -v 0.2.0 -n tap-install -f app-accelerator.yml
 - Installing package 'accelerator.apps.tanzu.vmware.com'
 | Getting namespace 'tap-install'
@@ -184,8 +213,9 @@ tanzu package install app-accelerator -p accelerator.apps.tanzu.vmware.com -v 0.
 - Creating package resource
 / Package install status: Reconciling
 ...
-
-
+```
+- Next, install some accelerators (= Application templates) to feed the `Application Accelerator` dashboard :
+```bash
 cat <<EOF > sample-accelerators-0-2.yaml
 ---
 apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
@@ -262,7 +292,9 @@ accelerator.accelerator.apps.tanzu.vmware.com/hello-ytt created
 accelerator.accelerator.apps.tanzu.vmware.com/spring-petclinic created
 accelerator.accelerator.apps.tanzu.vmware.com/spring-sql-jpa created
 accelerator.accelerator.apps.tanzu.vmware.com/node-accelerator created
-
+```
+- When done, install the `application live` package and configure it:
+```bash
 cat <<EOF > app-live-view.yml
 ---
 registry:
@@ -282,32 +314,24 @@ tanzu package install app-live-view -p appliveview.tanzu.vmware.com -v 0.1.0 -n 
 | Creating secret 'app-live-view-tap-install-values'
 - Creating package resource
 / Package install status: Reconciling
+```
 
-# To check the packages installed
-tanzu package installed list -n tap-install
-
-# To check the status of each package
+- Check the status of the packages installed:
+```bash
 tanzu package installed get -n tap-install cloud-native-runtimes
 tanzu package installed get -n tap-install app-live-view
 tanzu package installed get -n tap-install app-accelerator
-
-# To update a package if some errors are reported
+```
+- To update a package if some errors are reported, use the following commands:
+```bash
 tanzu package installed update cloud-native-runtimes -v 1.0.1 -n tap-install -f cnr.yml
 tanzu package installed update app-accelerator -v 0.2.0 -n tap-install -f app-accelerator.yml
 tanzu package installed update app-live-view -v 0.1.0 -n tap-install -f app-live-view.yml
 ```
-As the documentation is missing the steps to install `kpacck`, then follow my instructions.
-**REMARK**: Be sure that you have accepted the needed EULAs - https://network.tanzu.vmware.com/users/dashboard/eulas
+**WARNING**: Be sure that you have accepted the needed EULAs - https://network.tanzu.vmware.com/users/dashboard/eulas, otherwise some images will not be installed !
 
-```bash
-# Install kp client
-pivnet download-product-files --product-slug='build-service' --release-version='1.2.2' --product-file-id=1000629
-chmod +x kp-linux-0.3.1
-cp kp-linux-0.3.1 ~/bin/kp
-# download the list of the images to be installed 
-pivnet download-product-files --product-slug='tbs-dependencies' --release-version='100.0.155' --product-file-id=1036685
-```
-
+- Follow the instructions [here](#TAS) to install Tanzu Build Services as it is needed in order to play the DEMO.
+- 
 ## Demo
 
 - Access the `TAP UI` at the following address `http://<VM_IP>:<NODEPORT_ACCELERATOR_VIEW>`
@@ -510,11 +534,11 @@ $VM_IP petclinic.tap-install.example.com
 
 ## TAS
 
-- Login in first to `registry.pivotal.io` and your public registry (e.g. quay.io).
+- Login in first to `registry.pivotal.io` and your public registry (e.g. docker.io, ...).
 ```bash
 export REG_USER="<REG_USER>"
 export REG_PWD="<REG_PWD>"
-docker login -u=$REG_USER -p=$REG_PWD quay.io
+docker login -u=$REG_USER -p=$REG_PWD docker.io
 
 export PIVOTAL_REG_USER="<TANZUNET_USERNAME>"
 export PIVOTAL_REG_PWD="<TANZUNET_PWD>"
@@ -570,8 +594,15 @@ ytt -f ./bundle/values.yaml \
     | kapp deploy -a tanzu-build-service -f- -y
 ```
 
-- Import Tanzu Build Service Dependencies using the `kp` cli and the Dependency Descriptor `descriptor-<version>.yaml` file
+- Import the `Tanzu Build Service Dependencies` using the `kp` cli and the Dependency Descriptor `descriptor-<version>.yaml` file
 ```bash
+# Install kp client
+pivnet download-product-files --product-slug='build-service' --release-version='1.2.2' --product-file-id=1000629
+chmod +x kp-linux-0.3.1
+cp kp-linux-0.3.1 ~/bin/kp
+
+pivnet download-product-files --product-slug='tbs-dependencies' --release-version='100.0.155' --product-file-id=1036685
+2021/09/14 11:11:26 Downloading 'descriptor-100.0.155.yaml' to 'descriptor-100.0.155.yaml'
 kp import -f ./descriptor-<version>.yaml
 
 e.g: kp import -f ./descriptor-100.0.155.yaml
@@ -621,3 +652,18 @@ cp kp-linux-0.3.1 ~/bin/kp
 sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 sudo yum install docker-ce-cli
 ```
+### TODO
+
+Do we still need to perform such a command ;-)
+
+```bash
+# Macos installation
+docker login registry.tanzu.vmware.com -u cmoulliard@redhat.com
+docker pull registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:0.1.0
+
+# or using containerd and crictl
+# export VMWARE_USERNAME="<VMWARE_USERNAME>"
+# export VMWARE_PASSWORD="<VMWARE_PASSWORD>"
+# sudo crictl pull --creds $VMWARE_USERNAME:$VMWARE_PASSWORD registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:0.1.0
+```
+
