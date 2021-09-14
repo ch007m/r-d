@@ -447,15 +447,31 @@ petclinic-00001-deployment-f59c968c6-bfpdt             0/2     ContainerCreating
 ```
 - Get its service address and `ksvc`
 ```bash
-kubectl get service -n tap-install
-NAME                         TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)                                      AGE
-petclinic-00001              ClusterIP      10.109.43.10     <none>        80/TCP                                       2m27s
-petclinic-00001-private      ClusterIP      10.111.248.178   <none>        80/TCP,9090/TCP,9091/TCP,8022/TCP,8012/TCP   2m27s
-
 kubectl get ksvc -n tap-install
 NAME        URL                                        LATESTCREATED     LATESTREADY   READY     REASON
 petclinic   http://petclinic.tap-install.example.com   petclinic-00001                 Unknown   RevisionMissing
 ```
+- In order to route the traffic of the `URL` of the Knative service using port-forward, it is needed to find the `NodePort` of the `Contour External Envoy proxy`
+```bash
+nodePort=$(kc get svc/envoy -n contour-external -o jsonpath='{.spec.ports[0].nodePort}')
+kubectl port-forward -n contour-external svc/envoy $nodePort:80 &
+```
+- Next, access using curl the service
+```bash
+curl -v -H "HOST: petclinic.tap-install.example.com" http://petclinic.tap-install.example.com:$nodePort
+
+Curl regularly the service to keep the service alive
+watch -n 5 curl \"HOST: petclinic.tap-install.example.com\" http://petclinic.tap-install.example.com:$nodePort
+```
+- Configure locally (= on your laptop) your `/etc/hosts` to map the URL of the service to the IP address of the VM running the k8s cluster
+```bash
+VM_IP="<VM_IP"
+cat <<EOF >> /etc/hosts
+$VM_IP petclinic.tap-install.example.com
+```
+- Access the service using your browser `http://petclinic.tap-install.example.com:<nodePort>`
+- Enjoy !!
+
 ## TAS
 
 - Login in first to `registry.pivotal.io` and your public registry (e.g. quay.io).
