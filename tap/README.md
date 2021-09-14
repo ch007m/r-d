@@ -1,14 +1,14 @@
 Table of Contents
 =================
 
-      * [Platform](#platform)
-      * [References](#references)
-      * [Prerequisites](#prerequisites)
-      * [Instructions](#instructions)
-      * [Testing](#testing)
-      * [TAS](#tas)
-         * [Clean](#clean)
-         * [Additional tools](#additional-tools)
+   * [Platform](#platform)
+   * [References](#references)
+   * [Prerequisites](#prerequisites)
+   * [Instructions](#instructions)
+   * [Testing](#testing)
+   * [TAS](#tas)
+      * [Clean](#clean)
+      * [Additional tools](#additional-tools)
 
 ## Platform
 
