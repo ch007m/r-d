@@ -494,6 +494,11 @@ Importing Lifecycle...
 Importing ClusterStore 'default'...
 	Uploading '95.217.159.244:32500/tanzu-buildpacks_go@sha256:9fd3ba0f1f99f7dba25d22dc955233c7b38b7f1b55b038464968d1f1e37afd3d'
 	Uploading '95.217.159.244:32500/tanzu-buildpacks_java@sha256:578bccbfc996184ea3181b4b0fa39f98f456db1e2e427ef163db98224cd9ea04'
+	Uploading '95.217.159.244:32500/tanzu-buildpacks_nodejs@sha256:c2b47f6f74055bade5456c17dd92c5ef035fab7e075d0ce0b14afc15b2efa06c'
+	Uploading '95.217.159.244:32500/tanzu-buildpacks_java-native-image@sha256:74d8f4ba944ee1e62e7fc68654ee09fb89e0b26cb8eeda3a587322e9e7bd6bf5'
+	Uploading '95.217.159.244:32500/tanzu-buildpacks_dotnet-core@sha256:6d57e312e7ac86f78ece4afcc3967e5314fbb71fe592800fd6f0f58bd923945a'
+	Uploading '95.217.159.244:32500/tanzu-buildpacks_python@sha256:1222d5f695222597687173b1b8612844f3ccd763eae86e99c3ebacc41390db40'
+	 \ 578.31 MB
 ...	
 ```
 
