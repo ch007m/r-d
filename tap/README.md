@@ -1,3 +1,15 @@
+Table of Contents
+=================
+
+      * [Platform](#platform)
+      * [References](#references)
+      * [Prerequisites](#prerequisites)
+      * [Instructions](#instructions)
+      * [Testing](#testing)
+      * [TAS](#tas)
+         * [Clean](#clean)
+         * [Additional tools](#additional-tools)
+
 ## Platform
 
 Tanzu Application Platform - https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/index.html is a solution designed to be deployed top of K8s. 
@@ -16,6 +28,10 @@ It packages different technology such as:
 | [Application Accelerator](https://docs.vmware.com/en/Application-Accelerator-for-VMware-Tanzu/index.html) | Controller reconciling accelerator CRD (= developer project definition) | accelerator, source controllers | 0.2.0 |
 | [Flux2](https://github.com/fluxcd/flux2#flux-version-2) | Sync k8s resources and config up to date from Git repositories | Flux2 | 0.17.0 |
 | [Kapp](https://carvel.dev/kapp-controller/)| Deploy and view groups of Kubernetes resources as "applications" controller | kapp | 0.39.0 |
+
+## References
+
+Interesting reference to install Tanzu (Contour, Harbor, ...) top of kind: https://github.com/tanzu-japan/devsecops-demo
 
 ## Prerequisites
 
