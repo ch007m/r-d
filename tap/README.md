@@ -11,7 +11,6 @@ Table of Contents
   * [Additional tools](#additional-tools)
   * [TODO](#todo)
 
-
 ## What is TAP
 
 Tanzu Application Platform - https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/0.1/tap-0-1/GUID-overview.html is a packaged set of components that helps developers and
@@ -597,7 +596,7 @@ EOF
 ## Tanzu Build Service (TBS)
 
 - To install the `Tanzu Build Service` (aka [TBS](https://docs.pivotal.io/build-service/1-2/installing.html)) on your k8s cluster, execute the following commands
-- Login in first to `registry.pivotal.io` and your public registry (e.g. docker.io, ...).
+- Login in first to `registry.pivotal.io` and your public or private images registry (e.g. docker.io, ...).
 
 ```bash
 export REG_USER="<REG_USER>"
@@ -612,6 +611,8 @@ docker login -u=$PIVOTAL_REG_USER -p=$PIVOTAL_REG_PWD registry.pivotal.io
 - Copy the TBS images to your `<REGISTRY_USER>`/build-service
 
 **REMARK**: When this demo has been performed, the TBS version used was `1.2.2`
+
+**NOTE**: You can also use a private docker registry running on your k8s cluster. Use , in this case the version `2.6` as `2.7` reports `MANIFEST_BLOB_UNKNOWN` during imgpkg import !!
 
 ```bash
 export IMAGE_REPOSITORY="<YOUR_IMAGE_REPOSITORY"
@@ -637,13 +638,11 @@ copy | will export registry.pivotal.io/build-service/stackify@sha256:a40af2d5d56
 copy | will export registry.pivotal.io/build-service/stacks-operator@sha256:1daa693bd09a1fcae7a2f82859115dc1688823330464e5b47d8b9b709dee89f1
 copy | exported 17 images
 copy | importing 17 images...
-
-or
-
-imgpkg copy -b "registry.pivotal.io/build-service/bundle:$TBS_VERSION" --to-tar=tanzu-build-service.tar
 ```
 
-- Export the content of the images locally under a `./bundle` folder
+**NOTe**: When you deploy to a private docker registry, then provide as additional the parameter the path to the CA certificate of the registry `--registry-ca-cert-path certs/ca.crt`
+
+- Export the content of the images locally under the folder `./bundle`
 
 ```bash
 imgpkg pull -b "$IMAGE_REPOSITORY:$TBS_VERSION" -o ./bundle
@@ -655,9 +654,7 @@ imgpkg pull -b "$IMAGE_REPOSITORY:$TBS_VERSION" -o ./bundle
 imgpkg pull -b "registry.pivotal.io/build-service/bundle:$TBS_VERSION" -o ./bundle
 ```
 
-**REMARK**: Currently discussed in order to figure out why we don't use directly the images from the pivotal registry
-
-- Deploy TAS
+- Deploy `TBS`
 
 ```bash
 export IMAGE-REPOSITORY="quay.io/<REG_USER>/build-service" ## BUT SHOULD BE FOR DOCKER --> "docker.io/<REG_USER>"
@@ -671,21 +668,37 @@ ytt -f ./bundle/values.yaml \
     | kbld -f ./bundle/.imgpkg/images.yml -f- \
     | kapp deploy -a tanzu-build-service -f- -y
 ```
+- If you use a private docker registry, then execute this command
+```bash
+ytt -f ./bundle/values.yaml \
+    -f ./bundle/config/ \
+    -f <PATH-TO-CA> \
+    -v docker_repository='<PRIVATE_IMAGE_REPOSITORY>' \
+    -v docker_username='<PRIVATE_REGISTRY_USERNAME>' \
+    -v docker_password='<PRIVATE_REGISTRY-PASSWORD>' \
+    | kbld -f ./bundle/.imgpkg/images.yml -f- \
+    | kapp deploy -a tanzu-build-service -f- -y
+```
+**NOTE**: The `<PRIVATE_IMAGE_REPOSITORY>` should include as latest char a `/` (e.g: `<IP_ADDRESS>:<PORT>/`). Otherwise the `.dockerconfigjson` file generated for the `canonical-registry-secret` will include
+as registry `http//index.docker.io/v1/`
 
-- Import the `Tanzu Build Service Dependencies` using the `kp` cli and the Dependency Descriptor `descriptor-<version>.yaml` file
+- Install the `kp` cli
 
 ```bash
-# Install kp client
-pivnet download-product-files --product-slug='build-service' --release-version='$TBS_VERSION' --product-file-id=1000629
+pivnet download-product-files --product-slug='build-service' --release-version=$TBS_VERSION --product-file-id=1000629
 chmod +x kp-linux-0.3.1
 cp kp-linux-0.3.1 ~/bin/kp
-
+```
+- Import the `Tanzu Build Service Dependencies` such as: lifecycle, tanzu-buildpacks_g, ... using the dependency descriptor `descriptor-<version>.yaml` file
+  that you can download using pivnet
+```bash
 pivnet download-product-files --product-slug='tbs-dependencies' --release-version='100.0.155' --product-file-id=1036685
 2021/09/14 11:11:26 Downloading 'descriptor-100.0.155.yaml' to 'descriptor-100.0.155.yaml'
 kp import -f ./descriptor-<version>.yaml
 
 e.g: kp import -f ./descriptor-100.0.155.yaml
 ```
+- When done, play with the [demo](#Demo) :-)
 
 ### Clean
 
