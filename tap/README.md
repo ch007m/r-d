@@ -547,7 +547,7 @@ kubectl create secret docker-registry docker-hub-registry \
     --docker-server=https://index.docker.io/v1/ \
     --namespace tap-install
 ```
-**NOTE**: If you use a local private docker registry, change the parameters accordingly !
+**NOTE**: If you use a local private docker registry, change the parameters accordingly (e.g. docker_server=95.217.159.244:32500) !
 
 - Create a `sa` using the secret containing your docker registry creds
 
