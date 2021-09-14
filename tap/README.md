@@ -30,7 +30,7 @@ Tanzu Application Platform simplifies workflows in both the `inner` loop and `ou
 
 **REMARK**: The VMWare Tanzu definition of an inner loop implies an image build while this is not the case using Openshift odo as we push the code within a pod.
 
-**NOTE**: The problem they would like to solve is presented within this video: https://www.youtube.com/watch?v=9oupRtKT_JM
+**NOTE**: The problem TAP `beta 0.1` would like to solve is presented within this [video](https://www.youtube.com/watch?v=9oupRtKT_JM)
 
 It packages different technology such as:
 
