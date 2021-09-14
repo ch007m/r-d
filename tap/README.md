@@ -17,7 +17,10 @@ operators to more easily build, deploy, and manage apps on a Kubernetes platform
 
 Short introduction about what is TAP is available [here](http://i-programmer.cloudapp.net/news/90-tools/9503-vmware-announces-tanzu-application-platform-.html) and could be summarized as such:
 
-TAP is a `Knative` platform + `kpack` (= buildpacks controller) + `Contour` (= ingress) + `kapp` (= kind of helm technology but with more features) + `Application Live and Application Accelerator` (= Where VMWare/Pivotal would like to capture with a great DevExp on K8s the Spring Architects and Developers)
+TAP is a `Knative` platform using `kpack` (= buildpacks controller) to build images, `Contour` (= ingress) to route the traffic, `kapp` (= kind of helm technology but with more features) to assemble the 
+`applications` and `Application Live and Application Accelerator`** to guide the Architects/Developers to design/deploy/monitor applications on k8s.
+
+**: Where VMWare/Pivotal would like to capture with a great DevExp on K8s the Spring Architects and Developers.
 
 Tanzu Application Platform simplifies workflows in both the `inner` loop and `outer` loop of Kubernetes-based app development:
 
