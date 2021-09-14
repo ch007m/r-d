@@ -345,19 +345,19 @@ tanzu package installed update app-live-view -v 0.1.0 -n tap-install -f app-live
   echo http://$VM_IP:$UI_NODE_PORT
   # Open the address displayed
   ```
-- Download the `spring petclinic example by clicking on the `Generate project`
+- Download the `spring petclinic example` by clicking on the `Generate project` from the example selected using the UI
 - scp the file to the VM
 - Unzip the spring petclinic app
-- Create a new github repo and push the code to this repo
+- Create a new github repo and push the code to this repo using your `GITHUB_USER`
 - Create a secret containing your docker hub creds
 ```bash
 kubectl create secret docker-registry docker-hub-registry \
-    --docker-username=<dockerhub-username> \
-    --docker-password=<dockerhub-password> \
+    --docker-username="<dockerhub-username>" \
+    --docker-password="<dockerhub-password>" \
     --docker-server=https://index.docker.io/v1/ \
     --namespace tap-install
 ```
-- Create a sa using the secret containing your docker registry creds
+- Create a `sa` using the secret containing your docker registry creds
 ```bash
 cat <<EOF | kc apply -f -
 apiVersion: v1
@@ -371,7 +371,7 @@ imagePullSecrets:
 - name: docker-hub-registry
 EOF
 ```
-- Create a clusterRole and ClusterRoleBinding to give admin access to the SA
+- Create a `ClusterRole` and `ClusterRoleBinding` to give admin access to the `sa`
 ```bash
 cat <<EOF | kc apply -f -
 kind: ClusterRole
@@ -397,8 +397,7 @@ roleRef:
   name: cluster-admin-cluster-role
 EOF
 ```
-
-- Create an `image` kubernetes resource to let `Kpack` to perform a buildpacks build
+- Create a kpack `image` CRD resource to let `kpack` to perform a buildpacks build
 ```bash
 kc delete images.kpack.io/spring-petclinic-image -n tap-install
 export GITHUB_USER="<GITHUB_USER>"
@@ -447,10 +446,9 @@ BUILD    STATUS     IMAGE                                                       
 kp image list -n tap-install
 NAME                      READY    LATEST REASON    LATEST IMAGE                                                                                                               NAMESPACE
 spring-petclinic-image    True     CONFIG           index.docker.io/cmoulliard/spring-petclinic-eks@sha256:5f50f9ceb1a41e97f61b4053f5afa749631d869d79d1427fc153d80403cc0fc1    tap-install
-
 ```
-- Deploy the `image` generated in the namespace where `Application Live View` is running with the labels `tanzu.app.live.view=true` and `tanzu.app.live.view.application.name=<app_name>`.
-  Add the appropriate DNS entries using /etc/hosts.  
+- Deploy the `image` generated in the namespace where `Application Live View` is running with the 
+  labels `tanzu.app.live.view=true` and `tanzu.app.live.view.application.name=<app_name>`.  
 
 ```bash
 cat <<EOF | kubectl apply -f - 
@@ -505,11 +503,10 @@ EOF
 - Wait till the pod is created
 ```bash
 kubectl get pods -n tap-install -w
-kubectl get pods -n tap-install -w
 NAME                                                   READY   STATUS              RESTARTS   AGE
 petclinic-00001-deployment-f59c968c6-bfpdt             0/2     ContainerCreating   0          28s
 ```
-- Get its service address and `ksvc`
+- Get its Knative service URL
 ```bash
 kubectl get ksvc -n tap-install
 NAME        URL                                        LATESTCREATED     LATESTREADY   READY     REASON
@@ -532,6 +529,7 @@ watch -n 5 curl \"HOST: petclinic.tap-install.example.com\" http://petclinic.tap
 VM_IP="<VM_IP"
 cat <<EOF >> /etc/hosts
 $VM_IP petclinic.tap-install.example.com
+EOF
 ```
 - Access the service using your browser `http://petclinic.tap-install.example.com:<nodePort>`
 - Enjoy !!
