@@ -144,7 +144,9 @@ tanzu package available get cnrs.tanzu.vmware.com/1.0.1 --values-schema -n tap-i
   registry.username           <nil>    string   registry username
 ```
 - In order to install the package `CNR = Cloud Native Runtimes`, we will create a yaml file containing the parameters such as the `creds` to access the registry, the provider, ...
+  
   **WARNING**: If the k8s cluster that you will use do not run a LB, then configure the field `provider: local`
+
 ```bash
 cat <<EOF > cnr.yml
 ---
@@ -183,7 +185,9 @@ Added installed package 'cloud-native-runtimes' in namespace 'tap-install'
 ```
 
 - When this is done,we will proceed to the deployment of the `Application accelerator` and create another config yaml file:
+  
   **WARNING**: If the k8s cluster that you will use do not run a LB, then configure the field `service_type` to use `NodePort`
+
 ```bash
 cat <<EOF > app-accelerator.yml
 registry:
@@ -331,7 +335,7 @@ tanzu package installed update app-live-view -v 0.1.0 -n tap-install -f app-live
 **WARNING**: Be sure that you have accepted the needed EULAs - https://network.tanzu.vmware.com/users/dashboard/eulas, otherwise some images will not be installed !
 
 - Follow the instructions [here](#TAS) to install Tanzu Build Services as it is needed in order to play the DEMO.
-- 
+
 ## Demo
 
 - Access the `TAP UI` at the following address `http://<VM_IP>:<NODEPORT_ACCELERATOR_VIEW>`
