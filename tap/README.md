@@ -645,12 +645,14 @@ kc get build spring-petclinic-image-build-1-bj96l -n tap-install -o yaml
 ```bash
 kp build list -n tap-install
 BUILD    STATUS     IMAGE                                                                                                                      REASON
-1        SUCCESS    index.docker.io/cmoulliard/spring-petclinic-eks@sha256:5f50f9ceb1a41e97f61b4053f5afa749631d869d79d1427fc153d80403cc0fc1    CONFIG
+1        SUCCESS    95.217.159.244:32500/spring-petclinic-eks@sha256:49fa45da83c4a212b23a0dcd89e8fb731fe9891039824d6bd37f9fefb279a135    CONFIG
 
 kp image list -n tap-install
 NAME                      READY    LATEST REASON    LATEST IMAGE                                                                                                               NAMESPACE
-spring-petclinic-image    True     CONFIG           index.docker.io/cmoulliard/spring-petclinic-eks@sha256:5f50f9ceb1a41e97f61b4053f5afa749631d869d79d1427fc153d80403cc0fc1    tap-install
+spring-petclinic-image    True     CONFIG           95.217.159.244:32500/spring-petclinic-eks@sha256:49fa45da83c4a212b23a0dcd89e8fb731fe9891039824d6bd37f9fefb279a135    tap-install
 ```
+
+**REMARK**: If you use a private docker registry, then pull the image `docker pull 95.217.159.244:32500/spring-petclinic-eks@sha256:49fa45da83c4a212b23a0dcd89e8fb731fe9891039824d6bd37f9fefb279a135` !
 
 - Deploy the `image` generated in the namespace where `Application Live View` is running with the
   labels `tanzu.app.live.view=true` and `tanzu.app.live.view.application.name=<app_name>`.
@@ -748,6 +750,11 @@ EOF
 ```
 
 - Access the service using your browser `http://petclinic.tap-install.example.com:<nodePort>`
+- To access the `Applicatin View` UI, get the `NodePort` of the svc and open the address in your browser
+```bash
+nodePort=$(kc get svc/application-live-view-5112 -n tap-install -o jsonpath='{.spec.ports[0].nodePort}')
+echo http://$VM_IP:$nodePort/apps
+```
 - Enjoy !!
 
 ## Additional tools
