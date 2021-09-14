@@ -477,7 +477,7 @@ pivnet download-product-files --product-slug='build-service' --release-version=$
 chmod +x kp-linux-0.3.1
 cp kp-linux-0.3.1 ~/bin/kp
 ```
-- Import the `Tanzu Build Service Dependencies` such as: lifecycle, tanzu-buildpacks_g, ... using the dependency descriptor `descriptor-<version>.yaml` file
+- finally, import the `Tanzu Build Service` dependencies` such as: lifecycle, buildpacks (go, java, python, ..) using the dependency descriptor `descriptor-<version>.yaml` file
   that you can download using pivnet
 ```bash
 pivnet download-product-files --product-slug='tbs-dependencies' --release-version='100.0.155' --product-file-id=1036685
@@ -485,6 +485,12 @@ pivnet download-product-files --product-slug='tbs-dependencies' --release-versio
 kp import -f ./descriptor-<version>.yaml
 
 e.g: kp import -f ./descriptor-100.0.155.yaml
+Importing Lifecycle...
+	Uploading '95.217.159.244:32500/lifecycle@sha256:c923a81a1c3908122e29a30bae5886646d6ec26429bad4842c67103636041d93'
+Importing ClusterStore 'default'...
+	Uploading '95.217.159.244:32500/tanzu-buildpacks_go@sha256:9fd3ba0f1f99f7dba25d22dc955233c7b38b7f1b55b038464968d1f1e37afd3d'
+	Uploading '95.217.159.244:32500/tanzu-buildpacks_java@sha256:578bccbfc996184ea3181b4b0fa39f98f456db1e2e427ef163db98224cd9ea04'
+...	
 ```
 - When done, play with the [demo](#Demo) :-)
 
