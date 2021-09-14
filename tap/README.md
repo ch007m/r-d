@@ -72,16 +72,20 @@ The commands listed hereafter have been executed top of a `k8s 1.21` cluster and
 
 ### Tanzu client and TAP repository
 
-- The tanzu client version `0.1.0` has been downloaded from the Tanzu product site - https://network.pivotal.io/products/tanzu-application-platform and installed as such:
+To install/uninstall TAP on a k8s cluster, it is needed to install The Tanzu client that we can download from the `https://network.pivotal.io/products/` website
+or using the tool `pivnet`.
+
+- Download the Mac/Linux or Windows client from - https://network.pivotal.io/products/tanzu-application-platform
 
 ```bash
 # Macos installation
-mkdir ~/temp/tanzu && cd ~/temp/tanzu
+mkdir ~/tanzu && cd ~/tanzu
 mv ~/Downloads/tanzu-cli-bundle-darwin-amd64.tar .
 tar -vxf tanzu-cli-bundle-darwin-amd64.tar
 cp core/v1.4.0-rc.5/tanzu-core-darwin_amd64 /usr/local/bin/tanzu
-
-# Linux installation
+```
+- Or use the `pivnet` client tool
+```bash
 # To auth the user, use the API legacy token which is available here : https://network.pivotal.io/users/dashboard/edit-profile
 pivnet login --api-token=$LEGACY_API_TOKEN
 mkdir ~/tanzu && cd ~/tanzu
@@ -90,7 +94,7 @@ tar -vxf tanzu-cli-bundle-linux-amd64.tar
 cp cli/core/v1.4.0-rc.5/tanzu-core-linux_amd64 $HOME/bin/tanzu
 ```
 
-- Next, configure the Tanzu client to use the plugin `package` able to download the resources from the Pivotal registry
+- Next, configure the Tanzu client to install the plugin `package`. This extension will be used to download the resources from the Pivotal registry
 
 ```bash
 tanzu plugin clean
