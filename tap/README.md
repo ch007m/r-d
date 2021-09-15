@@ -50,7 +50,9 @@ It packages different technology such as:
 ## References
 
 [Contour Ingres architecture](https://projectcontour.io/docs/v1.18.1/architecture/)
+
 [Use an Ingress route with Contour](https://tanzu.vmware.com/developer/guides/kubernetes/service-routing-contour-to-ingress-and-beyond/)
+
 [How to install Tanzu (Contour, Harbor, TBS) on kind](https://github.com/tanzu-japan/devsecops-demo)
 
 ## Prerequisites
