@@ -391,7 +391,9 @@ tanzu package installed update app-live-view -v 0.1.0 -n tap-install -f app-live
 
 ### Install Tanzu Build Service (TBS)
 
-- To install the `Tanzu Build Service` (aka [TBS](https://docs.pivotal.io/build-service/1-2/installing.html)) on your k8s cluster, execute the following commands
+To install the `Tanzu Build Service` (aka [TBS](https://docs.pivotal.io/build-service/1-2/installing.html)) on your k8s cluster, execute the commands described hereafter.
+The commands have been tested successfully against `docker.io`, `private docker registry` version 2.6 (as version 2.7 fails)
+
 - Login in first to `registry.pivotal.io` and your public or private images registry (e.g. docker.io, ...).
 
 ```bash
@@ -751,6 +753,10 @@ VM_IP="<VM_IP"
 cat <<EOF >> /etc/hosts
 $VM_IP petclinic.tap-install.example.com
 EOF
+```
+**REMARK**: This step is not needed if you use ad domain `<VM_IP>.nip.io` and you patch the Knative Serving config-domain configmap
+```bash
+kubectl patch cm/config-domain -n knative-serving --type merge -p '{"data":{"95.217.159.244.nip.io":""}}'
 ```
 
 - Access the service using your browser `http://petclinic.tap-install.example.com:<nodePort>`
