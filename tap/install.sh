@@ -24,17 +24,17 @@ function pause(){
  echo ""
 }
 
-#echo "#### Install Tanzu tools: pivnet, ytt, kapp, imgpkg, kbld #####"
-#if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-#  echo "#### Detected Linux OS ####"
-#  curl -L https://carvel.dev/install.sh | sudo bash
-#  echo "TODO : Add command to install pivnet"
-#elif [[ "$OSTYPE" == "darwin"* ]]; then
-#  echo "#### Detected Mac OS ####"
-#  brew tap vmware-tanzu/carvel
-#  brew reinstall ytt kbld kapp kwt imgpkg vendir
-#  brew reinstall pivotal/tap/pivnet-cli
-#fi
+echo "#### Install Tanzu tools: pivnet, ytt, kapp, imgpkg, kbld #####"
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  echo "#### Detected Linux OS ####"
+  curl -L https://carvel.dev/install.sh | sudo bash
+  echo "TODO : Add command to install pivnet"
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  echo "#### Detected Mac OS ####"
+  brew tap vmware-tanzu/carvel
+  brew reinstall ytt kbld kapp kwt imgpkg vendir
+  brew reinstall pivotal/tap/pivnet-cli
+fi
 
 echo "### Create tanzu directory ####"
 if [ ! -d $TANZU_TEMP_DIR ]; then
@@ -59,9 +59,9 @@ echo "### Pivnet log in to Tanzu ###"
 pivnet login --api-token=$TANZU_LEGACY_API_TOKEN
 
 # Download the TANZU client
-#pivnet download-product-files --product-slug='tanzu-application-platform' --release-version='0.1.0' --product-file-id=$TANZU_PRODUCT_FILE_ID
-#tar -vxf $TANZU_PRODUCT_NAME.tar
-#cp cli/core/$TANZU_TAP_CLI_VERSION/tanzu-core* $DEST_DIR/tanzu
+pivnet download-product-files --product-slug='tanzu-application-platform' --release-version='0.1.0' --product-file-id=$TANZU_PRODUCT_FILE_ID
+tar -vxf $TANZU_PRODUCT_NAME.tar
+cp cli/core/$TANZU_TAP_CLI_VERSION/tanzu-core* $DEST_DIR/tanzu
 
 # Next, configure the Tanzu client to install the plugin `package`. This extension will be used to download the resources from the Pivotal registry
 tanzu plugin clean
@@ -279,7 +279,7 @@ docker login \
 # 3. Copy the TBS images to the `<REGISTRY_USER>`/build-service repository
 
 IMAGE_REPOSITORY=$CONTAINER_REGISTRY_URL/buildservice
-#imgpkg copy -b "registry.pivotal.io/build-service/bundle:$TANZU_BUILD_SERVICE_VERSION" --to-repo $IMAGE_REPOSITORY --registry-ca-cert-path reg-ca.crt
+imgpkg copy -b "registry.pivotal.io/build-service/bundle:$TANZU_BUILD_SERVICE_VERSION" --to-repo $IMAGE_REPOSITORY --registry-ca-cert-path reg-ca.crt
 
 imgpkg pull -b "$IMAGE_REPOSITORY:$TBS_VERSION" -o ./bundle --registry-ca-cert-path reg-ca.crt
 
