@@ -819,7 +819,27 @@ sudo reboot
 
 ### Clean
 
-TODO: To be reviewed and improved
+To delete the installed packages or applications:
+
+1. List the installed packages: `tanzu package installed list -n tap-install`
+
+2. Remove a package by running: `tanzu package installed delete PACKAGE-NAME -n tap-install`
+
+3. or execute the following `All in one command`
+
+```bash
+declare -a packages=("app-accelerator" "app-live-view" "cloud-native-runtimes")
+for pkg in ${packages[@]}; do
+  tanzu package installed delete $pkg -n tap-install -y
+done
+
+declare -a packages=("flux" "tanzu-build-service" "kc")
+for pkg in ${packages[@]}; do
+  kapp delete -a $pkg 
+done
+```
+
+Sometimes it has been needed to delete some resources manually when problems occurred during installation of a package (CNR, ...):
 ```bash
 kc delete clusterrole/cloud-native-runtimes-tap-install-cluster-role
 kc delete clusterrolebinding/cloud-native-runtimes-tap-install-cluster-rolebinding
@@ -829,8 +849,5 @@ kc delete -n tap-install secrets/cloud-native-runtimes-tap-install-values
 kc delete -n tap-install sa/app-accelerator-tap-install-sa
 kc delete clusterrole/app-accelerator-tap-install-cluster-role
 kc delete clusterrolebinding/app-accelerator-tap-install-cluster-rolebinding
-
-# CNR
-kapp delete -a cloud-native-runtimes -n cloud-native-runtimes
-kubectl delete ns cloud-native-runtimes
 ```
+Thats's all !
