@@ -322,10 +322,10 @@ kp import -f ./descriptor-100.0.155.yaml \
 
 ## Patch the KNative Serving config-domain configmap to expose as domain: <VM_IP>.nip.io
 ## TODO: Fix the error : invalid JSON Path
-PATCH="{\"data\":{\"$VM_IP.nip.io\": ''}}"
+PATCH="{\"data\":{\"$VM_IP.nip.io\": \"\"}}"
 kubectl patch cm/config-domain -n knative-serving \
   --type merge \
-  -p '$PATCH'
+  -p $PATCH
 
 popd
 
