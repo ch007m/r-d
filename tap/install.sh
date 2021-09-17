@@ -317,7 +317,8 @@ pivnet download-product-files --product-slug='tbs-dependencies' \
     --release-version='100.0.155'\
     --product-file-id=1036685
 
-kp import -f ./descriptor-100.0.155.yaml
+kp import -f ./descriptor-100.0.155.yaml \
+   --registry-ca-cert-path reg-ca.crt
 
 ## Patch the KNative Serving config-domain configmap to expose as domain: <VM_IP>.nip.io
 ## TODO: Fix the error : invalid JSON Path
