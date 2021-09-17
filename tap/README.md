@@ -10,10 +10,11 @@ Table of Contents
       * [Install TAP - Accelerator](#install-tap---accelerator)
       * [Install TAP - Review what it has been installed](#install-tap---review-what-it-has-been-installed)
       * [Install Tanzu Build Service (TBS)](#install-tanzu-build-service-tbs)
-      * [Clean](#clean)
    * [Demo](#demo)
+      * [Demo shortcuts](#demo-shortcuts)
    * [Additional tools](#additional-tools)
-   
+      * [Clean](#clean)
+      
 ## What is TAP
 
 Tanzu Application Platform - https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/0.1/tap-0-1/GUID-overview.html is a packaged set of components that helps developers and
@@ -512,19 +513,6 @@ Importing ClusterStore 'default'...
 
 - When done, play with the [demo](#Demo) :-)
 
-### Clean
-
-```bash
-kc delete clusterrole/cloud-native-runtimes-tap-install-cluster-role
-kc delete clusterrolebinding/cloud-native-runtimes-tap-install-cluster-rolebinding
-kc delete sa/cloud-native-runtimes-tap-install-sa -n tap-install
-kc delete -n tap-install secrets/cloud-native-runtimes-tap-install-values
-
-kc delete -n tap-install sa/app-accelerator-tap-install-sa
-kc delete clusterrole/app-accelerator-tap-install-cluster-role
-kc delete clusterrolebinding/app-accelerator-tap-install-cluster-rolebinding
-```
-
 - To delete the `build-service` using kapp
 
 ```bash
@@ -827,4 +815,22 @@ sudo systemctl enable docker
 sudo systemctl start docker
 sudo gpasswd -a snowdrop docker
 sudo reboot
+```
+
+### Clean
+
+TODO: To be reviewed and improved
+```bash
+kc delete clusterrole/cloud-native-runtimes-tap-install-cluster-role
+kc delete clusterrolebinding/cloud-native-runtimes-tap-install-cluster-rolebinding
+kc delete sa/cloud-native-runtimes-tap-install-sa -n tap-install
+kc delete -n tap-install secrets/cloud-native-runtimes-tap-install-values
+
+kc delete -n tap-install sa/app-accelerator-tap-install-sa
+kc delete clusterrole/app-accelerator-tap-install-cluster-role
+kc delete clusterrolebinding/app-accelerator-tap-install-cluster-rolebinding
+
+# CNR
+kapp delete -a cloud-native-runtimes -n cloud-native-runtimes
+kubectl delete ns cloud-native-runtimes
 ```
