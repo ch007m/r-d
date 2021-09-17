@@ -24,20 +24,17 @@ function pause(){
  echo ""
 }
 
-echo "#### Install Tanzu tools: pivnet, ytt, kapp, imgpkg, kbld #####"
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  echo "#### Detected Linux OS ####"
-  curl -L https://carvel.dev/install.sh | sudo bash
-  echo "TODO : Add command to install pivnet"
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-  echo "#### Detected Mac OS ####"
-  brew tap vmware-tanzu/carvel
-  brew reinstall ytt kbld kapp kwt imgpkg vendir
-  brew reinstall pivotal/tap/pivnet-cli
-fi
-
-echo "### Pivnet log in to Tanzu ###"
-pivnet login --api-token=$TANZU_LEGACY_API_TOKEN
+#echo "#### Install Tanzu tools: pivnet, ytt, kapp, imgpkg, kbld #####"
+#if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+#  echo "#### Detected Linux OS ####"
+#  curl -L https://carvel.dev/install.sh | sudo bash
+#  echo "TODO : Add command to install pivnet"
+#elif [[ "$OSTYPE" == "darwin"* ]]; then
+#  echo "#### Detected Mac OS ####"
+#  brew tap vmware-tanzu/carvel
+#  brew reinstall ytt kbld kapp kwt imgpkg vendir
+#  brew reinstall pivotal/tap/pivnet-cli
+#fi
 
 echo "### Create tanzu directory ####"
 if [ ! -d $TANZU_TEMP_DIR ]; then
@@ -58,10 +55,13 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
   TANZU_PRODUCT_NAME="tanzu-cli-bundle-darwin-amd64"
 fi
 
+echo "### Pivnet log in to Tanzu ###"
+pivnet login --api-token=$TANZU_LEGACY_API_TOKEN
+
 # Download the TANZU client
-pivnet download-product-files --product-slug='tanzu-application-platform' --release-version='0.1.0' --product-file-id=$TANZU_PRODUCT_FILE_ID
-tar -vxf $TANZU_PRODUCT_NAME.tar
-cp cli/core/$TANZU_TAP_CLI_VERSION/tanzu-core* $DEST_DIR/tanzu
+#pivnet download-product-files --product-slug='tanzu-application-platform' --release-version='0.1.0' --product-file-id=$TANZU_PRODUCT_FILE_ID
+#tar -vxf $TANZU_PRODUCT_NAME.tar
+#cp cli/core/$TANZU_TAP_CLI_VERSION/tanzu-core* $DEST_DIR/tanzu
 
 # Next, configure the Tanzu client to install the plugin `package`. This extension will be used to download the resources from the Pivotal registry
 tanzu plugin clean
@@ -70,7 +70,9 @@ tanzu package version
 
 # Install the needed components: kapp controller, fluxcd
 kapp deploy -a flux -f https://github.com/fluxcd/flux2/releases/download/$TANZU_FLUX_VERSION/install.yaml -y
+sleep 1m
 kapp deploy -a kubectl -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/$TANZU_KAPP_VERSION/download/release.yml -y
+sleep 1m
 
 # Deploy TAP
 # 1. Create NS
@@ -84,17 +86,14 @@ kubectl create secret docker-registry tap-registry \
   --docker-password=$TANZU_REG_PASSWORD
 
 # Step 3. Download the TAP repository
+echo "### Pivnet log in to Tanzu ###"
 pivnet download-product-files --product-slug='tanzu-application-platform' \
    --release-version='0.1.0' \
    --product-file-id=1029762
 
-pause
-
 kapp deploy -a tap-package-repo \
    -n tap-install \
    -f ./tap-package-repo.yaml -y
-
-pause
 
 # 4. Install the TAP packages
 # Configure and install: CNR
@@ -126,8 +125,6 @@ tanzu package install cloud-native-runtimes \
    -n tap-install \
    -f ./cnr.yml
 
-pause
-
 # 4. Install the TAP packages
 # Configure and install: Application Accelerator
 cat <<EOF > app-accelerator.yml
@@ -150,8 +147,6 @@ tanzu package install app-accelerator \
    -n tap-install \
    -f app-accelerator.yml
 
-pause
-
 # Configure and install: Application View
 cat <<EOF > app-live-view.yml
 ---
@@ -166,8 +161,6 @@ tanzu package install app-live-view \
    -v 0.1.0 \
    -n tap-install \
    -f ./app-live-view.yml
-
-pause
 
 # 5. Deploy some Accelerator samples to feed the `Application Accelerator` dashboard
 cat <<EOF > sample-accelerators-0-2.yaml
@@ -241,24 +234,8 @@ spec:
 EOF
 
 kubectl apply -f ./sample-accelerators-0-2.yaml
-pause
 
 # Install Tanzu Build Service
-
-# 1. Log on to the private or public container registry
-docker login \
-   -u=$CONTAINER_REGISTRY_USERNAME \
-   -p=$CONTAINER_REGISTRY_PASSWORD \
-   $CONTAINER_REGISTRY_URL
-
-# 2. Log on to the Tanzu container registry
-docker login \
-   -u=$TANZU_REG_USERNAME \
-   -p=$TANZU_REG_PASSWORD \
-   registry.pivotal.io
-
-pause
-# 3. Copy the TBS images to the `<REGISTRY_USER>`/build-service repository
 
 # The following certificate (TO BE CHANGED) is only needed when you use a local private container registry
 cat <<EOF > reg-ca.crt
@@ -281,15 +258,30 @@ nWs+sTbsABmNR3qUBKsiiLJa2FeTtTnu2cOeHw1xIN4+/1UriqbfMIwv9i3/w+sP
 qhq84mkP+KnMmozE3/JN8CMSnTYNYAIaNBq0
 -----END CERTIFICATE-----
 EOF
+#
+# DO NOT FORGET TO COPY THE CERTIFICATE UNDER /etc/docker/certs.d !
+# sudo mkdir -p /etc/docker/certs.d/95.217.159.244:32500
+# sudo cp reg-ca.crt /etc/docker/certs.d/95.217.159.244:32500/ca.crt
+#
+
+# 1. Log on to the private or public container registry
+docker login \
+   -u=$CONTAINER_REGISTRY_USERNAME \
+   -p=$CONTAINER_REGISTRY_PASSWORD \
+   $CONTAINER_REGISTRY_URL
+
+# 2. Log on to the Tanzu container registry
+docker login \
+   -u=$TANZU_REG_USERNAME \
+   -p=$TANZU_REG_PASSWORD \
+   registry.pivotal.io
+
+# 3. Copy the TBS images to the `<REGISTRY_USER>`/build-service repository
 
 IMAGE_REPOSITORY=$CONTAINER_REGISTRY_URL/buildservice
-imgpkg copy -b "registry.pivotal.io/build-service/bundle:$TANZU_BUILD_SERVICE_VERSION" \
-   --to-repo $IMAGE_REPOSITORY \
-   --registry-ca-cert-path reg-ca.crt
+#imgpkg copy -b "registry.pivotal.io/build-service/bundle:$TANZU_BUILD_SERVICE_VERSION" --to-repo $IMAGE_REPOSITORY --registry-ca-cert-path reg-ca.crt
 
-imgpkg pull \
-   -b "$IMAGE_REPOSITORY:$TBS_VERSION" \
-   -o ./bundle
+imgpkg pull -b "$IMAGE_REPOSITORY:$TBS_VERSION" -o ./bundle --registry-ca-cert-path reg-ca.crt
 
 # 4. Deploy TBS
 ytt -f ./bundle/values.yaml \
@@ -301,15 +293,24 @@ ytt -f ./bundle/values.yaml \
     | kbld -f ./bundle/.imgpkg/images.yml -f- \
     | kapp deploy -a tanzu-build-service -f- -y
 
-pause
 # 5. Install the kp client
+echo "### Download KP"
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  echo "#### Detected Linux OS ####"
+  TANZU_PRODUCT_FILE_ID="1000629"
+  TANZU_PRODUCT_NAME="kp-linux-0.3.1"
+
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  echo "#### Detected Mac OS ####"
+  TANZU_PRODUCT_FILE_ID="1000628"
+  TANZU_PRODUCT_NAME="kp-darwin-0.3.1"
+fi
 pivnet download-product-files --product-slug='build-service' \
    --release-version=$TANZU_BUILD_SERVICE_VERSION \
-   --product-file-id=1000629
-chmod +x kp-linux-0.3.1
-cp kp-linux-0.3.1 $DEST_DIR/kp
+   --product-file-id=$TANZU_PRODUCT_FILE_ID
+chmod +x $TANZU_PRODUCT_NAME
+cp $TANZU_PRODUCT_NAME $DEST_DIR/kp
 
-pause
 # 6. Import the `Tanzu Build Service` dependencies` such as: lifecycle, buildpacks (go, java, python, ..)
 #    using the dependency descriptor `descriptor-<version>.yaml` file
 pivnet download-product-files --product-slug='tbs-dependencies' \
@@ -317,11 +318,13 @@ pivnet download-product-files --product-slug='tbs-dependencies' \
     --product-file-id=1036685
 
 kp import -f ./descriptor-100.0.155.yaml
-pause
+
 ## Patch the KNative Serving config-domain configmap to expose as domain: <VM_IP>.nip.io
+## TODO: Fix the error : invalid JSON Path
+PATCH="{\"data\":{\"$VM_IP.nip.io\": ''}}"
 kubectl patch cm/config-domain -n knative-serving \
   --type merge \
-  -p '{"data":{"${VM_IP}.nip.io":""}}'
+  -p '$PATCH'
 
 popd
 
