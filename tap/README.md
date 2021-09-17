@@ -754,7 +754,7 @@ cat <<EOF >> /etc/hosts
 $VM_IP petclinic.tap-install.example.com
 EOF
 ```
-**REMARK**: This step is not needed if you use ad domain `<VM_IP>.nip.io` and you patch the Knative Serving config-domain configmap
+**REMARK**: This step is needed if you wouls like to use as domain `<VM_IP>.nip.io` as we must patch the Knative Serving config-domain configmap
 ```bash
 kubectl patch cm/config-domain -n knative-serving --type merge -p '{"data":{"95.217.159.244.nip.io":""}}'
 ```
@@ -766,6 +766,27 @@ nodePort=$(kc get svc/application-live-view-5112 -n tap-install -o jsonpath='{.s
 echo http://$VM_IP:$nodePort/apps
 ```
 - Enjoy !!
+
+### Demo shortcuts
+
+```bash
+# Access remotely the kube cluster
+export KUBECONFIG=$HOME/.kube/h01-121
+export VM_IP=95.217.159.244
+
+export UI_NODE_PORT=$(kc get svc/acc-ui-server -n accelerator-system -o jsonpath='{.spec.ports[0].nodePort}')
+echo "Accelerator UI: http://$VM_IP:$UI_NODE_PORT"
+open -na "Google Chrome" --args --incognito http://$VM_IP:$UI_NODE_PORT
+open http://$VM_IP:$UI_NODE_PORT
+
+export LIVE_NODE_PORT=$(kc get svc/application-live-view-5112 -n tap-install -o jsonpath='{.spec.ports[0].nodePort}')
+echo "Live view: http://$VM_IP.nip.io:$LIVE_NODE_PORT/apps"
+open -na "Google Chrome" --args --incognito http://$VM_IP.nip.io:$LIVE_NODE_PORT/apps
+
+export ENVOY_NODE_PORT=$(kc get svc/envoy -n contour-external -o jsonpath='{.spec.ports[0].nodePort}')
+echo "Petclinic demo: http://petclinic.tap-install.$VM_IP.nip.io:$ENVOY_NODE_PORT"
+open -na "Google Chrome" --args --incognito http://petclinic.tap-install.$VM_IP.nip.io:$ENVOY_NODE_PORT
+```
 
 ## Additional tools
 
