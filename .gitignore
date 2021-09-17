@@ -2,3 +2,5 @@
 .DS_Store
 tmp_dashboard
 manifest.yml
+/tap/cli/
+/tap/tanzu/
