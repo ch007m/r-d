@@ -287,9 +287,9 @@ imgpkg pull -b "$IMAGE_REPOSITORY:$TBS_VERSION" -o ./bundle --registry-ca-cert-p
 ytt -f ./bundle/values.yaml \
     -f ./bundle/config/ \
     -f reg-ca.crt \
-    -v docker_repository='$CONTAINER_REGISTRY_URL/' \
-    -v docker_username='$CONTAINER_REGISTRY_USERNAME' \
-    -v docker_password='$CONTAINER_REGISTRY_PASSWORD' \
+    -v docker_repository=$CONTAINER_REGISTRY_URL/ \
+    -v docker_username=$CONTAINER_REGISTRY_USERNAME \
+    -v docker_password=$CONTAINER_REGISTRY_PASSWORD \
     | kbld -f ./bundle/.imgpkg/images.yml -f- \
     | kapp deploy -a tanzu-build-service -f- -y
 
