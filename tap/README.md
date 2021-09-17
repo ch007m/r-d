@@ -411,7 +411,7 @@ docker login -u=$PIVOTAL_REG_USER -p=$PIVOTAL_REG_PWD registry.pivotal.io
 
 **REMARK**: When this demo has been performed, the TBS version used was `1.2.2`
 
-**NOTE**: You can also use a private docker registry running on your k8s cluster. Use , in this case the version `2.6` as `2.7` reports `MANIFEST_BLOB_UNKNOWN` during imgpkg import !!
+**NOTE**: You can also use a private docker registry running on your k8s cluster. Use, in this case, the version `2.6` as `2.7` reports `MANIFEST_BLOB_UNKNOWN` during imgpkg import !!
 
 ```bash
 export IMAGE_REPOSITORY="<YOUR_IMAGE_REPOSITORY"
@@ -439,7 +439,7 @@ copy | exported 17 images
 copy | importing 17 images...
 ```
 
-**NOTe**: When you deploy to a private docker registry, then provide as additional the parameter the path to the CA certificate of the registry `--registry-ca-cert-path certs/ca.crt`
+**NOTe**: When you deploy to a private docker registry, then provide as additional parameter the path to the CA certificate of the registry `--registry-ca-cert-path certs/ca.crt`
 
 - Export the content of the images locally under the folder `./bundle`
 
@@ -488,7 +488,7 @@ pivnet download-product-files --product-slug='build-service' --release-version=$
 chmod +x kp-linux-0.3.1
 cp kp-linux-0.3.1 ~/bin/kp
 ```
-- finally, import the `Tanzu Build Service` dependencies` such as: lifecycle, buildpacks (go, java, python, ..) using the dependency descriptor `descriptor-<version>.yaml` file
+- Finally, import the `Tanzu Build Service` dependencies` such as: lifecycle, buildpacks (go, java, python, ..) using the dependency descriptor `descriptor-<version>.yaml` file
   that you can download using pivnet
 ```bash
 pivnet download-product-files --product-slug='tbs-dependencies' --release-version='100.0.155' --product-file-id=1036685

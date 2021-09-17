@@ -1,4 +1,4 @@
-created: 2021-08-29T05:56:51.345726333Z
+created: 2021-08-30T22:57:06.442398665Z
 plugins:
 - name: core
   description: The core Tanzu CLI
@@ -7,4 +7,4 @@ plugins:
   description: Tanzu package management
   versions: []
 version: ""
-coreVersion: v1.4.0-rc.5
+coreVersion: v1.4.0
