@@ -89,7 +89,7 @@ or using the tool `pivnet`.
 mkdir ~/tanzu && cd ~/tanzu
 mv ~/Downloads/tanzu-cli-bundle-darwin-amd64.tar .
 tar -vxf tanzu-cli-bundle-darwin-amd64.tar
-cp core/v1.4.0-rc.5/tanzu-core-darwin_amd64 /usr/local/bin/tanzu
+cp core/v1.4.0/tanzu-core-darwin_amd64 /usr/local/bin/tanzu
 ```
 
 - Or use the `pivnet` client tool
@@ -100,14 +100,14 @@ pivnet login --api-token=$LEGACY_API_TOKEN
 mkdir ~/tanzu && cd ~/tanzu
 pivnet download-product-files --product-slug='tanzu-application-platform' --release-version='0.1.0' --product-file-id=1030933
 tar -vxf tanzu-cli-bundle-linux-amd64.tar
-cp cli/core/v1.4.0-rc.5/tanzu-core-linux_amd64 $HOME/bin/tanzu
+cp cli/core/v1.4.0/tanzu-core-linux_amd64 $HOME/bin/tanzu
 ```
 
 - Next, configure the Tanzu client to install the plugin `package`. This extension will be used to download the resources from the Pivotal registry
 
 ```bash
 tanzu plugin clean
-tanzu plugin install -v v1.4.0-rc.5 --local cli package
+tanzu plugin install -v v1.4.0 --local cli package
 ✔  successfully installed package
 tanzu package version
 ```
