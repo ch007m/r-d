@@ -1,4 +1,5 @@
 #@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
 ---
 apiVersion: kappctrl.k14s.io/v1alpha1
 kind: App
@@ -39,7 +40,7 @@ spec:
                     tanzu.app.live.view.application.name: "spring-petclinic"
                 spec:
                   containers:
-                  - image: #@ data.values.container_image
+                  - image: (@= data.values.container_image @)
                     securityContext:
                       runAsUser: 1000
   template:
