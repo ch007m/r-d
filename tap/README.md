@@ -1,22 +1,22 @@
 Table of Contents
 =================
 
-   * [What is TAP](#what-is-tap)
-   * [References](#references)
-   * [Prerequisites](#prerequisites)
-   * [Instructions](#instructions)
-      * [Tanzu client and TAP repository](#tanzu-client-and-tap-repository)
-      * [Install TAP - Cloud Native Runtimes](#install-tap---cloud-native-runtimes)
-      * [Install TAP - Accelerator](#install-tap---accelerator)
-      * [Install TAP - Review what it has been installed](#install-tap---review-what-it-has-been-installed)
-      * [Install Tanzu Build Service (TBS)](#install-tanzu-build-service-tbs)
-   * [Demo](#demo)
-     * [All in one instructions](#all-in-one-instructions)
-     * [Step by step instructions](#step-by-step-instructions)
-     * [Demo shortcuts](#demo-shortcuts)
-   * [Additional tools](#additional-tools)
-      * [Clean](#clean)
-      
+* [What is TAP](#what-is-tap)
+* [References](#references)
+* [Prerequisites](#prerequisites)
+* [Instructions](#instructions)
+  * [Tanzu client and TAP repository](#tanzu-client-and-tap-repository)
+  * [Install TAP - Cloud Native Runtimes](#install-tap---cloud-native-runtimes)
+  * [Install TAP - Accelerator](#install-tap---accelerator)
+  * [Install TAP - Review what it has been installed](#install-tap---review-what-it-has-been-installed)
+  * [Install Tanzu Build Service (TBS)](#install-tanzu-build-service-tbs)
+* [Demo](#demo)
+  * [Step by step instructions](#step-by-step-instructions)
+  * [All in one instructions](#all-in-one-instructions)
+  * [Demo shortcuts](#demo-shortcuts)
+* [Additional tools](#additional-tools)
+  * [Clean](#clean)
+
 ## What is TAP
 
 Tanzu Application Platform - https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/0.1/tap-0-1/GUID-overview.html is a packaged set of components that helps developers and
@@ -91,7 +91,9 @@ mv ~/Downloads/tanzu-cli-bundle-darwin-amd64.tar .
 tar -vxf tanzu-cli-bundle-darwin-amd64.tar
 cp core/v1.4.0-rc.5/tanzu-core-darwin_amd64 /usr/local/bin/tanzu
 ```
+
 - Or use the `pivnet` client tool
+
 ```bash
 # To auth the user, use the API legacy token which is available here : https://network.pivotal.io/users/dashboard/edit-profile
 pivnet login --api-token=$LEGACY_API_TOKEN
@@ -219,7 +221,7 @@ tanzu package install cloud-native-runtimes -p cnrs.tanzu.vmware.com -v 1.0.1 -n
 Added installed package 'cloud-native-runtimes' in namespace 'tap-install'
 ```
 
-### Install TAP - Accelerator 
+### Install TAP - Accelerator
 
 - When this is done, we will proceed to the deployment of the `Application accelerator` and create another config yaml file:
 
@@ -469,7 +471,9 @@ ytt -f ./bundle/values.yaml \
     | kbld -f ./bundle/.imgpkg/images.yml -f- \
     | kapp deploy -a tanzu-build-service -f- -y
 ```
+
 - If you use a private docker registry, then execute this command
+
 ```bash
 ytt -f ./bundle/values.yaml \
     -f ./bundle/config/ \
@@ -480,6 +484,7 @@ ytt -f ./bundle/values.yaml \
     | kbld -f ./bundle/.imgpkg/images.yml -f- \
     | kapp deploy -a tanzu-build-service -f- -y
 ```
+
 **NOTE**: The `<PRIVATE_IMAGE_REPOSITORY>` should include as latest char a `/` (e.g: `<IP_ADDRESS>:<PORT>/`). Otherwise the `.dockerconfigjson` file generated for the `canonical-registry-secret` will include
 as registry `http//index.docker.io/v1/`
 
@@ -490,8 +495,10 @@ pivnet download-product-files --product-slug='build-service' --release-version=$
 chmod +x kp-linux-0.3.1
 cp kp-linux-0.3.1 ~/bin/kp
 ```
-- Finally, import the `Tanzu Build Service` dependencies` such as: lifecycle, buildpacks (go, java, python, ..) using the dependency descriptor `descriptor-<version>.yaml` file
+
+- Finally, import the `Tanzu Build Service` dependencies such as: lifecycle, buildpacks (go, java, python, ..) using the dependency descriptor `descriptor-<version>.yaml` file
   that you can download using pivnet
+
 ```bash
 pivnet download-product-files --product-slug='tbs-dependencies' --release-version='100.0.155' --product-file-id=1036685
 2021/09/14 11:11:26 Downloading 'descriptor-100.0.155.yaml' to 'descriptor-100.0.155.yaml'
@@ -508,13 +515,12 @@ Importing ClusterStore 'default'...
 	Uploading '95.217.159.244:32500/tanzu-buildpacks_dotnet-core@sha256:6d57e312e7ac86f78ece4afcc3967e5314fbb71fe592800fd6f0f58bd923945a'
 	Uploading '95.217.159.244:32500/tanzu-buildpacks_python@sha256:1222d5f695222597687173b1b8612844f3ccd763eae86e99c3ebacc41390db40'
 	 \ 578.31 MB
-...	
+...
 ```
 
 **WARNING**: This step to import the `buildpacks` will take time !
 
 - When done, play with the [demo](#Demo) :-)
-
 - To delete the `build-service` using kapp
 
 ```bash
@@ -545,6 +551,7 @@ kubectl create secret docker-registry docker-hub-registry \
     --docker-server=https://index.docker.io/v1/ \
     --namespace tap-install
 ```
+
 **NOTE**: If you use a local private docker registry, change the parameters accordingly (e.g. `docker_server=95.217.159.244:32500`) !
 
 - Create a `sa` using the secret containing your docker registry creds
@@ -616,6 +623,7 @@ spec:
       revision: main
 EOF
 ```
+
 **NOTE**: To delete the application deployed, do `kc delete images.kpack.io/spring-petclinic-image -n tap-install`
 
 - Check the status of the `build` and/or the `image`
@@ -746,17 +754,21 @@ cat <<EOF >> /etc/hosts
 $VM_IP petclinic.tap-install.example.com
 EOF
 ```
+
 **REMARK**: This step is needed if you wouls like to use as domain `<VM_IP>.nip.io` as we must patch the Knative Serving config-domain configmap
+
 ```bash
 kubectl patch cm/config-domain -n knative-serving --type merge -p '{"data":{"95.217.159.244.nip.io":""}}'
 ```
 
 - Access the service using your browser `http://petclinic.tap-install.example.com:<nodePort>`
 - To access the `Applicatin View` UI, get the `NodePort` of the svc and open the address in your browser
+
 ```bash
 nodePort=$(kc get svc/application-live-view-5112 -n tap-install -o jsonpath='{.spec.ports[0].nodePort}')
 echo http://$VM_IP:$nodePort/apps
 ```
+
 - Enjoy !!
 
 ### All in one instructions
@@ -777,10 +789,11 @@ ytt -f values.yml \
   -v github_org="<GITHUB_ORG>" \  
   --output-files ./generated
 ```
+
 - Deploy next the kubernetes YAML resources within the namespace `tap-install` to:
-    - Create the `ServiceAccount` with the proper permission (= RBAC) and `imagePullSecret` to access the container registry for the `TAP service account`
-    - Build an image of the project using `kpack`
-    - Deploy the application using `kapp` and `Knative`
+  - Create the `ServiceAccount` with the proper permission (= RBAC) and `imagePullSecret` to access the container registry for the `TAP service account`
+  - Build an image of the project using `kpack`
+  - Deploy the application using `kapp` and `Knative`
 
 ```bash
 # Create the docker-registry secret, sa, rbac for the tap-user
@@ -866,9 +879,7 @@ sudo reboot
 To delete the installed packages or applications:
 
 1. List the installed packages: `tanzu package installed list -n tap-install`
-
 2. Remove a package by running: `tanzu package installed delete PACKAGE-NAME -n tap-install`
-
 3. or execute the following `All in one command`
 
 ```bash
@@ -884,6 +895,7 @@ done
 ```
 
 Sometimes it has been needed to delete some resources manually when problems occurred during installation of a package (CNR, ...):
+
 ```bash
 kc delete clusterrole/cloud-native-runtimes-tap-install-cluster-role
 kc delete clusterrolebinding/cloud-native-runtimes-tap-install-cluster-rolebinding
@@ -894,4 +906,5 @@ kc delete -n tap-install sa/app-accelerator-tap-install-sa
 kc delete clusterrole/app-accelerator-tap-install-cluster-role
 kc delete clusterrolebinding/app-accelerator-tap-install-cluster-rolebinding
 ```
+
 Thats's all !
