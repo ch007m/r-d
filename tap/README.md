@@ -805,11 +805,24 @@ kapp deploy -a tap-service-account \
 # Build the image
 kubectl apply -f ./generated/tap-kpack-image.yml
 
-# Grab the container image sha and generate the `tap-kapp.yml` file
-# TODO: ytt ...
+# Check build and image status
+kp image list -n tap-install                    
+kp build list -n tap-install
 
-# Build the image
-kubectl apply -f ./k8S/generated/tap-kpack-image.yml
+# Grab the container image sha and generate the `tap-kapp.yml` file using ytt command
+LATEST_IMAGE=$(kc get image.kpack.io/spring-petclinic-image -n tap-install -o jsonpath='{.status.latestImage}')
+SPLIT_REF=$(echo $LATEST_IMAGE | grep -o '[^:]*$')
+echo $SPLIT_REF | cut -d. -f1
+echo "Image reference to be pulled on the target VM: $LATEST_IMAGE"
+
+
+# Deploy the application
+kubectl apply -f ./generated/tap-kapp.yml
+```
+To clean:
+```bash
+kubectl delete image.kpack.io/spring-petclinic-image -n tap-install
+kapp delete -a tap-service-account
 ```
 
 ### Demo shortcuts
@@ -822,7 +835,6 @@ export VM_IP=95.217.159.244
 export UI_NODE_PORT=$(kc get svc/acc-ui-server -n accelerator-system -o jsonpath='{.spec.ports[0].nodePort}')
 echo "Accelerator UI: http://$VM_IP:$UI_NODE_PORT"
 open -na "Google Chrome" --args --incognito http://$VM_IP:$UI_NODE_PORT
-open http://$VM_IP:$UI_NODE_PORT
 
 export LIVE_NODE_PORT=$(kc get svc/application-live-view-5112 -n tap-install -o jsonpath='{.spec.ports[0].nodePort}')
 echo "Live view: http://$VM_IP.nip.io:$LIVE_NODE_PORT/apps"
