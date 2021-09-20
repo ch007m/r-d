@@ -11,7 +11,9 @@ Table of Contents
       * [Install TAP - Review what it has been installed](#install-tap---review-what-it-has-been-installed)
       * [Install Tanzu Build Service (TBS)](#install-tanzu-build-service-tbs)
    * [Demo](#demo)
-      * [Demo shortcuts](#demo-shortcuts)
+     * [All in one instructions](#all-in-one-instructions)
+     * [Step by step instructions](#step-by-step-instructions)
+     * [Demo shortcuts](#demo-shortcuts)
    * [Additional tools](#additional-tools)
       * [Clean](#clean)
       
@@ -520,6 +522,48 @@ kapp delete -a tanzu-build-service -n build-service
 ```
 
 ## Demo
+
+### All in one instructions
+
+To generate the proper kubernetes manifests (secret, kapp, kapp, ...), yu can use the `ytt` template files created under the 
+`k8s` folder with the needed parameters:
+
+```bash
+cd k8s
+
+ytt -f values.yml \
+  -f ./config \ 
+  -v docker_registry="<PUBLIC_OR_PRIVATE_CONTAINER_REG>" \
+  -v docker_username="<CONTAINER_REG_USERNAME>" \
+  -v docker_password="<CONTAINER_REG_USERNAME>" \
+  -v container_image="<CONTAINER_IMAGE_URL>" \
+  -v container_image_sha="<CONTAINER_IMAGE_SHA" \
+  --output-files ./generated
+  
+cd ..
+```
+- Deploy next the kubernetes the YAML resources to:
+  - Create the `ServiceAccount` with the proper permission (= RBAC) and `imagePullSecret`
+  - Build an image of the project using `kpack`
+  - Deploy the application using `kapp` and `Knative`
+
+```bash
+# Create the sa, rbac
+kubectl apply -f ./k8S/generated/tap-rbac.yml
+kubectl apply -f ./k8S/generated/tap-sa.yml
+kubectl apply -f ./k8S/generated/tap-secret.yml
+
+# Build the image
+./k8S/generated/tap-kpack-image.yml
+
+# Grab the container image sha and generate the `tap-kapp.yml` file
+# TODO: ytt ...
+
+# Build the image
+kubectl apply -f ./k8S/generated/tap-kpack-image.yml
+```
+
+### Step by step instructions
 
 - Access the `TAP Accelerator UI` at the following address `http://<VM_IP>:<NODEPORT_ACCELERATOR_SERVER>`
   ```bash
