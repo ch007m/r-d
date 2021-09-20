@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tap-service-account
+  namespace: tap-install
+secrets:
+  - name: docker-hub-registry
+imagePullSecrets:
+  - name: docker-hub-registry

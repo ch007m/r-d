@@ -1,0 +1,17 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: kpack.io/v1alpha1
+kind: Image
+metadata:
+  name: spring-petclinic-image
+  namespace: tap-install
+spec:
+  tag: #@ data.values.container_image
+  serviceAccount: tap-service-account
+  builder:
+    kind: ClusterBuilder
+    name: default
+  source:
+    git:
+      url: https://github.com/ch007m/spring-pet-clinic-eks
+      revision: main
