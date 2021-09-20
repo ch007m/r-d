@@ -41,14 +41,14 @@ Tanzu Application Platform simplifies workflows in both the `inner` loop and `ou
 It packages different technology such as:
 
 
-| Name                                                                                                                 | Description                                                                                                                                                                                        | System(s)                       | Version |
-| ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | --------- |
-| [Tanzu Build Service](https://docs.pivotal.io/build-service/1-2/)                                                    | Service building Container images using buildpacks spec                                                                                                                                            | kpack                           | 1.2.2   |
-| [Cloud Native runtimes](https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/0.1/tap-0-1/GUID-overview.html) | Serverless application runtime for Kubernetes that is based on Knative and runs on a single Kubernetes cluster                                                                                     |                                 | 1.0.2   |
-| [Application Live](https://docs.vmware.com/en/Application-Live-View-for-VMware-Tanzu/0.1/docs/GUID-index.html)       | lightweight insights and troubleshooting tool that helps application developers and application operators to look inside running applications. It is based on the concept of Spring Boot Actuators | AppLive controler/server        | 0.1.0   |
-| [Application Accelerator](https://docs.vmware.com/en/Application-Accelerator-for-VMware-Tanzu/index.html)            | Controller reconciling accelerator CRD (= developer project definition)                                                                                                                            | accelerator, source controllers | 0.2.0   |
-| [Flux2](https://github.com/fluxcd/flux2#flux-version-2)                                                              | Sync k8s resources and config up to date from Git repositories                                                                                                                                     | Flux2                           | 0.17.0  |
-| [Kapp](https://carvel.dev/kapp-controller/)                                                                          | Deploy and view groups of Kubernetes resources as "applications" controller                                                                                                                        | kapp                            | 0.39.0  |
+| Name                                                                                                                 | Description                                                                                                                                                                                        | System(s)                                   | Product page                                         | Version        |
+| ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------ | ---------------- |
+| [Tanzu Build Service](https://docs.pivotal.io/build-service/1-2/)                                                    | Service building Container images using buildpacks spec                                                                                                                                            | kpack                                       | https://network.pivotal.io/products/build-service/   | 1.2.2          |
+| [Cloud Native runtimes](https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/0.1/tap-0-1/GUID-overview.html) | Serverless application runtime for Kubernetes that is based on Knative and runs on a single Kubernetes cluster                                                                                     |                                             | https://network.pivotal.io/products/serverless       | 1.0.2+build.81 |
+| [Application Live](https://docs.vmware.com/en/Application-Live-View-for-VMware-Tanzu/0.1/docs/GUID-index.html)       | lightweight insights and troubleshooting tool that helps application developers and application operators to look inside running applications. It is based on the concept of Spring Boot Actuators | Application Live controller & server        | https://network.pivotal.io/products/app-live-view/   | 0.1.0          |
+| [Application Accelerator](https://docs.vmware.com/en/Application-Accelerator-for-VMware-Tanzu/index.html)            | Controller reconciling accelerator CRD (= developer project definition)                                                                                                                            | Application accelerator & source controller | https://network.pivotal.io/products/app-accelerator/ | 0.2.0          |
+| [Flux2](https://github.com/fluxcd/flux2#flux-version-2)                                                              | Sync k8s resources and config up to date from Git repositories                                                                                                                                     | Flux2                                       | https://fluxcd.io/                                   | 0.17.0         |
+| [Kapp](https://carvel.dev/kapp-controller/)                                                                          | Deploy and view groups of Kubernetes resources as "applications" controller                                                                                                                        | kapp                                        | https://carvel.dev/kapp-controller/                  | 0.24.0         |
 
 ## References
 
@@ -806,7 +806,7 @@ kapp deploy -a tap-service-account \
 kubectl apply -f ./generated/tap-kpack-image.yml
 
 # Check build and image status
-kp image list -n tap-install                    
+kp image list -n tap-install                
 kp build list -n tap-install
 
 # Grab the container image sha and generate the `tap-kapp.yml` file using ytt command
@@ -821,9 +821,11 @@ ssh-hetznerc h01-121 "docker pull $LATEST_IMAGE"
 # Deploy the application
 kubectl apply -f ./generated/tap-kapp.yml
 ```
+
 Next, use the demo shortcuts to open the different UI and access the Spring Petclinic
 
 To clean:
+
 ```bash
 kubectl delete image.kpack.io/spring-petclinic-image -n tap-install
 kapp delete -a tap-service-account
