@@ -40,7 +40,7 @@ spec:
                     tanzu.app.live.view.application.name: "spring-petclinic"
                 spec:
                   containers:
-                  - image: (@= data.values.container_image @)
+                  - image: (@= data.values.container_image_name @)@sha256:(@= data.values.container_image_sha @)
                     securityContext:
                       runAsUser: 1000
   template:

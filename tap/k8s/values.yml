@@ -4,5 +4,7 @@ docker_registry:
 docker_username:
 docker_password:
 
-container_image: 95.217.159.244:32500/spring-petclinic-eks
-container_image_sha: 49fa45da83c4a212b23a0dcd89e8fb731fe9891039824d6bd37f9fefb279a135
+container_image_name:
+container_image_sha:
+
+github_org:

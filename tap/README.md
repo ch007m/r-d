@@ -523,46 +523,6 @@ kapp delete -a tanzu-build-service -n build-service
 
 ## Demo
 
-### All in one instructions
-
-To generate the proper kubernetes manifests (secret, kapp, kapp, ...), yu can use the `ytt` template files created under the 
-`k8s` folder with the needed parameters:
-
-```bash
-cd k8s
-
-ytt -f values.yml \
-  -f ./config \ 
-  -v docker_registry="<PUBLIC_OR_PRIVATE_CONTAINER_REG>" \
-  -v docker_username="<CONTAINER_REG_USERNAME>" \
-  -v docker_password="<CONTAINER_REG_USERNAME>" \
-  -v container_image="<CONTAINER_IMAGE_URL>" \
-  -v container_image_sha="<CONTAINER_IMAGE_SHA" \
-  --output-files ./generated
-  
-cd ..
-```
-- Deploy next the kubernetes the YAML resources to:
-  - Create the `ServiceAccount` with the proper permission (= RBAC) and `imagePullSecret`
-  - Build an image of the project using `kpack`
-  - Deploy the application using `kapp` and `Knative`
-
-```bash
-# Create the sa, rbac
-kubectl apply -f ./k8S/generated/tap-rbac.yml
-kubectl apply -f ./k8S/generated/tap-sa.yml
-kubectl apply -f ./k8S/generated/tap-secret.yml
-
-# Build the image
-./k8S/generated/tap-kpack-image.yml
-
-# Grab the container image sha and generate the `tap-kapp.yml` file
-# TODO: ytt ...
-
-# Build the image
-kubectl apply -f ./k8S/generated/tap-kpack-image.yml
-```
-
 ### Step by step instructions
 
 - Access the `TAP Accelerator UI` at the following address `http://<VM_IP>:<NODEPORT_ACCELERATOR_SERVER>`
@@ -798,6 +758,46 @@ nodePort=$(kc get svc/application-live-view-5112 -n tap-install -o jsonpath='{.s
 echo http://$VM_IP:$nodePort/apps
 ```
 - Enjoy !!
+
+### All in one instructions
+
+To generate the proper kubernetes manifests (secret, kapp, kapp, ...), yu can use the `ytt` template files created under the
+`k8s` folder with the needed parameters:
+
+```bash
+cd k8s
+
+ytt -f values.yml \
+  -f ./config \ 
+  -v docker_registry="<PUBLIC_OR_PRIVATE_CONTAINER_REG>" \
+  -v docker_username="<CONTAINER_REG_USERNAME>" \
+  -v docker_password="<CONTAINER_REG_USERNAME>" \
+  -v container_image_name="<CONTAINER_IMAGE_NAME>" \
+  -v container_image_sha="<CONTAINER_IMAGE_SHA>" \
+  -v github_org="<GITHUB_ORG>" \  
+  --output-files ./generated
+```
+- Deploy next the kubernetes YAML resources within the namespace `tap-install` to:
+    - Create the `ServiceAccount` with the proper permission (= RBAC) and `imagePullSecret` to access the container registry for the `TAP service account`
+    - Build an image of the project using `kpack`
+    - Deploy the application using `kapp` and `Knative`
+
+```bash
+# Create the docker-registry secret, sa, rbac for the tap-user
+kapp deploy -a tap-service-account \
+  -f ./generated/tap-secret.yml \
+  -f ./generated/tap-sa.yml \
+  -f ./generated/tap-rbac.yml
+
+# Build the image
+kubectl apply -f ./generated/tap-kpack-image.yml
+
+# Grab the container image sha and generate the `tap-kapp.yml` file
+# TODO: ytt ...
+
+# Build the image
+kubectl apply -f ./k8S/generated/tap-kpack-image.yml
+```
 
 ### Demo shortcuts
 
