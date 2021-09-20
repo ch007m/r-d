@@ -815,10 +815,14 @@ SPLIT_REF=$(echo $LATEST_IMAGE | grep -o '[^:]*$')
 echo $SPLIT_REF | cut -d. -f1
 echo "Image reference to be pulled on the target VM: $LATEST_IMAGE"
 
+# !! Execute a docker pull on the VM
+ssh-hetznerc h01-121 "docker pull $LATEST_IMAGE"
 
 # Deploy the application
 kubectl apply -f ./generated/tap-kapp.yml
 ```
+Next, use the demo shortcuts to open the different UI and access the Spring Petclinic
+
 To clean:
 ```bash
 kubectl delete image.kpack.io/spring-petclinic-image -n tap-install
