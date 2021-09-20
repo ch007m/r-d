@@ -71,7 +71,7 @@ tanzu package version
 # Install the needed components: kapp controller, fluxcd
 kapp deploy -a flux -f https://github.com/fluxcd/flux2/releases/download/$TANZU_FLUX_VERSION/install.yaml -y
 sleep 1m
-kapp deploy -a kubectl -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/$TANZU_KAPP_VERSION/download/release.yml -y
+kapp deploy -a kc -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/$TANZU_KAPP_VERSION/download/release.yml -y
 sleep 1m
 
 # Deploy TAP
