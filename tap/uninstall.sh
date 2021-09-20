@@ -11,15 +11,11 @@ for pkg in ${packages[@]}; do
   tanzu package installed delete $pkg -n tap-install -y
 done
 
-# Trick to fix the issue which blocks to delete kc
-kubectl patch crd/apps.kappctrl.k14s.io -p '{"metadata":{"finalizers":null}}' --type=merge
-
-declare -a packages=("tap-package-repo" "flux" "tanzu-build-service" "kc")
+declare -a packages=("tap-service-account" "tanzu-build-service" "tap-package-repo" "flux" "kc")
 for pkg in ${packages[@]}; do
   echo "### DELETING ####"
   echo "kapp delete -a $pkg -y"
   kapp delete -a $pkg -y
 done
 
-kubectl delete all,sa,secrets -n tap-install
 kubectl delete ns tap-install
