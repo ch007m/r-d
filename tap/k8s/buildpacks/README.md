@@ -64,5 +64,5 @@ The backend endpoint would be:
 ```
 
 Now if apps actuator path is configured with label: `tanzu.app.live.view.application.actuator.path: quarkus`
-instead of the default which is actuator on the app you’d be hitting endpoint /`quarkus/app-memory` the response json
+instead of the default which is actuator on the app you’d be hitting endpoint `/quarkus/app-memory` the response json
 for which you should be able to handle in your UI plugin.
