@@ -1,24 +1,47 @@
 ## Steps executed to install our buildpacks
 
+```bash
+git clone https://github.com/quarkusio/quarkus-buildpacks.git && cd quarkus-buildpacks
+
+# Generate the buildpacks image (pack ...)
+./create-buildpacks.sh
+
+# Tag and push the images to a private docker registry
+export REGISTRY_URL="95.217.159.244:32500"
+docker tag redhat/buildpacks-builder-quarkus-jvm:latest $REGISTRY_URL/redhat-buildpacks/quarkus-java:latest
+docker tag redhat/buildpacks-stack-quarkus-run:jvm $REGISTRY_URL/redhat-buildpacks/quarkus:run
+docker tag redhat/buildpacks-stack-quarkus-build:jvm $REGISTRY_URL/redhat-buildpacks/quarkus:build
+
+docker push $REGISTRY_URL/redhat-buildpacks/quarkus-java:latest
+docker push $REGISTRY_URL/redhat-buildpacks/quarkus:build
+docker push $REGISTRY_URL/redhat-buildpacks/quarkus:run
+
+# Create the clusterStore, ClusterBuilder and ClusterStack CR
+kapp deploy -a runtime-buildpacks \
+  -f buildpacks/runtime-clusterstore.yml \
+  -f buildpacks/runtime-clusterstack.yml \
+  -f buildpacks/runtime-clusterbuilder.yml
+
+# To delete
+kapp delete -a runtime-buildpacks
 ```
-git clone https://github.com/quarkusio/quarkus-buildpacks.git && cd quarkus-buildpacks./create-buildpacks.sh
-docker tag redhat/buildpacks-builder-quarkus-jvm:latest 95.217.159.244:32500/redhat-buildpacks/quarkus-java:latest
-docker tag redhat/buildpacks-stack-quarkus-run:jvm 95.217.159.244:32500/redhat-buildpacks/quarkus:run
-docker tag redhat/buildpacks-stack-quarkus-build:jvm 95.217.159.244:32500/redhat-buildpacks/quarkus:build
 
-docker push 95.217.159.244:32500/redhat-buildpacks/quarkus-java:latest
-docker push 95.217.159.244:32500/redhat-buildpacks/quarkus:build
-docker push 95.217.159.244:32500/redhat-buildpacks/quarkus:run
+## Build the Quarkus application
 
-kc delete -f buildpacks/runtime-clusterstore.yml -f buildpacks/runtime-clusterstack.yml -f buildpacks/runtime-clusterbuilder.yml
-kc apply -f buildpacks/runtime-clusterstore.yml -f buildpacks/runtime-clusterstack.yml -f buildpacks/runtime-clusterbuilder.yml
-```
-
-## Deploy the Quarkus Application and build it
-
-```
+```bash
 kc delete -f buildpacks/runtime-kpack-image.yml
 kc apply -f buildpacks/runtime-kpack-image.yml
+
+# Check build status
+kc get build.kpack.io -l image.kpack.io/image=quarkus-petclinic-image -n tap-install  
+NAME                                    IMAGE                                                                                                            SUCCEEDED
+quarkus-petclinic-image-build-1-7lkg4   95.217.159.244:32500/quarkus-petclinic@sha256:d7a49934e988e7c281b5de52b6b227a1926f4238c90b3a01ab654c7f554a82bd   True
+```
+## Deploy the Quarkus Application
+
+```bash
+kapp delete -a quarkus-petclinic
+kapp deploy -a quarkus-petclinic -f buildpacks/quarkus-kapp.yml
 ```
 
 ## Trick to allow a quarkus application to work with Application Live View
