@@ -22,7 +22,7 @@ kapp deploy -a runtime-buildpacks \
   -f buildpacks/runtime-clusterstack.yml \
   -f buildpacks/runtime-clusterbuilder.yml
 
-# To delete
+# To delete the buildpacks, builders installed
 kapp delete -a runtime-buildpacks
 ```
 
@@ -40,7 +40,7 @@ quarkus-petclinic-image-build-1-7lkg4   95.217.159.244:32500/quarkus-petclinic@s
 ## Deploy the Quarkus Petclinic Application
 
 ```bash
-kapp delete -a quarkus-petclinic
+kapp delete -a quarkus-petclinic -y
 kapp deploy -a quarkus-petclinic -f buildpacks/quarkus-kapp.yml
 ```
 ## Access the Quarkus Petclinic UI from your browser
