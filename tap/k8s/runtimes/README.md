@@ -29,8 +29,8 @@ kapp delete -a runtime-buildpacks
 ## Build the Quarkus application
 
 ```bash
-kc delete -f buildpacks/runtime-kpack-image.yml
-kc apply -f buildpacks/runtime-kpack-image.yml
+kc delete -f build/kpack-image.yml
+kc apply -f build/kpack-image.yml
 
 # Check build status
 kc get build.kpack.io -l image.kpack.io/image=quarkus-petclinic-image -n tap-install  
@@ -41,7 +41,7 @@ quarkus-petclinic-image-build-1-7lkg4   95.217.159.244:32500/quarkus-petclinic@s
 
 ```bash
 kapp delete -a quarkus-petclinic -y
-kapp deploy -a quarkus-petclinic -f buildpacks/quarkus-kapp.yml
+kapp deploy -a quarkus-petclinic -f ./deploy/quarkus-kapp.yml
 ```
 ## Access the Quarkus Petclinic UI from your browser
 ```bash

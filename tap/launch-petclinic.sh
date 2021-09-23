@@ -1,7 +1,7 @@
 export KUBECONFIG=$HOME/.kube/h01-121
 export VM_IP=95.217.159.244
 export NAMESPACE="tap-install"
-export APPLICATION="petclinic"
+export APPLICATION=${1:-quarkus-petclinic}
 
 export UI_NODE_PORT=$(kubectl get svc/acc-ui-server -n accelerator-system -o jsonpath='{.spec.ports[0].nodePort}')
 echo "Accelerator UI: http://$VM_IP:$UI_NODE_PORT"

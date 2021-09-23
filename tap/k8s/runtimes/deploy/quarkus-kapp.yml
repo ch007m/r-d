@@ -31,6 +31,7 @@ spec:
               template:
                 metadata:
                   annotations:
+                    autoscaling.knative.dev/scaleDownDelay: "15m"
                     client.knative.dev/user-image: ""
                   labels:
                     tanzu.app.live.view: "true"
