@@ -37,7 +37,7 @@ spec:
                   labels:
                     tanzu.app.live.view: "true"
                     tanzu.app.live.view.application.name: "quarkus-petclinic"
-                    tanzu.app.live.view.application.flavours: "quarkus"
+                    # tanzu.app.live.view.application.flavours: "quarkus"
                 spec:
                   containers:
                   - image: 95.217.159.244:32500/quarkus-petclinic@sha256:848008bac5d0dea730450ec5ac844e28fd92a0a59f9cad9e62ff7cf28da44b5f
