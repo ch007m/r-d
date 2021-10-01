@@ -773,7 +773,7 @@ echo http://$VM_IP:$nodePort/apps
 
 ### All in one instructions
 
-To generate the proper kubernetes manifests (secret, kapp, kapp, ...), yu can use the `ytt` template files created under the
+To generate the proper kubernetes manifests (secret, kapp, kapp, ...), you can use the `ytt` template files created under the
 `k8s` folder with the needed parameters:
 
 ```bash
@@ -808,6 +808,9 @@ kubectl apply -f ./generated/tap-kpack-image.yml
 # Check build and image status
 kp image list -n tap-install                
 kp build list -n tap-install
+
+# Check build log
+kp build logs spring-petclinic-image -n tap-install 
 
 # Grab the container image sha and generate the `tap-kapp.yml` file using ytt command
 LATEST_IMAGE=$(kc get image.kpack.io/spring-petclinic-image -n tap-install -o jsonpath='{.status.latestImage}')
