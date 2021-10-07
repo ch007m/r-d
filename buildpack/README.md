@@ -118,12 +118,8 @@ Next, deploy the latest release of shipwright
 kubectl apply -f https://github.com/shipwright-io/build/releases/download/v0.5.1/release.yaml
 ```
 
-When done, we can deploy ou Buildpack strategy using the CR
-```bash
-kubectl apply -f k8s/shipwright/clusterbuildstrategy-runtime.yml
-kubectl delete -f k8s/shipwright/clusterbuildstrategy-runtime.yml
-```
-Generate a secret to access your container registry:
+When done, we can create a secret, used by the serviceAccount of the build's pod to access the container
+registry
 
 ```bash
 REGISTRY_HOST="registry.local:5000" REGISTRY_USER=admin REGISTRY_PASSWORD=snowdrop
@@ -132,6 +128,18 @@ kubectl create secret docker-registry registry-creds -n demo \
   --docker-username="${REGISTRY_USER}" \
   --docker-password="${REGISTRY_PASSWORD}"
 ```
+Install the serviceAccount that the build's pod will use (as we need to use an imagePullSecret consumming the registry secret):
+```bash
+kubectl apply -f k8s/shipwright/sa.yml
+kubectl delete -f k8s/shipwright/sa.yml
+```
+
+Next, deploy the Buildpack strategy using the following CR
+```bash
+kubectl apply -f k8s/shipwright/buildstrategy-runtime.yml
+kubectl delete -f k8s/shipwright/buildstrategy-runtime.yml
+```
+
 Create a Build object:
 
 ```bash
@@ -142,8 +150,8 @@ To view the Build which you just created:
 
 ```bash
 kubectl get build -n demo                        
-NAME                      REGISTERED   REASON      BUILDSTRATEGYKIND      BUILDSTRATEGYNAME    CREATIONTIME
-buildpack-quarkus-build   True         Succeeded   ClusterBuildStrategy   quarkus-buildpacks   3s
+NAME                      REGISTERED   REASON                  BUILDSTRATEGYKIND   BUILDSTRATEGYNAME    CREATIONTIME
+buildpack-quarkus-build   False        BuildStrategyNotFound   BuildStrategy       quarkus-buildpacks   174m
 ```
 
 Submit your BuildRun:
@@ -152,7 +160,7 @@ Submit your BuildRun:
 kubectl apply -f k8s/shipwright/build-run.yml
 kubectl delete -f k8s/shipwright/build-run.yml
 ```
-Wait until your BuildRun is completed and then you can view it as follows:
+Wait until your BuildRun is completed, and then you can view it as follows:
 
 ```bash
 kubectl get buildruns -n demo

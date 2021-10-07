@@ -9,7 +9,7 @@ spec:
     contextDir: .
   strategy:
     name: quarkus-buildpacks
-    kind: ClusterBuildStrategy
+    kind: BuildStrategy
   output:
     image: registry.local:5000/quarkus-petclinic
     credentials:

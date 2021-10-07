@@ -4,5 +4,8 @@ metadata:
   name: buildpack-quarkus-buildrun-1
   namespace: demo
 spec:
+  serviceAccount:
+    name: registry-creds
+    generate: false
   buildRef:
     name: buildpack-quarkus-build

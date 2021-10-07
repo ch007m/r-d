@@ -1,7 +1,8 @@
 apiVersion: shipwright.io/v1alpha1
-kind: ClusterBuildStrategy
+kind: BuildStrategy
 metadata:
   name: quarkus-buildpacks
+  namespace: demo
 spec:
   buildSteps:
     - name: prepare
