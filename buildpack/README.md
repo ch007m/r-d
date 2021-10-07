@@ -68,10 +68,11 @@ pack build ${REGISTRY_HOST}/quarkus-petclinic \
      --builder ${REGISTRY_HOST}/buildpacks-builder-quarkus-jvm
 ```
 
-If you plan to use a different version of the lifecycle, append then the following parameter with the image: 
+If you plan to use a different version of the lifecycle, append then the following parameter with the image to be used: 
 ```bash
     --lifecycle-image buildpacksio/lifecycle:919b8ad-linux-arm64
 ```
+**WARNING**: Take care that, image will only be used for `analyze/restore/export` and you would need to update the lifecycle in the builder image for it to be used for `detect/build`
 
 ## 2. Pod running the lifecycle creator
 
