@@ -11,14 +11,14 @@
       * [Build an image](#build-an-image)
       * [Deploy the quarkus application](#deploy-the-quarkus-application)
    * [5. Tanzu Build Service (TBS) aka kpack](#5-tanzu-build-service-tbs-aka-kpack)
-
-
+   
 ## How to build a runtime using buildpack
 
 The goal of this project is to test/experiment different approach to build a runtime using:
 
-- [pack] build client()
-- [pod] build
+- [pack](#1-pack-client) build client
+- [pod](#2-pod-running-the-lifecycle-creator) build
+- [kpack](#3-kpack-with-a-local-docker-registry) build
 - Tekton
 - Shipwright
 
