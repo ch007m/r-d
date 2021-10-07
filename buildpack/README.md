@@ -103,8 +103,10 @@ kubectl -n demo logs -lapp=quarkus-petclinic-image-build -c build -f
 
 See project doc for more information - https://github.com/shipwright-io/build
 
-This scenario will not work for the moment as we cannot specify the docker file containing the `registry auths` - [issue-838](https://github.com/shipwright-io/build/issues/838)
-and [issue-896](https://github.com/shipwright-io/build/issues/896)
+This scenario will not work for the moment due to several issues:
+- [issue-838](https://github.com/shipwright-io/build/issues/838)
+- [issue-895](https://github.com/shipwright-io/build/issues/895)
+- [issue-896](https://github.com/shipwright-io/build/issues/896)
 
 To use shipwright, it is needed to have a k8s cluster, tekton installed
 ```bash
