@@ -1,16 +1,16 @@
 ## Table of Contents
 
-  * [Table of Contents](#table-of-contents)
-  * [How to build a runtime using buildpack](#how-to-build-a-runtime-using-buildpack)
-  * [0. Common steps](#0-common-steps)
-  * [1. Pack client](#1-pack-client)
-  * [2. Scenario to be re-tested using a pod able to perform the buildpack steps](#2-scenario-to-be-re-tested-using-a-pod-able-to-perform-the-buildpack-steps)
-  * [3. Scenario tested using kpack deployed on a k8s cluster with a local docker registry](#3-scenario-tested-using-kpack-deployed-on-a-k8s-cluster-with-a-local-docker-registry)
-       * [Kpack controller](#kpack-controller)
-       * [Deploy the runtime resources](#deploy-the-runtime-resources)
-       * [Build an image](#build-an-image)
-       * [Deploy the quarkus application](#deploy-the-quarkus-application)
-  * [5. Scenario using : Tanzu Build Service (TBS) aka kpack](#5-scenario-using--tanzu-build-service-tbs-aka-kpack)
+   * [Table of Contents](#table-of-contents)
+   * [How to build a runtime using buildpack](#how-to-build-a-runtime-using-buildpack)
+   * [0. Common steps](#0-common-steps)
+   * [1. Pack client](#1-pack-client)
+   * [2. Pod running the lifecycle creator](#2-pod-running-the-lifecycle-creator)
+   * [3. kpack with a local docker registry](#3-kpack-with-a-local-docker-registry)
+      * [Kpack controller](#kpack-controller)
+      * [Deploy the runtime resources](#deploy-the-runtime-resources)
+      * [Build an image](#build-an-image)
+      * [Deploy the quarkus application](#deploy-the-quarkus-application)
+   * [5. Tanzu Build Service (TBS) aka kpack](#5-tanzu-build-service-tbs-aka-kpack)
 
 
 ## How to build a runtime using buildpack
