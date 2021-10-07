@@ -168,6 +168,19 @@ NAME                           SUCCEEDED   REASON    STARTTIME   COMPLETIONTIME
 buildpack-quarkus-buildrun-1   Unknown     Pending   11s  
 ```
 
+### All steps
+```bash
+kubectl apply -f k8s/shipwright/sa.yml
+kubectl apply -f k8s/shipwright/buildstrategy-runtime.yml
+kubectl apply -f k8s/shipwright/build.yml
+kubectl apply -f k8s/shipwright/build-run.yml
+
+kubectl delete -f k8s/shipwright/sa.yml
+kubectl delete -f k8s/shipwright/buildstrategy-runtime.yml
+kubectl delete -f k8s/shipwright/build.yml
+kubectl delete -f k8s/shipwright/build-run.yml
+```
+
 ## 4. Tekton
 
 TODO
