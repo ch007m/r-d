@@ -52,7 +52,8 @@ able to run a k8s cluster, a TLS/secured registry
 git clone https://github.com/snowdrop/k8s-infra.git && cd k8s-infra/kind
 ./k8s/kind-tls-secured-reg.sh
 ```
-**NOTE**: The certificate generated is copied within the file `$HOME/local-registry.crt` and the user, password to be used to be authenticated with the registry are respectively` admin` and `snwodrop`
+**NOTE**: The certificate generated is copied within the file `$HOME/local-registry.crt` and the user, password to be used to be authenticated 
+with the registry are respectively `admin` and `snowdrop`
 
 ## 1. Pack client 
 
