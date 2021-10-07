@@ -1,26 +1,21 @@
 ## Table of Contents
 
-   * [Table of Contents](#table-of-contents)
-   * [How to build a runtime using buildpack](#how-to-build-a-runtime-using-buildpack)
-   * [0. Common steps](#0-common-steps)
-   * [1. Pack client](#1-pack-client)
-   * [2. Pod running the lifecycle creator](#2-pod-running-the-lifecycle-creator)
-   * [3. kpack with a local docker registry](#3-kpack-with-a-local-docker-registry)
-      * [Kpack controller](#kpack-controller)
-      * [Deploy the runtime resources](#deploy-the-runtime-resources)
-      * [Build an image](#build-an-image)
-      * [Deploy the quarkus application](#deploy-the-quarkus-application)
-   * [5. Tanzu Build Service (TBS) aka kpack](#5-tanzu-build-service-tbs-aka-kpack)
-   
+  * [0. Common steps](#0-common-steps)
+  * [1. Pack client](#1-pack-client)
+  * [2. Pod running the lifecycle creator](#2-pod-running-the-lifecycle-creator)
+  * [3. Shipwright and Buildpack v3](#3-shipwright-and-buildpack-v3)
+  * [4. Tekton](#4-tekton)
+  * [4. kpack with a local docker registry](#4-kpack-with-a-local-docker-registry)
+  
 ## How to build a runtime using buildpack
 
 The goal of this project is to test/experiment different approach to build a runtime using:
 
 - [pack](#1-pack-client) build client
 - [pod](#2-pod-running-the-lifecycle-creator) build
-- [kpack](#3-kpack-with-a-local-docker-registry) build
-- Tekton
-- Shipwright
+- [Shipwright](#3-shipwright-and-buildpack-v3)
+- [Tekton](#4-tekton)
+- [kpack](#3-kpack-with-a-local-docker-registry)
 
 ## 0. Common steps
 
@@ -103,7 +98,14 @@ Watch the progression of the build
 kubectl -n demo logs -lapp=quarkus-petclinic-image-build -c build -f
 ```
 
-## 3. kpack with a local docker registry
+## 3. Shipwright and Buildpack v3
+
+TODO: See - https://github.com/shipwright-io/build
+
+## 4. Tekton
+
+TODO
+## 4. kpack with a local docker registry
 
 Install kind and a private secured/TLS registry locally (using registry version 2.6 !)
 ```bash
@@ -237,7 +239,7 @@ kapp delete -a quarkus-petclinic -n -y
 ```
 and play with it from the browser `http://localhost:31000` :-)
 
-## 5. Tanzu Build Service (TBS) aka kpack
+## 6. Tanzu Build Service (TBS) aka kpack
 
 If you prefer to use Tanzu Build Service and not kpack, then follow the steps described hereafter
 
