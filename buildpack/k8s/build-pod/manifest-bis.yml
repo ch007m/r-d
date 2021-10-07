@@ -1,0 +1,251 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: buildpack
+  namespace: demo
+secrets:
+  - name: registry-creds
+imagePullSecrets:
+  - name: registry-creds
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: quarkus-petclinic-image-cache
+  namespace: demo
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500m
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quarkus-petclinic-image-build
+  namespace: demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quarkus-petclinic-image-build
+  template:
+    metadata:
+      labels:
+        app: quarkus-petclinic-image-build
+    spec:
+     volumes:
+       - name: secret-volume-registry-creds
+         secret:
+           secretName: registry-creds
+           defaultMode: 420
+       - name: cache-dir
+         persistentVolumeClaim:
+           claimName: quarkus-petclinic-image-cache
+       - name: layers-dir
+         emptyDir: {}
+       - name: home-dir
+         emptyDir: {}
+       - name: workspace-dir
+         emptyDir: {}
+       - name: platform-dir
+         emptyDir: {}
+       - name: report-dir
+         emptyDir: {}
+       - name: network-wait-launcher-dir
+         emptyDir: {}
+       - name: image-pull-secrets-dir
+         emptyDir: {}
+       - name: builder-pull-secrets-dir
+         emptyDir: {}
+       - name: notary-dir
+         emptyDir: {}
+       - name: ca-certs
+         emptyDir: {}
+       - name: local-registry-cert
+         configMap:
+           name: local-registry-cert
+     initContainers:
+       - name: setup-ca-certs
+         image: registry.local:5000/alpine:3.14
+         workingDir: /workspace
+         command: [ "/bin/sh","-c" ]
+         args:
+           - |
+             set -e
+
+             # Install thetool able to update locally the trusted CA certificates
+             apk --no-cache add ca-certificates openssl
+             rm -rf /var/cache/apk/*
+
+             cp /local-registry-cert.crt /usr/local/share/ca-certificates/local-registry-cert.crt
+             echo -e "\n## Updating the ca certificates"
+             update-ca-certificates
+
+             # To verify the certificate installed
+             # cat /etc/ssl/certs/ca-certificates.crt | grep "VQQKDAdSZWQgSGF0MREwDwYDVQQLDAhTbm93ZHJvcDESMBAG"
+             # openssl s_client -connect registry.local:5000 -CApath /etc/ssl/certs
+
+             # Copy the certificates updated to the /workspace folder which is used by buildpack to
+             # access private container registry
+             echo -e "\n## Copy the certificates to the /workspace"
+             cp /etc/ssl/certs/* /workspace/
+         volumeMounts:
+           - name: ca-certs
+             mountPath: /workspace
+           - name: local-registry-cert
+             mountPath: /local-registry-cert.crt
+             subPath: local-registry.crt
+         imagePullPolicy: Always
+         securityContext:
+           privileged: true
+       #- name: curl
+       #  image: registry.local:5000/alpine:3.14
+       #  command: [ "/bin/sh","-c" ]
+       #  args:
+       #    - |
+       #      set -e
+       #      apk --update add curl
+       #      echo "## Curl the registry"
+       #      curl -v -u admin:snowdrop https://registry.local:5000/v2/_catalog
+       #  workingDir: /workspace
+       #  volumeMounts:
+       #    - name: ca-certs
+       #      readOnly: true
+       #      mountPath: /etc/ssl/certs
+       #  imagePullPolicy: Always
+       # #######################################################################################@
+       #- name: prepare
+       #  image: registry.local:5000/busybox:1.28
+       #  env:
+       #    - name: PROJECT_NAME
+       #      value: "quarkus-tap-petclinic-main"
+       #    - name: PROJECT_ZIP_URL
+       #      value: "https://github.com/snowdrop/quarkus-tap-petclinic/archive/refs/heads/main.zip"
+       #  command: [ "/bin/sh","-c" ]
+       #  args:
+       #    - |
+       #      set -e
+       #      echo "## Fetch the zip of the project: $PROJECT_ZIP_URL"
+       #      wget $PROJECT_ZIP_URL && unzip -qq main.zip
+       #      cp -a $PROJECT_NAME/. /workspace/
+       #      echo "## $PROJECT_NAME content moved to /workspace"
+       #      # ls -la /workspace/
+       #  workingDir: /workspace
+       #  volumeMounts:
+       #    - name: secret-volume-registry-creds
+       #      mountPath: /var/build-secrets/registry-creds
+       #    - name: builder-pull-secrets-dir
+       #      readOnly: true
+       #      mountPath: /builderPullSecrets
+       #    - name: image-pull-secrets-dir
+       #      readOnly: true
+       #      mountPath: /imagePullSecrets
+       #    - name: platform-dir
+       #      mountPath: /platform
+       #    - name: workspace-dir
+       #      mountPath: /workspace
+       #    - name: home-dir
+       #      mountPath: /builder/home
+       #    - name: layers-dir
+       #      mountPath: /projectMetadata
+       #    - name: ca-certs
+       #      readOnly: true
+       #      mountPath: /etc/ssl/certs
+       #  imagePullPolicy: Always
+       - name: init
+         image: registry.local:5000/kpack/build-init
+         args:
+           - '-dockerconfig=docker-hub-registry'
+         workingDir: /workspace
+         env:
+           - name: GIT_URL
+             value: 'https://github.com/snowdrop/quarkus-tap-petclinic'
+           - name: GIT_REVISION
+             value: 62cae9e32668c685c52ac1cef4c6273d9a63a71b
+           - name: SOURCE_SUB_PATH
+           - name: PLATFORM_ENV_VARS
+             value: 'null'
+           - name: IMAGE_TAG
+             value: 'registry.local:5000/quarkus-petclinic'
+           - name: RUN_IMAGE
+             value: 'registry.local:5000/redhat-buildpacks/quarkus:run'
+           - name: DNS_PROBE_HOSTNAME
+             value: 'registry.local:5000'
+         volumeMounts:
+           - name: secret-volume-registry-creds
+             mountPath: /var/build-secrets/docker-hub-registry
+           - name: builder-pull-secrets-dir
+             readOnly: true
+             mountPath: /builderPullSecrets
+           - name: image-pull-secrets-dir
+             readOnly: true
+             mountPath: /imagePullSecrets
+           - name: platform-dir
+             mountPath: /platform
+           - name: workspace-dir
+             mountPath: /workspace
+           - name: home-dir
+             mountPath: /builder/home
+           - name: layers-dir
+             mountPath: /projectMetadata
+           - name: ca-certs
+             readOnly: true
+             mountPath: /etc/ssl/certs
+         securityContext:
+           runAsUser: 185
+           runAsGroup: 185
+         imagePullPolicy: IfNotPresent
+       - name: create
+         image: registry.local:5000/buildpacks-builder-quarkus-jvm:latest #registry.local:5000/redhat-builder/quarkus
+         command:
+           - /cnb/lifecycle/creator
+         # Arg removed:
+         # - '-group=/layers/group.toml'
+         # - '-plan=/layers/plan.toml'
+         # - '-analyzed=/layers/analyzed.toml'
+         args:
+           - '-cache-dir=/cache'
+           - '-run-image=registry.local:5000/redhat-buildpacks/quarkus:run'
+           - 'registry.local:5000/quarkus-petclinic'
+         env:
+           - name: HOME
+             value: /builder/home
+           - name: CNB_PLATFORM_API
+             value: '0.5'
+         volumeMounts:
+           - name: layers-dir
+             mountPath: /layers
+           - name: workspace-dir
+             mountPath: /workspace
+           - name: home-dir
+             mountPath: /builder/home
+           - name: report-dir
+             mountPath: /var/report
+           - name: cache-dir
+             mountPath: /cache
+           - name: ca-certs
+             readOnly: true
+             mountPath: /etc/ssl/certs
+         imagePullPolicy: Always
+         securityContext:
+           runAsUser: 185
+           runAsGroup: 185
+     containers:
+       - name: completion
+         image: registry.local:5000/busybox:1.28
+         command: [ "/bin/sh","-c" ]
+         args:
+           - |
+             set -e
+             echo "Build completed successfully"
+             exit 0
+         volumeMounts:
+           - mountPath: /builder/home
+             name: home-dir
+     serviceAccountName: buildpack
+     imagePullSecrets:
+      - name: registry-creds
+
