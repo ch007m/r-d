@@ -1,0 +1,16 @@
+apiVersion: shipwright.io/v1alpha1
+kind: Build
+metadata:
+  name: buildpack-quarkus-build
+  namespace: demo
+spec:
+  source:
+    url: https://github.com/snowdrop/quarkus-tap-petclinic
+    contextDir: .
+  strategy:
+    name: quarkus-buildpacks
+    kind: ClusterBuildStrategy
+  output:
+    image: registry.local:5000/quarkus-petclinic
+    credentials:
+      name: registry-creds

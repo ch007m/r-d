@@ -1,0 +1,59 @@
+apiVersion: shipwright.io/v1alpha1
+kind: ClusterBuildStrategy
+metadata:
+  name: quarkus-buildpacks
+spec:
+  buildSteps:
+    - name: prepare
+      image: docker.io/paketobuildpacks/builder:full
+      imagePullPolicy: Always
+      securityContext:
+        runAsUser: 0
+        capabilities:
+          add:
+            - CHOWN
+      command:
+        - chown
+      args:
+        - -R
+        - "1000:1000"
+        - /tekton/home
+        - /builder/home
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1Gi
+        requests:
+          cpu: 250m
+          memory: 65Mi
+    - name: build-and-push
+      image: registry.local:5000/redhat-builder/quarkus
+      imagePullPolicy: Always
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      command:
+        - /bin/bash
+      args:
+        - -c
+        - |
+          set -euo pipefail
+
+          mkdir /tmp/cache /tmp/layers
+
+          /cnb/lifecycle/creator \
+            '-app=$(params.shp-source-context)' \
+            -cache-dir=/tmp/cache \
+            -layers=/tmp/layers \
+            -report=/tmp/report.toml \
+            '$(params.shp-output-image)'
+
+          # Store the image digest
+          grep digest /tmp/report.toml | tr -d ' \"\n' | sed s/digest=// > "$(results.shp-image-digest.path)"
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1Gi
+        requests:
+          cpu: 250m
+          memory: 65Mi

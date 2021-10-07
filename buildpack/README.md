@@ -101,7 +101,62 @@ kubectl -n demo logs -lapp=quarkus-petclinic-image-build -c build -f
 
 ## 3. Shipwright and Buildpack v3
 
-TODO: See - https://github.com/shipwright-io/build
+See project doc for more information - https://github.com/shipwright-io/build
+
+This scenario will not work for the moment as we cannot specify the docker file containing the `registry auths` - [issue-838](https://github.com/shipwright-io/build/issues/838)
+and [issue-896](https://github.com/shipwright-io/build/issues/896)
+
+To use shipwright, it is needed to have a k8s cluster, tekton installed
+```bash
+kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.25.0/release.
+kubectl apply -f https://storage.googleapis.com/tekton-releases/pipeline/previous/v0.28.1/release.yaml
+```
+Next, deploy the latest release of shipwright
+```bash
+kubectl apply -f https://github.com/shipwright-io/build/releases/download/v0.5.1/release.yaml
+```
+
+When done, we can deploy ou Buildpack strategy using the CR
+```bash
+kubectl apply -f k8s/shipwright/clusterbuildstrategy-runtime.yml
+kubectl delete -f k8s/shipwright/clusterbuildstrategy-runtime.yml
+```
+Generate a secret to access your container registry:
+
+```bash
+REGISTRY_HOST="registry.local:5000" REGISTRY_USER=admin REGISTRY_PASSWORD=snowdrop
+kubectl create secret docker-registry registry-creds -n demo \
+  --docker-server="${REGISTRY_HOST}" \
+  --docker-username="${REGISTRY_USER}" \
+  --docker-password="${REGISTRY_PASSWORD}"
+```
+Create a Build object:
+
+```bash
+kubectl apply -f k8s/shipwright/build.yml
+kubectl delete -f k8s/shipwright/build.yml
+```
+To view the Build which you just created:
+
+```bash
+kubectl get build -n demo                        
+NAME                      REGISTERED   REASON      BUILDSTRATEGYKIND      BUILDSTRATEGYNAME    CREATIONTIME
+buildpack-quarkus-build   True         Succeeded   ClusterBuildStrategy   quarkus-buildpacks   3s
+```
+
+Submit your BuildRun:
+
+```bash
+kubectl apply -f k8s/shipwright/build-run.yml
+kubectl delete -f k8s/shipwright/build-run.yml
+```
+Wait until your BuildRun is completed and then you can view it as follows:
+
+```bash
+kubectl get buildruns -n demo
+NAME                           SUCCEEDED   REASON    STARTTIME   COMPLETIONTIME
+buildpack-quarkus-buildrun-1   Unknown     Pending   11s  
+```
 
 ## 4. Tekton
 
