@@ -14,6 +14,7 @@ Table of Contents
   * [Step by step instructions](#step-by-step-instructions)
   * [All in one instructions](#all-in-one-instructions)
   * [Demo shortcuts](#demo-shortcuts)
+* [Issues](#issues)
 * [Additional tools](#additional-tools)
   * [Clean](#clean)
 
@@ -852,6 +853,43 @@ open -na "Google Chrome" --args --incognito http://$VM_IP.nip.io:$LIVE_NODE_PORT
 export ENVOY_NODE_PORT=$(kc get svc/envoy -n contour-external -o jsonpath='{.spec.ports[0].nodePort}')
 echo "Petclinic demo: http://petclinic.tap-install.$VM_IP.nip.io:$ENVOY_NODE_PORT"
 open -na "Google Chrome" --args --incognito http://petclinic.tap-install.$VM_IP.nip.io:$ENVOY_NODE_PORT
+```
+
+## Issues
+
+If during the build of the application the step `detect` (= iniContainer) reports such an error
+```bash
+ERROR: failed to detect: open /cnb/buildpacks/paketo-buildpacks_procfile/4.3.0/buildpack.toml: no such file or directory
+```
+verify then that the latest images are well deployed !!
+
+This could be done automatically using a `TanzuNetDependencyUpdater` CR as documented [here](https://docs.pivotal.io/build-service/1-2/updating-deps.html)
+
+```bash
+kp secret create dependency-updater-secret --registry registry.pivotal.io --registry-user $TANZU_REG_USERNAME -n tap-install
+
+cat <<EOF > TanzuNetDependencyUpdater.yml
+apiVersion: buildservice.tanzu.vmware.com/v1alpha1
+kind: TanzuNetDependencyUpdater
+metadata:
+  name: dependency-updater
+  namespace: tap-install
+spec:
+  serviceAccountName: default
+  productSlug: tbs-dependencies
+  checkEvery: 120m
+EOF
+
+kubectl apply -f TanzuNetDependencyUpdater.yml
+
+kubectl get TanzuNetDependencyUpdater -A
+NAMESPACE     NAME                 DESCRIPTORVERSION   READY
+tap-install   dependency-updater
+```
+To bulk update the `ClusterStores|Stack|Builders`, use the latest version of the `descriptor.yml` file publised [here](https://network.pivotal.io/products/tbs-dependencies/)
+```bash
+pivnet download-product-files --product-slug='tbs-dependencies' --release-version='100.0.187' --product-file-id=1059210
+kp import -f descriptor-100.0.187.yaml
 ```
 
 ## Additional tools
