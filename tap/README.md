@@ -543,7 +543,7 @@ kapp delete -a tanzu-build-service -n build-service
 - scp the file to the VM (optional)
 - Unzip the spring petclinic app
 - Create a new github repo and push the code to this repo using your `GITHUB_USER` (e.g http://github.com/<GITHUB_USER>/spring-pet-clinic-eks)
-- Create a secret containing your docker hub creds
+- Create a secret containing your docker registry creds
 
 ```bash
 kubectl create secret docker-registry docker-hub-registry \
@@ -658,9 +658,6 @@ kp image list -n tap-install
 NAME                      READY    LATEST REASON    LATEST IMAGE                                                                                                               NAMESPACE
 spring-petclinic-image    True     CONFIG           95.217.159.244:32500/spring-petclinic-eks@sha256:49fa45da83c4a212b23a0dcd89e8fb731fe9891039824d6bd37f9fefb279a135    tap-install
 ```
-
-**REMARK**: If you use a private docker registry, then pull the image `docker pull 95.217.159.244:32500/spring-petclinic-eks@sha256:49fa45da83c4a212b23a0dcd89e8fb731fe9891039824d6bd37f9fefb279a135` !
-
 - Deploy the `image` generated in the namespace where `Application Live View` is running with the
   labels `tanzu.app.live.view=true` and `tanzu.app.live.view.application.name=<app_name>`.
 
