@@ -29,6 +29,11 @@ docker build -t builder-quarkus:$SNAPSHOT_LIFECYCLE_VERSION .
 popd
 ```
 
+To include the `hook` or `extension` content, it will be needed to also copy the resources located here:
+```bash
+FROM existing-builder COPY ./cnb/ext /cnb/ext
+```
+
 Next, check the if the lifecycle packaged is the proper one
 ```bash
 $ docker run --rm -it builder-quarkus:$SNAPSHOT_LIFECYCLE_VERSION /cnb/lifecycle/creator -version
