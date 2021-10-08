@@ -72,7 +72,10 @@ If you plan to use a different version of the lifecycle, append then the followi
 ```bash
     --lifecycle-image buildpacksio/lifecycle:919b8ad-linux-arm64
 ```
-**WARNING**: Take care that, image will only be used for `analyze/restore/export` and you would need to update the lifecycle in the builder image for it to be used for `detect/build`
+**WARNING**: Take care that the lifecycle-image parameter will only be used for `analyze/restore/export` and you would need to update the lifecycle in the builder image for it to be used for `detect/build`
+
+**NOTE**: The `builder.toml` can include or not a section containing the version and/or uri of the lifecycle to be used (e.g version: 0.12.4 or uri: ).
+If both are omitted, lifecycle defaults to the version that was last released at the time of pack’s release. In other words, for a particular version of `pack`, this default will not change despite new lifecycle versions being released.
 
 ## 2. Pod running the lifecycle creator
 
