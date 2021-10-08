@@ -18,26 +18,26 @@ From your terminal, move to the `out` directory of the lifecycle project which c
 create a new image
 
 ```bash
-pushd $home/code/cncf/lifecycle/out/linux-amd64
-SNAPSHOT_VERSION="v0.12.0-rc.1-4+919b8add"
+pushd $HOME/code/cncf/lifecycle/out/linux-amd64
+SNAPSHOT_LIFECYCLE_VERSION="v0.12.0-SNAPSHOT-919b8add"
 
 cat << EOF > Dockerfile
 FROM redhat/buildpacks-builder-quarkus-jvm
 COPY ./lifecycle /cnb/lifecycle
 EOF
-docker build -t builder-quarkus:v0.12.0-rc.1-4+919b8add .
+docker build -t builder-quarkus:$SNAPSHOT_LIFECYCLE_VERSION .
 popd
 ```
 
-Next, check the if thelifecycle packaged is the proper one
+Next, check the if the lifecycle packaged is the proper one
 ```bash
-$ docker run --rm -it redhat/buildpacks-builder-quarkus-jvm /cnb/lifecycle/creator -version
+$ docker run --rm -it builder-quarkus:$SNAPSHOT_LIFECYCLE_VERSION /cnb/lifecycle/creator -version
 0.12.0-rc.1-4+919b8add
 ```
 
-3. Rebuild a new image
+2 Build a new builder image
 
-For that purpose, edit the `builder.toml` file of your builder.toml project to specify using the `uri` variable, the path to the archive
+For that purpose, edit the `builder.toml` file of your builder project to specify using the `uri` variable, the path of the lifecycle archive
 
 ```toml
 [lifecycle]
