@@ -1,0 +1,2 @@
+[run-image]
+image = "redhat/buildpacks-stack-quarkus-run:jvm"

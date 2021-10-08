@@ -1,0 +1,13 @@
+api = "<buildpack API version>"
+
+[extension]
+id = "<extension ID>"
+name = "<extension name>"
+version = "<extension version>"
+homepage = "<extension homepage>"
+description = "<extension description>"
+keywords = [ "<string>" ]
+
+[[extension.licenses]]
+type = "<string>"
+uri = "<uri>"

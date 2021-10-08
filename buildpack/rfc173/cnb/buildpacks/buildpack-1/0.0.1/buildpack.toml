@@ -1,0 +1,15 @@
+# Buildpack API version
+api = "0.2"
+
+# Buildpack ID and metadata
+[buildpack]
+id = "io.quarkus.buildpacks.buildpack"
+version = "0.0.1"
+name = "Quarkus Buildpack"
+
+# Stacks that the buildpack will work with
+[[stacks]]
+id = "io.quarkus.buildpacks.stack.jvm"
+
+[[stacks]]
+id = "io.quarkus.buildpacks.stack.native"

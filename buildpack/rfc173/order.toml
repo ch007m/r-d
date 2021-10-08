@@ -1,0 +1,5 @@
+[[order]]
+
+[[order.group]]
+id = "io.quarkus.buildpacks.buildpack"
+version = "0.0.1"

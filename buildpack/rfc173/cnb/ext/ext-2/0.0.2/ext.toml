@@ -1,0 +1,3 @@
+#!/bin/sh
+[ -f build.Dockerfile ] && cp build.Dockerfile "$1/"
+[ -f run.Dockerfile ] && cp run.Dockerfile "$1/"
