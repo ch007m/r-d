@@ -5,7 +5,7 @@
   * [2. Pod running the lifecycle creator](#2-pod-running-the-lifecycle-creator)
   * [3. Shipwright and Buildpack v3](#3-shipwright-and-buildpack-v3)
   * [4. Tekton](#4-tekton)
-  * [4. kpack with a local docker registry](#4-kpack-with-a-local-docker-registry)
+  * [5. kpack with a local docker registry](#5-kpack-with-a-local-docker-registry)
   
 ## How to build a runtime using buildpack
 
@@ -15,7 +15,7 @@ The goal of this project is to test/experiment different approach to build a run
 - [pod](#2-pod-running-the-lifecycle-creator) build
 - [Shipwright](#3-shipwright-and-buildpack-v3)
 - [Tekton](#4-tekton)
-- [kpack](#3-kpack-with-a-local-docker-registry)
+- [kpack](#5-kpack-with-a-local-docker-registry)
 
 ## 0. Common steps
 
@@ -188,7 +188,8 @@ kubectl delete -f k8s/shipwright/build-run.yml
 ## 4. Tekton
 
 TODO
-## 4. kpack with a local docker registry
+
+## 5. kpack with a local docker registry
 
 Install kind and a private secured/TLS registry locally (using registry version 2.6 !)
 ```bash
