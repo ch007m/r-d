@@ -13,11 +13,26 @@ TANZU_LEGACY_API_TOKEN="<CHANGE_ME>"
 TANZU_REG_USERNAME="<CHANGE_ME>"
 TANZU_REG_PASSWORD="<CHANGE_ME>"
 
-TANZU_TAP_CLI_VERSION="v1.4.0"
-TANZU_FLUX_VERSION="v0.17.0"
-TANZU_KAPP_VERSION="latest"
+TANZU_TAP_CLI_VERSION="v1.4.0" # v0.5.0
+TANZU_FLUX_VERSION="v0.17.0" # v0.15.4
+TANZU_KAPP_VERSION="latest" # v0.27.0
+TANZU_SECRET_CONTROLLER="v0.5.0"
 TANZU_BUILD_SERVICE_VERSION="1.2.2"
 TANZU_TEMP_DIR="./tanzu"
+
+CERT_MANAGER="v1.5.3"
+
+# TODO
+# ADD: kapp deploy -a sg -f https://github.com/vmware-tanzu/carvel-secretgen-controller/releases/download/$TANZU_SECRET_CONTROLLER/release.yml
+# ADD: kapp deploy -a cert-manager -f https://github.com/jetstack/cert-manager/releases/download/$CERT_MANAGER/cert-manager.yaml
+# CHANGE:
+# kubectl create namespace flux-system
+# kubectl create clusterrolebinding default-admin \
+#         --clusterrole=cluster-admin \
+#        --serviceaccount=flux-system:default
+# kapp deploy -a flux-source-controller -n flux-system \
+#   -f https://github.com/fluxcd/source-controller/releases/download/v0.15.4/source-controller.crds.yaml \
+#   -f https://github.com/fluxcd/source-controller/releases/download/v0.15.4/source-controller.deployment.yaml
 
 function pause(){
  read -s -n 1 -p "Press any key to continue . . ."
@@ -60,12 +75,13 @@ pivnet login --api-token=$TANZU_LEGACY_API_TOKEN
 
 # Download the TANZU client
 pivnet download-product-files --product-slug='tanzu-application-platform' --release-version='0.1.0' --product-file-id=$TANZU_PRODUCT_FILE_ID
+# TODO: pivnet download-product-files --product-slug='tanzu-application-platform' --release-version='0.2.0' --product-file-id=1055576
 tar -vxf $TANZU_PRODUCT_NAME.tar
 cp cli/core/$TANZU_TAP_CLI_VERSION/tanzu-core* $DEST_DIR/tanzu
 
 # Next, configure the Tanzu client to install the plugin `package`. This extension will be used to download the resources from the Pivotal registry
 tanzu plugin clean
-tanzu plugin install -v $TANZU_TAP_CLI_VERSION --local cli package
+tanzu plugin install -v $TANZU_TAP_CLI_VERSION --local cli all #package
 tanzu package version
 
 # Install the needed components: kapp controller, fluxcd
