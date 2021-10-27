@@ -20,6 +20,8 @@ Table of Contents
 
 ## What is TAP
 
+**TODO: To be reviewed to align the information with TAP 0.2.0**
+
 Tanzu Application Platform - https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/0.1/tap-0-1/GUID-overview.html is a packaged set of components that helps developers and
 operators to more easily build, deploy, and manage apps on a Kubernetes platform.
 
