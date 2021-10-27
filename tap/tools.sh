@@ -4,9 +4,9 @@ TANZU_TEMP_DIR="./tanzu/tools"
 
 TANZU_LEGACY_API_TOKEN=${TANZU_LEGACY_API_TOKEN:-"<CHANGE_ME>"}
 
-TANZU_TAP_CLI_VERSION="v0.5.0"
-TANZU_PACKAGES_VERSION="0.2.0"
-PIVNET_VERSION="3.0.1"
+TANZU_TAP_CLI_VERSION  ="v0.5.0"
+TANZU_PACKAGES_VERSION ="0.2.0"
+PIVNET_VERSION         ="3.0.1"
 
 echo "### Create tanzu directory ####"
 if [ ! -d $TANZU_TEMP_DIR ]; then
@@ -60,7 +60,9 @@ cp cli/core/$TANZU_TAP_CLI_VERSION/tanzu-core* $BIN_DEST_DIR/tanzu
 
 # Next, configure the Tanzu client to install the plugin `package`. This extension will be used to download the resources from the Pivotal registry
 tanzu plugin install --local cli all
-tanzu package version
+
+# List the tanzu plugins installed
+echo "#### tanzu plugin list"
 tanzu plugin list
 
 popd
