@@ -1,20 +1,21 @@
 
-KUBE_CFG_FILE=${1:-h01-121}
+KUBE_CFG_FILE=${1:-config}
 export KUBECONFIG=$HOME/.kube/${KUBE_CFG_FILE}
 
-DEST_DIR="/usr/local/bin"
+TANZU_TEMP_DIR="./tanzu"
 
 VM_IP="<CHANGE_ME>"
-CONTAINER_REGISTRY_URL="$VM_IP:32500"
-CONTAINER_REGISTRY_USERNAME="<CHANGE_ME>"
-CONTAINER_REGISTRY_PASSWORD="<CHANGE_ME>"
-CERT_PATH="/home/snowdrop/local-registry.crt"
+REGISTRY_HOSTNAME_OR_IP="<CHANGE_ME>"
+REGISTRY_PORT="<CHANGE_ME>"
+REGISTRY_SERVER="$REGISTRY_HOSTNAME_OR_IP:$REGISTRY_PORT"
+REGISTRY_USERNAME="<CHANGE_ME>"
+REGISTRY_PASSWORD="<CHANGE_ME>"
 
-TANZU_LEGACY_API_TOKEN="<CHANGE_ME>"
+CERT_PATH="<CHANGE_ME>"
+
 TANZU_REG_USERNAME="<CHANGE_ME>"
 TANZU_REG_PASSWORD="<CHANGE_ME>"
 
-TANZU_TAP_CLI_VERSION="v0.5.0"
 TANZU_PACKAGES_VERSION="0.2.0"
 
 TANZU_FLUX_VERSION="v0.15.4"
@@ -38,8 +39,6 @@ TANZU_TAP_SCP_TOOLKIT="0.3.0"
 
 DEMO_WORKSPACE_NAME="demo"
 
-TANZU_TEMP_DIR="./tanzu"
-
 CERT_MANAGER="v1.5.3"
 
 function pause(){
@@ -47,51 +46,12 @@ function pause(){
  echo ""
 }
 
-echo "#### Install Tanzu tools: pivnet, ytt, kapp, imgpkg, kbld #####"
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  echo "#### Detected Linux OS ####"
-  curl -L https://carvel.dev/install.sh | sudo bash
-  echo "TODO : Add command to install pivnet"
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-  echo "#### Detected Mac OS ####"
-  brew tap vmware-tanzu/carvel
-  brew reinstall ytt kbld kapp kwt imgpkg vendir
-  brew reinstall pivotal/tap/pivnet-cli
-fi
-
 echo "### Create tanzu directory ####"
 if [ ! -d $TANZU_TEMP_DIR ]; then
     mkdir -p $TANZU_TEMP_DIR
 fi
 
 pushd $TANZU_TEMP_DIR
-
-echo "### Download TANZU CLIENT"
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  echo "#### Detected Linux OS ####"
-  TANZU_PRODUCT_FILE_ID="1055586"
-  TANZU_PRODUCT_NAME="tanzu-framework-linux-amd64"
-
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-  echo "#### Detected Mac OS ####"
-  TANZU_PRODUCT_FILE_ID="1055576"
-  TANZU_PRODUCT_NAME="tanzu-framework-darwin-amd64"
-fi
-
-echo "### Pivnet log in to Tanzu ###"
-pivnet login --api-token=$TANZU_LEGACY_API_TOKEN
-
-# Download the TANZU client
-pivnet download-product-files --product-slug='tanzu-application-platform' --release-version=$TANZU_PACKAGES_VERSION --product-file-id=$TANZU_PRODUCT_FILE_ID
-
-rm -rf ~/.config/tanzu
-tar -vxf $TANZU_PRODUCT_NAME.tar
-sudo cp cli/core/$TANZU_TAP_CLI_VERSION/tanzu-core* $DEST_DIR/tanzu
-
-# Next, configure the Tanzu client to install the plugin `package`. This extension will be used to download the resources from the Pivotal registry
-tanzu plugin install --local cli all
-tanzu package version
-tanzu plugin list
 
 # Install the needed components: kapp controller, secretgen, cert-manager, fluxcd
 kapp deploy -a cert-manager -f https://github.com/jetstack/cert-manager/releases/download/$CERT_MANAGER/cert-manager.yaml -y
@@ -177,9 +137,9 @@ tanzu package install source-controller \
 REG_CERT="$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' $CERT_PATH)"
 cat <<EOF > tbs-values.yml
 ca_cert_data: "$REG_CERT"
-kp_default_repository: $CONTAINER_REGISTRY_URL/build-service
-kp_default_repository_username: $CONTAINER_REGISTRY_USERNAME
-kp_default_repository_password: $CONTAINER_REGISTRY_PASSWORD
+kp_default_repository: $REGISTRY_SERVER/build-service
+kp_default_repository_username: $REGISTRY_USERNAME
+kp_default_repository_password: $REGISTRY_PASSWORD
 tanzunet_username: $TANZU_REG_USERNAME
 tanzunet_password: $TANZU_REG_PASSWORD
 EOF
@@ -202,7 +162,7 @@ tanzu package install cartographer \
 cat <<EOF > default-supply-chain-values.yml
 ---
 registry:
-  server: $CONTAINER_REGISTRY_URL
+  server: $REGISTRY_SERVER
   repository: $DEMO_WORKSPACE_NAME
 service_account: default
 EOF
@@ -276,9 +236,9 @@ tanzu package installed list -n tap-install
 
 # Step 21: Set Up Developer Namespaces to Use Installed Packages
 tanzu imagepullsecret add registry-credentials \
-   --registry $CONTAINER_REGISTRY_URL/ \
-   --username $CONTAINER_REGISTRY_USERNAME \
-   --password $CONTAINER_REGISTRY_PASSWORD \
+   --registry $REGISTRY_SERVER/ \
+   --username $REGISTRY_USERNAME \
+   --password $REGISTRY_PASSWORD \
    -n $DEMO_WORKSPACE_NAME
 
 # Add placeholder read secrets, a service account, and RBAC rules to the developer namespace:
@@ -346,4 +306,24 @@ kubectl patch cm/config-domain -n knative-serving \
   --type merge \
   -p $PATCH
 
+## Create an ingress rouyte to access the Accelerator UI
+cat <<EOF | kubectl apply -f -
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tap-accelerator
+  namespace: accelerator-system
+spec:
+  rules:
+    - host: app.$VM_IP.nip.io
+      http:
+        paths:
+          - backend:
+              service:
+                name: acc-ui-server
+                port:
+                  number: 8877
+            path: /
+            pathType: Prefix
+EOF
 popd
