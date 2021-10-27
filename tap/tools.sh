@@ -1,3 +1,4 @@
+#!/bin/bash
 
 BIN_DEST_DIR=${1:-/usr/local/bin}
 TANZU_TEMP_DIR="./tanzu/tools"

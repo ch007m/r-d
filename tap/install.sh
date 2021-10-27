@@ -1,3 +1,4 @@
+#!/bin/bash
 
 KUBE_CFG_FILE=${1:-config}
 export KUBECONFIG=$HOME/.kube/${KUBE_CFG_FILE}
