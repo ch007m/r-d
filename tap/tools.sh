@@ -21,8 +21,7 @@ pushd $TANZU_TEMP_DIR
 echo "#### Install Tanzu tools: pivnet, ytt, kapp, imgpkg, kbld #####"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   echo "#### Detected Linux OS ####"
-  export K14SIO_INSTALL_BIN_DIR=$BIN_DEST_DIR
-  curl -L https://carvel.dev/install.sh | sudo bash
+  curl -L https://carvel.dev/install.sh | K14SIO_INSTALL_BIN_DIR=~/.local/bin bash
   echo "#### Install pivnet"
   wget https://github.com/pivotal-cf/pivnet-cli/releases/download/v$PIVNET_VERSION/pivnet-linux-amd64-$PIVNET_VERSION
   chmod +x pivnet-linux-amd64-$PIVNET_VERSION
