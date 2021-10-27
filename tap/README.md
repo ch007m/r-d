@@ -5,6 +5,7 @@ Table of Contents
 * [References](#references)
 * [Prerequisites](#prerequisites)
 * [Instructions](#instructions)
+  * [Automated deployment](#automated-deployment)
   * [Tanzu client and TAP repository](#tanzu-client-and-tap-repository)
   * [Install TAP - Cloud Native Runtimes](#install-tap---cloud-native-runtimes)
   * [Install TAP - Accelerator](#install-tap---accelerator)
@@ -77,8 +78,33 @@ The following tools are required to install App Accelerator:
 
 ## Instructions
 
-The commands listed hereafter have been executed top of a `k8s 1.21` cluster and have been reviewed due to some issues discovered using the
-[tanzu installation guide](https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/0.1/tap-0-1/GUID-install.html).
+The commands listed hereafter have been executed top of a `k8s 1.21` cluster and have been adapted due to some issues discovered using the
+[tanzu installation guide](https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/0.2/tap-0-2/GUID-overview.html).
+
+### Automated deployment
+
+To simplify your life, you can install the needed tools and TAP using the following 2 bash scripts.
+
+**NOTE**: Override the bash variables containing asvalue `"<CHANGE_ME>"`
+```bash
+## TAS bash script
+
+cd <PATH_OF_PROJECT_CLONED>/tap
+
+export VM_IP="IP_ADDRESS_OF_THE_VM_RUNNING_K8S"
+export REGISTRY_HOSTNAME_OR_IP="IP OR HOSTNAME OF THE LOCAL PRIVATE REGISTRY"
+export REGISTRY_PORT="PORT OF THE LOCAL PRIVATE REGISTRY"
+export REGISTRY_USERNAME="YOUR LOCAL PRIVATE REGISTRY USERNAME "
+export REGISTRY_PASSWORD="YOUR LOCAL PRIVATE REGISTRY PASSWORD"
+
+export CERT_PATH="PATH OF THE CERTIFICATE NEEDED TO ACCESS THE LOCAL REGISTRY USING HTTPS PROTOCOL. THIS CERTIFICATE SHOULD INCLUDE THE LIST OF THE DNS HOST NAMES"
+
+export TANZU_REG_USERNAME="YOUR TANZU REGISTRY USERNAME"
+export TANZU_REG_PASSWORD="YOUR TANZU REGISTRY PASSWORD"
+
+./tools.sh ~/.local/bin
+./install.sh
+```
 
 ### Tanzu client and TAP repository
 
