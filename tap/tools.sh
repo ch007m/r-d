@@ -11,6 +11,8 @@ PIVNET_VERSION="3.0.1"
 echo "### Create tanzu directory ####"
 if [ ! -d $TANZU_TEMP_DIR ]; then
     mkdir -p $TANZU_TEMP_DIR
+else
+    rm -rf $TANZU_TEMP_DIR/*
 fi
 
 pushd $TANZU_TEMP_DIR
