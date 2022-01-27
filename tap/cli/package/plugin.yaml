@@ -1,7 +1,0 @@
-name: package
-description: Tanzu package management
-version: v1.4.0
-buildSHA: c9929b8f
-group: Run
-docURL: ""
-completionType: 0
