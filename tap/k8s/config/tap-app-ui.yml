@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tap-accelerator
+  namespace: accelerator-system
+spec:
+  rules:
+    - host: app.95.217.159.244.nip.io
+      http:
+        paths:
+          - backend:
+              service:
+                name: acc-ui-server
+                port:
+                  number: 8877
+            path: /
+            pathType: Prefix

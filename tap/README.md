@@ -21,7 +21,7 @@ Table of Contents
 
 ## What is TAP
 
-**TODO: To be reviewed to align the information with TAP 0.2.0**
+**WARNIN**: Work on TAP 0.2 will stop as a new version is out 1.0 !!
 
 Tanzu Application Platform - https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/0.1/tap-0-1/GUID-overview.html is a packaged set of components that helps developers and
 operators to more easily build, deploy, and manage apps on a Kubernetes platform.
@@ -85,7 +85,7 @@ The commands listed hereafter have been executed top of a `k8s 1.21` cluster and
 
 To simplify your life, you can install the needed tools and TAP using the following 2 bash scripts.
 
-**NOTE**: Override the bash variables containing asvalue `"<CHANGE_ME>"`
+**NOTE**: Override the bash variables containing as value `"<CHANGE_ME>"`
 ```bash
 ## TAS bash script
 
