@@ -32,6 +32,7 @@ TAP_VERSION="1.0.0"
 TANZU_CLI_VERSION="v0.10.0"
 
 TAP_GIT_CATALOG_REPO=https://raw.githubusercontent.com/halkyonio/tap-catalog-blank/main
+NAMESPACE_DEMO="tap-demo"
 
 TANZU_TEMP_DIR="$REMOTE_HOME_DIR/tanzu"
 
@@ -134,9 +135,9 @@ sleep 10s
 tanzu package available list --namespace tap-install
 
 echo "## Install a Tanzu Application Platform profile"
-echo "## Create first the tap-values.yaml file to configute the profile .... .light"
+echo "## Create first the tap-values.yaml file to configure the profile .... .light"
 
-cat <<'EOF' > tap-values.yaml
+cat  > tap-values.yml <<EOF
 profile: light
 ceip_policy_disclosed: true # Installation fails if this is set to 'false'
 
@@ -176,14 +177,109 @@ metadata_store:
   app_service_type: NodePort
 EOF
 
-cat tap-values.yaml
+cat tap-values.yml
+
+echo "## Installing the packages ..."
+tanzu package install tap -p tap.tanzu.vmware.com -v $TAP_VERSION --values-file tap-values.yml -n tap-install
+
+echo "## Verify the package install"
+tanzu package installed get tap -n tap-install
+sleep 10m
+tanzu package installed list -A
+
+echo "## Set up developer namespaces to use installed packages"
+kubectl create ns $NAMESPACE_DEMO
+tanzu secret registry add registry-credentials --server $REGISTRY_URL/ --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD --namespace $NAMESPACE_DEMO
+
+echo "## Add placeholder read secrets, a service account, and RBAC rules to the developer namespace"
+cat <<EOF | kubectl -n $NAMESPACE_DEMO create -f -
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tap-registry
+  annotations:
+    secretgen.carvel.dev/image-pull-secret: ""
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: e30K
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+secrets:
+  - name: registry-credentials
+imagePullSecrets:
+  - name: registry-credentials
+  - name: tap-registry
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: default
+rules:
+- apiGroups: [source.toolkit.fluxcd.io]
+  resources: [gitrepositories]
+  verbs: ['*']
+- apiGroups: [source.apps.tanzu.vmware.com]
+  resources: [imagerepositories]
+  verbs: ['*']
+- apiGroups: [carto.run]
+  resources: [deliverables, runnables]
+  verbs: ['*']
+- apiGroups: [kpack.io]
+  resources: [images]
+  verbs: ['*']
+- apiGroups: [conventions.apps.tanzu.vmware.com]
+  resources: [podintents]
+  verbs: ['*']
+- apiGroups: [""]
+  resources: ['configmaps']
+  verbs: ['*']
+- apiGroups: [""]
+  resources: ['pods']
+  verbs: ['list']
+- apiGroups: [tekton.dev]
+  resources: [taskruns, pipelineruns]
+  verbs: ['*']
+- apiGroups: [tekton.dev]
+  resources: [pipelines]
+  verbs: ['list']
+- apiGroups: [kappctrl.k14s.io]
+  resources: [apps]
+  verbs: ['*']
+- apiGroups: [serving.knative.dev]
+  resources: ['services']
+  verbs: ['*']
+- apiGroups: [servicebinding.io]
+  resources: ['servicebindings']
+  verbs: ['*']
+- apiGroups: [services.apps.tanzu.vmware.com]
+  resources: ['resourceclaims']
+  verbs: ['*']
+- apiGroups: [scanning.apps.tanzu.vmware.com]
+  resources: ['imagescans', 'sourcescans']
+  verbs: ['*']
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: default
+subjects:
+  - kind: ServiceAccount
+    name: default
+EOF
 
 popd
 exit
-
-# tanzu package install tap -p tap.tanzu.vmware.com -v 1.0.0 --values-file tap-values.yml -n tap-install
-# echo "## Verify the package install"
-# tanzu package installed get tap -n tap-install
 
 ## Patch the Knative Serving config-domain configmap to expose as domain: <VM_IP>.nip.io
 #PATCH="{\"data\":{\"$VM_IP.nip.io\": \"\"}}"
