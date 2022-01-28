@@ -23,7 +23,7 @@ Table of Contents
 Tanzu Application Platform 1.0 - https://docs.vmware.com/en/Tanzu-Application-Platform/1.0/tap/GUID-overview.html is a packaged set of components that helps developers and
 operators to more easily build, deploy, and manage apps on a Kubernetes platform.
 
-Short introduction about what is TAP is available [here](http://i-programmer.cloudapp.net/news/90-tools/9503-vmware-announces-tanzu-application-platform-.html) and could be summarized as such:
+Short introduction about what is TAP is available [here](https://www.youtube.com/watch?v=H6rbIkaJ1xc&ab_channel=VMwareTanzu) and could be summarized as such:
 
 TAP is a `Knative` platform using `kpack` (= buildpacks controller) to build images, `Contour` (= ingress) to route the traffic, `kapp` (= kind of helm technology but with more features) to assemble the
 `applications` and `Application Live and Application Accelerator`** to guide the Architects/Developers to design/deploy/monitor applications on k8s.
@@ -61,7 +61,7 @@ It packages different technology such as:
 
 ## Prerequisites
 
-The following tools are required to install App Accelerator:
+The following [tools](https://docs.vmware.com/en/Tanzu-Application-Platform/1.0/tap/GUID-install-general.html#prereqs) are required to install TAP:
 
 - `shasum` binary (for linux OS) using `yum install perl-Digest-SHA -y`
 - Carvel [tools](https://carvel.dev/#whole-suite) - `curl -L https://carvel.dev/install.sh | sudo bash`
@@ -69,7 +69,7 @@ The following tools are required to install App Accelerator:
   - kbld version v0.30.0 or later.
   - imgpkg version v0.12.0 or later.
   - kapp version v0.37.0 or later.
-- kubectl and Kubernetes v1.17 and later.
+- kubectl and Kubernetes >= v1.20.
 - [Flux2](https://github.com/fluxcd/flux2#flux-version-2).
 - [Tanzu Build Service](#TAS)
 
