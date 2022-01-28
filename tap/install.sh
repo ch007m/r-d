@@ -42,9 +42,10 @@ function pause(){
  echo ""
 }
 
-echo "## Install needed tool: k9s"
+echo "## Install needed tool: k9s, unzip"
 wget https://github.com/derailed/k9s/releases/download/v0.25.18/k9s_Linux_x86_64.tar.gz && tar -vxf k9s_Linux_x86_64.tar.gz
 sudo cp k9s /usr/local/bin
+sudo yum install unzip
 
 echo "## Executing installation Part I of the TAP guide"
 echo "## Install Tanzu tools "
@@ -202,7 +203,7 @@ tanzu package installed list -A
 
 echo "## Set up developer namespaces to use installed packages"
 kubectl create ns $NAMESPACE_DEMO
-tanzu secret registry add registry-credentials --server $REGISTRY_URL/ --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD --namespace $NAMESPACE_DEMO
+tanzu secret registry add registry-credentials --server $REGISTRY_URL --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD --namespace $NAMESPACE_DEMO
 
 echo "## Add placeholder read secrets, a service account, and RBAC rules to the developer namespace"
 cat <<EOF | kubectl -n $NAMESPACE_DEMO create -f -
