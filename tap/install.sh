@@ -1,4 +1,9 @@
-
+#!/usr/bin/env bash
+#
+# TODO: ADD instructions to use this script
+# To remotely install this script within a VM using SSH, execute:
+# ssh-hetznerc h01-121 'bash -s' < ./install.sh
+#
 KUBE_CFG_FILE=${1:-h01-121}
 export KUBECONFIG=$HOME/.kube/${KUBE_CFG_FILE}
 
@@ -13,6 +18,8 @@ TANZU_LEGACY_API_TOKEN="<CHANGE_ME>"
 TANZU_REG_USERNAME="<CHANGE_ME>"
 TANZU_REG_PASSWORD="<CHANGE_ME>"
 
+PIVNET_CLI_VERSION="3.0.1"
+
 TANZU_TAP_CLI_VERSION="v1.4.0"
 TANZU_FLUX_VERSION="v0.17.0"
 TANZU_KAPP_VERSION="latest"
@@ -24,17 +31,21 @@ function pause(){
  echo ""
 }
 
-echo "#### Install Tanzu tools: pivnet, ytt, kapp, imgpkg, kbld #####"
+echo "## Install Tanzu tools: pivnet, ytt, kapp, imgpkg, kbld #####"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  echo "#### Detected Linux OS ####"
-  curl -L https://carvel.dev/install.sh | sudo bash
-  echo "TODO : Add command to install pivnet"
+  echo "## Detected Linux OS ####"
+  # curl -L https://carvel.dev/install.sh | sudo bash
+  echo "## Installing pivnet tool ..."
+  wget -c https://github.com/pivotal-cf/pivnet-cli/releases/download/v$PIVNET_CLI_VERSION/pivnet-linux-amd64-$PIVNET_CLI_VERSION
+  chmod +x pivnet-linux-amd64-$PIVNET_CLI_VERSION && mv pivnet-linux-amd64-$PIVNET_CLI_VERSION pivnet && sudo cp pivnet /usr/local/bin
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-  echo "#### Detected Mac OS ####"
+  echo "## Detected Mac OS ####"
   brew tap vmware-tanzu/carvel
   brew reinstall ytt kbld kapp kwt imgpkg vendir
   brew reinstall pivotal/tap/pivnet-cli
 fi
+
+pause
 
 echo "### Create tanzu directory ####"
 if [ ! -d $TANZU_TEMP_DIR ]; then
@@ -45,18 +56,20 @@ pushd $TANZU_TEMP_DIR
 
 echo "### Download TANZU CLIENT"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  echo "#### Detected Linux OS ####"
+  echo "## Detected Linux OS ####"
   TANZU_PRODUCT_FILE_ID="1040320"
   TANZU_PRODUCT_NAME="tanzu-cli-bundle-linux-amd64"
 
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-  echo "#### Detected Mac OS ####"
+  echo "## Detected Mac OS ####"
   TANZU_PRODUCT_FILE_ID="1040323"
   TANZU_PRODUCT_NAME="tanzu-cli-bundle-darwin-amd64"
 fi
 
 echo "### Pivnet log in to Tanzu ###"
 pivnet login --api-token=$TANZU_LEGACY_API_TOKEN
+
+pause
 
 # Download the TANZU client
 pivnet download-product-files --product-slug='tanzu-application-platform' --release-version='0.1.0' --product-file-id=$TANZU_PRODUCT_FILE_ID
@@ -296,12 +309,12 @@ ytt -f ./bundle/values.yaml \
 # 5. Install the kp client
 echo "### Download KP"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  echo "#### Detected Linux OS ####"
+  echo "## Detected Linux OS ####"
   TANZU_PRODUCT_FILE_ID="1000629"
   TANZU_PRODUCT_NAME="kp-linux-0.3.1"
 
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-  echo "#### Detected Mac OS ####"
+  echo "## Detected Mac OS ####"
   TANZU_PRODUCT_FILE_ID="1000628"
   TANZU_PRODUCT_NAME="kp-darwin-0.3.1"
 fi
