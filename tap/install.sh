@@ -24,14 +24,15 @@ TANZU_LEGACY_API_TOKEN="jzZZHugEFBS_2K_y4KXh"
 TANZU_REG_USERNAME="cmoulliard@redhat.com"
 TANZU_REG_PASSWORD=".P?V9yM^e3vsVH9"
 
-INGRESS_DOMAIN=$VM_IP.xip.io
+INGRESS_DOMAIN=$VM_IP.nip.io
 
 PIVNET_CLI_VERSION="3.0.1"
 TANZU_CLUSTER_ESSENTIALS_VERSION="1.0.0"
 TAP_VERSION="1.0.0"
 TANZU_CLI_VERSION="v0.10.0"
 
-TAP_GIT_CATALOG_REPO=https://raw.githubusercontent.com/halkyonio/tap-catalog-blank/main
+# Do not use the RAW URL but instead the Github HTTPS URL followed by blob/main
+TAP_GIT_CATALOG_REPO=https://github.com/halkyonio/tap-catalog-blank/blob/main
 NAMESPACE_DEMO="tap-demo"
 
 TANZU_TEMP_DIR="$REMOTE_HOME_DIR/tanzu"
@@ -40,6 +41,10 @@ function pause(){
  read -s -n 1 -p "Press any key to continue . . ."
  echo ""
 }
+
+echo "## Install needed tool: k9s"
+wget https://github.com/derailed/k9s/releases/download/v0.25.18/k9s_Linux_x86_64.tar.gz && tar -vxf k9s_Linux_x86_64.tar.gz
+sudo cp k9s /usr/local/bin
 
 echo "## Executing installation Part I of the TAP guide"
 echo "## Install Tanzu tools "
@@ -121,7 +126,8 @@ kubectl create ns tap-install
 
 echo "## Create a registry secret"
 tanzu secret registry add tap-registry \
-  --username ${INSTALL_REGISTRY_USERNAME} --password ${INSTALL_REGISTRY_PASSWORD} \
+  --username ${INSTALL_REGISTRY_USERNAME} \
+  --password ${INSTALL_REGISTRY_PASSWORD} \
   --server ${INSTALL_REGISTRY_HOSTNAME} \
   --export-to-all-namespaces --yes --namespace tap-install
 
@@ -134,6 +140,12 @@ sleep 10s
 
 tanzu package available list --namespace tap-install
 
+# TODO: Document the following step of the script to pass as parameter the secret and namespace to be used
+echo "## Store the X509 certificate of the local registry"
+X_509=$(kubectl get secret/cert-key -n infra -o=go-template='{{index .data "server.crt"}}' | base64 -d)
+echo $X_509 > server.crt
+X_509_ONELINE=$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' server.crt)
+
 echo "## Install a Tanzu Application Platform profile"
 echo "## Create first the tap-values.yaml file to configure the profile .... .light"
 
@@ -145,6 +157,7 @@ buildservice:
   kp_default_repository: "$REGISTRY_URL/build-service"
   kp_default_repository_username: "$REGISTRY_USERNAME"
   kp_default_repository_password: "$REGISTRY_PASSWORD"
+  ca_cert_data: $X_509_ONELINE
   tanzunet_username: "$TANZU_REG_USERNAME"
   tanzunet_password: "$TANZU_REG_PASSWORD"
 
