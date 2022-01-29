@@ -167,7 +167,8 @@ supply_chain: basic
 ootb_supply_chain_basic:
   registry:
     server: "$REGISTRY_URL"
-    repository: "tap"
+    repository: "$NAMESPACE_DEMO"
+    service_account: default
   gitops:
     ssh_secret: ""
 
