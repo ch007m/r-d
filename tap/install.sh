@@ -165,10 +165,10 @@ buildservice:
 supply_chain: basic
 
 ootb_supply_chain_basic:
+  service_account: default
   registry:
     server: "$REGISTRY_URL"
     repository: "$NAMESPACE_DEMO"
-    service_account: default
   gitops:
     ssh_secret: ""
 
@@ -297,10 +297,10 @@ popd
 exit
 
 ## Patch the Knative Serving config-domain configmap to expose as domain: <VM_IP>.nip.io
-#PATCH="{\"data\":{\"$VM_IP.nip.io\": \"\"}}"
-#kubectl patch cm/config-domain -n knative-serving \
-#  --type merge \
-#  -p $PATCH
+PATCH="{\"data\":{\"$VM_IP.nip.io\": \"\"}}"
+kubectl patch cm/config-domain -n knative-serving \
+  --type merge \
+  -p $PATCH
 
 
 
