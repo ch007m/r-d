@@ -9,7 +9,6 @@ Table of Contents
   * [Install TAP - Cloud Native Runtimes](#install-tap---cloud-native-runtimes)
   * [Install TAP - Accelerator](#install-tap---accelerator)
   * [Install TAP - Review what it has been installed](#install-tap---review-what-it-has-been-installed)
-  * [Install Tanzu Build Service (TBS)](#install-tanzu-build-service-tbs)
 * [Demo](#demo)
   * [Step by step instructions](#step-by-step-instructions)
   * [All in one instructions](#all-in-one-instructions)
@@ -61,22 +60,13 @@ It packages different technology such as:
 
 ## Prerequisites
 
-The following [tools](https://docs.vmware.com/en/Tanzu-Application-Platform/1.0/tap/GUID-install-general.html#prereqs) are required to install TAP:
+The following [tools](https://docs.vmware.com/en/Tanzu-Application-Platform/1.0/tap/GUID-install-general.html#prereqs) are required to install TAP.
 
-- `shasum` binary (for linux OS) using `yum install perl-Digest-SHA -y`
-- Carvel [tools](https://carvel.dev/#whole-suite) - `curl -L https://carvel.dev/install.sh | sudo bash`
-  - ytt version v0.34.0 or later.
-  - kbld version v0.30.0 or later.
-  - imgpkg version v0.12.0 or later.
-  - kapp version v0.37.0 or later.
-- kubectl and Kubernetes >= v1.20.
-- [Flux2](https://github.com/fluxcd/flux2#flux-version-2).
-- [Tanzu Build Service](#TAS)
+**NOTE**: Some additional tools are installed using the [install.sh](./install.sh) bah script (unzip, k9s, pivnet).
 
 ## Instructions
 
-The commands listed hereafter have been executed top of a `k8s 1.21` cluster and have been reviewed due to some issues discovered using the
-[tanzu installation guide](https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/0.1/tap-0-1/GUID-install.html).
+The commands listed hereafter have been executed top of a `k8s 1.21` cluster.
 
 ### Tanzu client and TAP repository
 
@@ -392,141 +382,6 @@ tanzu package installed update app-live-view -v 0.1.0 -n tap-install -f app-live
 ```
 
 **WARNING**: Be sure that you have accepted the needed EULAs - https://network.tanzu.vmware.com/users/dashboard/eulas, otherwise some images will not be installed !
-
-- Move now to the next section to install `Tanzu Build Services` as it is needed to build the image of the DEMO.
-
-### Install Tanzu Build Service (TBS)
-
-To install the `Tanzu Build Service` (aka [TBS](https://docs.pivotal.io/build-service/1-2/installing.html)) on your k8s cluster, execute the commands described hereafter.
-The commands have been tested successfully against `docker.io`, `private docker registry` version 2.6 (as version 2.7 fails)
-
-- Login in first to `registry.pivotal.io` and your public or private images registry (e.g. docker.io, ...).
-
-```bash
-export REG_USER="<REG_USER>"
-export REG_PWD="<REG_PWD>"
-docker login -u=$REG_USER -p=$REG_PWD docker.io
-
-export PIVOTAL_REG_USER="<TANZUNET_USERNAME>"
-export PIVOTAL_REG_PWD="<TANZUNET_PWD>"
-docker login -u=$PIVOTAL_REG_USER -p=$PIVOTAL_REG_PWD registry.pivotal.io
-```
-
-- Copy the TBS images to your `<REGISTRY_USER>`/build-service
-
-**REMARK**: When this demo has been performed, the TBS version used was `1.2.2`
-
-**NOTE**: You can also use a private docker registry running on your k8s cluster. Use, in this case, the version `2.6` as `2.7` reports `MANIFEST_BLOB_UNKNOWN` during imgpkg import !!
-
-```bash
-export IMAGE_REPOSITORY="<YOUR_IMAGE_REPOSITORY"
-export TBS_VERSION="1.2.2"
-imgpkg copy -b "registry.pivotal.io/build-service/bundle:$TBS_VERSION" --to-repo $IMAGE_REPOSITORY
-copy | exporting 17 images...
-copy | will export registry.pivotal.io/build-service/bundle@sha256:e03765dbce254a1266a8bba026a71ec908854681bd12bf69cd7d55d407bbca95
-copy | will export registry.pivotal.io/build-service/dependency-updater@sha256:9f71c2fa6f7779924a95d9bcdedc248b4623c4d446ecddf950a21117e1cebd76
-copy | will export registry.pivotal.io/build-service/kpack-build-init-windows@sha256:20758ba22ead903aa4aacaa08a3f89dce0586f938a5d091e6c37bf5b13d632f3
-copy | will export registry.pivotal.io/build-service/kpack-build-init@sha256:31e95adee6d59ac46f5f2ec48208cbd154db0f4f8e6c1de1b8edf0cd9418bba8
-copy | will export registry.pivotal.io/build-service/kpack-completion-windows@sha256:1f8f1d98ea439ba6a25808a29af33259ad926a7054ad8f4b1aea91abf8a8b141
-copy | will export registry.pivotal.io/build-service/kpack-completion@sha256:1c63b9c876b11b7bf5f83095136b690fc07860c80b62a167c41b4c3efd1910bd
-copy | will export registry.pivotal.io/build-service/kpack-controller@sha256:4b3c825d6fb656f137706738058aab59051d753312e75404fc5cdaf49c352867
-copy | will export registry.pivotal.io/build-service/kpack-lifecycle@sha256:c923a81a1c3908122e29a30bae5886646d6ec26429bad4842c67103636041d93
-copy | will export registry.pivotal.io/build-service/kpack-rebase@sha256:79ae0f103bb39d7ef498202d950391c6ef656e06f937b4be4ec2abb6a37ad40a
-copy | will export registry.pivotal.io/build-service/kpack-webhook@sha256:594fe3525a8bc35f99280e31ebc38a3f1f8e02e0c961c35d27b6397c2ad8fa68
-copy | will export registry.pivotal.io/build-service/pod-webhook@sha256:3d8b31e5fba451bb51ccd586b23c439e0cab293007748c546ce79f698968dab8
-copy | will export registry.pivotal.io/build-service/secret-syncer@sha256:77aecf06753ddca717f63e0a6c8b8602381fef7699856fa4741617b965098d57
-copy | will export registry.pivotal.io/build-service/setup-ca-certs@sha256:3f8342b534e3e308188c3d0683c02c941c407a1ddacb086425499ed9cf0888e9
-copy | will export registry.pivotal.io/build-service/sleeper@sha256:0881284ec39f0b0e00c0cfd2551762f14e43580085dce9d0530717c704ade988
-copy | will export registry.pivotal.io/build-service/smart-warmer@sha256:4c8627a7f23d84fc25b409b7864930d27acc6454e3cdaa5e3917b5f252ff65ad
-copy | will export registry.pivotal.io/build-service/stackify@sha256:a40af2d5d569ea8bee8ec1effc43ba0ddf707959b63e7c85587af31f49c4157f
-copy | will export registry.pivotal.io/build-service/stacks-operator@sha256:1daa693bd09a1fcae7a2f82859115dc1688823330464e5b47d8b9b709dee89f1
-copy | exported 17 images
-copy | importing 17 images...
-```
-
-**NOTe**: When you deploy to a private docker registry, then provide as additional parameter the path to the CA certificate of the registry `--registry-ca-cert-path certs/ca.crt`
-
-- Export the content of the images locally under the folder `./bundle`
-
-```bash
-imgpkg pull -b "$IMAGE_REPOSITORY:$TBS_VERSION" -o ./bundle
-```
-
-- Alternatively, we can export the content of the TAS image from the pivotal registry using the following command
-
-```bash
-imgpkg pull -b "registry.pivotal.io/build-service/bundle:$TBS_VERSION" -o ./bundle
-```
-
-- Deploy `TBS`
-
-```bash
-export IMAGE-REPOSITORY="quay.io/<REG_USER>/build-service" ## BUT SHOULD BE FOR DOCKER --> "docker.io/<REG_USER>"
-ytt -f ./bundle/values.yaml \
-    -f ./bundle/config/ \
-    -v docker_repository='<IMAGE-REPOSITORY>' \
-    -v docker_username='<REGISTRY-USERNAME>' \
-    -v docker_password='<REGISTRY-PASSWORD>' \
-    -v tanzunet_username='<TANZUNET_USERNAME>' \
-    -v tanzunet_password='<TANZUNET_PASSWORD>' \
-    | kbld -f ./bundle/.imgpkg/images.yml -f- \
-    | kapp deploy -a tanzu-build-service -f- -y
-```
-
-- If you use a private docker registry, then execute this command
-
-```bash
-ytt -f ./bundle/values.yaml \
-    -f ./bundle/config/ \
-    -f <PATH-TO-CA> \
-    -v docker_repository='<PRIVATE_IMAGE_REPOSITORY>' \
-    -v docker_username='<PRIVATE_REGISTRY_USERNAME>' \
-    -v docker_password='<PRIVATE_REGISTRY-PASSWORD>' \
-    | kbld -f ./bundle/.imgpkg/images.yml -f- \
-    | kapp deploy -a tanzu-build-service -f- -y
-```
-
-**NOTE**: The `<PRIVATE_IMAGE_REPOSITORY>` should include as latest char a `/` (e.g: `<IP_ADDRESS>:<PORT>/`). Otherwise the `.dockerconfigjson` file generated for the `canonical-registry-secret` will include
-as registry `http//index.docker.io/v1/`
-
-- Install the `kp` cli
-
-```bash
-pivnet download-product-files --product-slug='build-service' --release-version=$TBS_VERSION --product-file-id=1000629
-chmod +x kp-linux-0.3.1
-cp kp-linux-0.3.1 ~/bin/kp
-```
-
-- Finally, import the `Tanzu Build Service` dependencies such as: lifecycle, buildpacks (go, java, python, ..) using the dependency descriptor `descriptor-<version>.yaml` file
-  that you can download using pivnet
-
-```bash
-pivnet download-product-files --product-slug='tbs-dependencies' --release-version='100.0.155' --product-file-id=1036685
-2021/09/14 11:11:26 Downloading 'descriptor-100.0.155.yaml' to 'descriptor-100.0.155.yaml'
-kp import -f ./descriptor-<version>.yaml
-
-e.g: kp import -f ./descriptor-100.0.155.yaml
-Importing Lifecycle...
-	Uploading '95.217.159.244:32500/lifecycle@sha256:c923a81a1c3908122e29a30bae5886646d6ec26429bad4842c67103636041d93'
-Importing ClusterStore 'default'...
-	Uploading '95.217.159.244:32500/tanzu-buildpacks_go@sha256:9fd3ba0f1f99f7dba25d22dc955233c7b38b7f1b55b038464968d1f1e37afd3d'
-	Uploading '95.217.159.244:32500/tanzu-buildpacks_java@sha256:578bccbfc996184ea3181b4b0fa39f98f456db1e2e427ef163db98224cd9ea04'
-	Uploading '95.217.159.244:32500/tanzu-buildpacks_nodejs@sha256:c2b47f6f74055bade5456c17dd92c5ef035fab7e075d0ce0b14afc15b2efa06c'
-	Uploading '95.217.159.244:32500/tanzu-buildpacks_java-native-image@sha256:74d8f4ba944ee1e62e7fc68654ee09fb89e0b26cb8eeda3a587322e9e7bd6bf5'
-	Uploading '95.217.159.244:32500/tanzu-buildpacks_dotnet-core@sha256:6d57e312e7ac86f78ece4afcc3967e5314fbb71fe592800fd6f0f58bd923945a'
-	Uploading '95.217.159.244:32500/tanzu-buildpacks_python@sha256:1222d5f695222597687173b1b8612844f3ccd763eae86e99c3ebacc41390db40'
-	 \ 578.31 MB
-...
-```
-
-**WARNING**: This step to import the `buildpacks` will take time !
-
-- When done, play with the [demo](#Demo) :-)
-- To delete the `build-service` using kapp
-
-```bash
-kapp delete -a tanzu-build-service -n build-service
-```
 
 ## Demo
 
