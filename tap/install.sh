@@ -219,6 +219,9 @@ kubectl create ns $NAMESPACE_DEMO
 tanzu secret registry add registry-credentials --server $REGISTRY_SERVER --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD --namespace $NAMESPACE_DEMO
 
 echo "## Create a secret to access the tap-registry, a service account configured with imagePullSecrets, and RBAC rules to the developer namespace"
+echo "### Delete the service account as it has already been created ... strange"
+kubectl delete sa default -n $NAMESPACE_DEMO --ignore-not-found
+
 cat <<EOF | kubectl -n $NAMESPACE_DEMO create -f -
 
 apiVersion: v1
