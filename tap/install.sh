@@ -4,6 +4,7 @@
 # Change the REMOTE_HOME_DIR var o point to the remote VM home dir
 # Define the following env vars:
 # - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM
+# - VM_IP: IP address of the VM where the cluster is running
 # - REGISTRY_URL: image registry (docker.io, gcr.io, localhost:5000)
 # - REGISTRY_USERNAME: username to be used to log on the registry
 # - REGISTRY_PASSWORD: password to be used to log on the registry
@@ -20,11 +21,11 @@ export KUBECONFIG=$HOME/.kube/${KUBE_CFG_FILE}
 # Terminal UI to interact with a Kubernetes cluster
 K9S_VERSION=$(curl --silent "https://api.github.com/repos/derailed/k9s/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
 
-REMOTE_HOME_DIR="/home/snowdrop"
+REMOTE_HOME_DIR="<CHANGE_ME>"
 DEST_DIR="/usr/local/bin"
 TANZU_TEMP_DIR="$REMOTE_HOME_DIR/tanzu"
 
-VM_IP=65.108.51.37
+VM_IP="<CHANGE_ME>"
 REGISTRY_URL="<CHANGE_ME>"
 REGISTRY_USERNAME="<CHANGE_ME>"
 REGISTRY_PASSWORD="<CHANGE_ME>"
