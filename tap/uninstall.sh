@@ -39,11 +39,13 @@ while read -r package; do
   tanzu package repository delete $name -n $NAMESPACE -y
 done <<< "$(tanzu package repository list -n $NAMESPACE -o json | jq -c '.[]')"
 
-declare -a packages=("tap-install" "kapp-controller" "secretgen-controller" "tanzu-cluster-essentials"  "tanzu-package-repo-global")
+declare -a packages=("tap-install" "secretgen-controller" "tanzu-cluster-essentials"  "tanzu-package-repo-global" "kapp-controller")
 for pkg in ${packages[@]}; do
    echo "Deleting the resources and namespace of: $pkg"
-   kubectl delete all --all -n $pkg
-   kubectl delete ns  $pkg
+   echo "If the namespace cannot be deleted as some finalizers are still pemding, execute this command"
+   echo "kc get ns $pkg -o json | tr -d "\n" | sed "s/\"finalizers\": \[[^]]\+\]/\"finalizers\": []/" | kubectl replace --raw /api/v1/namespaces/$NpkgS/finalize -f -"
+   kubectl delete "$(kubectl api-resources --namespaced=true --verbs=delete -o name | tr "\n" "," | sed -e 's/,$//')" --all -n $pkg
+   kubectl delete ns $pkg
 done
 
 echo "## Clean previous installation of the Tanzu client"
