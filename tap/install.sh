@@ -12,6 +12,9 @@
 KUBE_CFG_FILE=${1:-h01-121}
 export KUBECONFIG=$HOME/.kube/${KUBE_CFG_FILE}
 
+# Terminal UI to interact with a Kubernetes cluster
+K9S_VERSION=$(curl --silent "https://api.github.com/repos/derailed/k9s/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+
 REMOTE_HOME_DIR="/home/snowdrop"
 DEST_DIR="/usr/local/bin"
 
@@ -37,15 +40,12 @@ NAMESPACE_DEMO="tap-demo"
 
 TANZU_TEMP_DIR="$REMOTE_HOME_DIR/tanzu"
 
-function pause(){
- read -s -n 1 -p "Press any key to continue . . ."
- echo ""
-}
-
-echo "## Install needed tool: k9s, unzip"
-wget https://github.com/derailed/k9s/releases/download/v0.25.18/k9s_Linux_x86_64.tar.gz && tar -vxf k9s_Linux_x86_64.tar.gz
+echo "## Install useful tools: k9s, unzip, jq,..."
+wget https://github.com/derailed/k9s/releases/download/$K9S_VERSION/k9s_Linux_x86_64.tar.gz && tar -vxf k9s_Linux_x86_64.tar.gz
 sudo cp k9s /usr/local/bin
 sudo yum install unzip
+sudo yum install epel-release -y
+sudo yum install jq -y
 
 echo "## Executing installation Part I of the TAP guide"
 echo "## Install Tanzu tools "
@@ -92,13 +92,6 @@ sudo cp ./kapp /usr/local/bin/kapp
 cd ..
 
 echo "## Install the Tanzu client & plug-ins"
-echo "## Clean previous installation of the Tanzu client"
-rm -rf $TANZU_TEMP_DIR/cli        # Remove previously downloaded cli files
-sudo rm /usr/local/bin/tanzu  # Remove CLI binary (executable)
-rm -rf ~/.config/tanzu/       # current location # Remove config directory
-rm -rf ~/.tanzu/              # old location # Remove config directory
-rm -rf ~/.cache/tanzu         # remove cached catalog.yaml
-
 echo "## Download the Tanzu client and extract it"
 TANZU_PRODUCT_FILE_ID="1114447"
 TANZU_PRODUCT_NAME="tanzu-framework-linux-amd64"
