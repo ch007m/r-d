@@ -21,18 +21,18 @@ export KUBECONFIG=$HOME/.kube/${KUBE_CFG_FILE}
 # Terminal UI to interact with a Kubernetes cluster
 K9S_VERSION=$(curl --silent "https://api.github.com/repos/derailed/k9s/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
 
-REMOTE_HOME_DIR="<CHANGE_ME>"
+REMOTE_HOME_DIR="/home/snowdrop"
 DEST_DIR="/usr/local/bin"
 TANZU_TEMP_DIR="$REMOTE_HOME_DIR/tanzu"
 
-VM_IP="<CHANGE_ME>"
-REGISTRY_URL="<CHANGE_ME>"
-REGISTRY_USERNAME="<CHANGE_ME>"
-REGISTRY_PASSWORD="<CHANGE_ME>"
+VM_IP=65.108.51.37
+REGISTRY_URL="docker.io"
+REGISTRY_USERNAME="cmoulliard"
+REGISTRY_PASSWORD="aGxecQquG7"
 
-TANZU_LEGACY_API_TOKEN="<CHANGE_ME>"
-TANZU_REG_USERNAME="<CHANGE_ME>"
-TANZU_REG_PASSWORD="<CHANGE_ME>"
+TANZU_LEGACY_API_TOKEN="jzZZHugEFBS_2K_y4KXh"
+TANZU_REG_USERNAME="cmoulliard@redhat.com"
+TANZU_REG_PASSWORD=".P?V9yM^e3vsVH9"
 
 INGRESS_DOMAIN=$VM_IP.nip.io
 
@@ -46,16 +46,14 @@ TAP_GIT_CATALOG_REPO=https://github.com/halkyonio/tap-catalog-blank/blob/main
 NAMESPACE_DEMO="tap-demo"
 
 echo "## Install useful tools: k9s, unzip, jq,..."
-wget https://github.com/derailed/k9s/releases/download/$K9S_VERSION/k9s_Linux_x86_64.tar.gz && tar -vxf k9s_Linux_x86_64.tar.gz
+wget -q https://github.com/derailed/k9s/releases/download/$K9S_VERSION/k9s_Linux_x86_64.tar.gz && tar -vxf k9s_Linux_x86_64.tar.gz
 sudo cp k9s /usr/local/bin
-sudo yum install unzip
-sudo yum install epel-release -y
-sudo yum install jq -y
+sudo yum install unzip epel-release jq -y
 
 echo "## Executing installation Part I of the TAP guide"
 echo "## Install Tanzu tools "
 echo "## Installing pivnet tool ..."
-wget -c https://github.com/pivotal-cf/pivnet-cli/releases/download/v$PIVNET_CLI_VERSION/pivnet-linux-amd64-$PIVNET_CLI_VERSION
+wget -q -c https://github.com/pivotal-cf/pivnet-cli/releases/download/v$PIVNET_CLI_VERSION/pivnet-linux-amd64-$PIVNET_CLI_VERSION
 chmod +x pivnet-linux-amd64-$PIVNET_CLI_VERSION && mv pivnet-linux-amd64-$PIVNET_CLI_VERSION pivnet && sudo cp pivnet /usr/local/bin
 pivnet version
 
@@ -132,7 +130,7 @@ tanzu secret registry add tap-registry \
 
 echo "## Add Tanzu Application Platform package repository to the k8s cluster"
 tanzu package repository add tanzu-tap-repository \
-  --url registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:1.0.0 \
+  --url registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:$TAP_VERSION \
   --namespace tap-install
 
 sleep 10s
@@ -140,10 +138,10 @@ sleep 10s
 tanzu package available list --namespace tap-install
 
 # TODO: Document the following step of the script to pass as parameter the secret and namespace to be used
-echo "## Store the X509 certificate of the local registry"
-X_509=$(kubectl get secret/cert-key -n infra -o=go-template='{{index .data "server.crt"}}' | base64 -d)
-echo $X_509 > server.crt
-X_509_ONELINE=$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' server.crt)
+#echo "## Store the X509 certificate of the local registry"
+#X_509=$(kubectl get secret/cert-key -n infra -o=go-template='{{index .data "server.crt"}}' | base64 -d)
+#echo $X_509 > server.crt
+#X_509_ONELINE=$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' server.crt)
 
 echo "## Install a Tanzu Application Platform profile"
 echo "## Create first the tap-values.yaml file to configure the profile .... .light"
@@ -159,7 +157,7 @@ buildservice:
   kp_default_repository: "$REGISTRY_URL/build-service"
   kp_default_repository_username: "$REGISTRY_USERNAME"
   kp_default_repository_password: "$REGISTRY_PASSWORD"
-  ca_cert_data: $X_509_ONELINE
+  # ca_cert_data: $X_509_ONELINE
   tanzunet_username: "$TANZU_REG_USERNAME"
   tanzunet_password: "$TANZU_REG_PASSWORD"
 
