@@ -3,13 +3,18 @@
 # To remotely install this script within a VM using SSH, execute:
 # Change the REMOTE_HOME_DIR var o point to the remote VM home dir
 # Define the following env vars:
-# - TANZU_LEGACY_API_TOKEN used by pivnet to login
+# - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM
+# - REGISTRY_URL: image registry (docker.io, gcr.io, localhost:5000)
+# - REGISTRY_USERNAME: username to be used to log on the registry
+# - REGISTRY_PASSWORD: password to be used to log on the registry
+# - TANZU_LEGACY_API_TOKEN: Token used by pivnet to login
 # - TANZU_REG_USERNAME: user to be used to be authenticated against the Tanzu image registry
 # - TANZU_REG_PASSWORD: password to be used to be authenticated against the Tanzu image registry
 #
-# ssh-hetznerc h01-121 'bash -s' < ./install.sh
+# Execute this command remotely
+# ssh -i <PUB_KEY_FILE_PATH> <USER>@<IP> -p <PORT> "bash -s" -- < ./uninstall.sh
 #
-KUBE_CFG_FILE=${1:-h01-121}
+KUBE_CFG_FILE=${1:-config}
 export KUBECONFIG=$HOME/.kube/${KUBE_CFG_FILE}
 
 # Terminal UI to interact with a Kubernetes cluster
@@ -17,6 +22,7 @@ K9S_VERSION=$(curl --silent "https://api.github.com/repos/derailed/k9s/releases/
 
 REMOTE_HOME_DIR="/home/snowdrop"
 DEST_DIR="/usr/local/bin"
+TANZU_TEMP_DIR="$REMOTE_HOME_DIR/tanzu"
 
 VM_IP=65.108.51.37
 REGISTRY_URL="<CHANGE_ME>"
@@ -37,8 +43,6 @@ TANZU_CLI_VERSION="v0.10.0"
 # Do not use the RAW URL but instead the Github HTTPS URL followed by blob/main
 TAP_GIT_CATALOG_REPO=https://github.com/halkyonio/tap-catalog-blank/blob/main
 NAMESPACE_DEMO="tap-demo"
-
-TANZU_TEMP_DIR="$REMOTE_HOME_DIR/tanzu"
 
 echo "## Install useful tools: k9s, unzip, jq,..."
 wget https://github.com/derailed/k9s/releases/download/$K9S_VERSION/k9s_Linux_x86_64.tar.gz && tar -vxf k9s_Linux_x86_64.tar.gz
