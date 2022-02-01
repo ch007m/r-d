@@ -9,42 +9,44 @@
 KUBE_CFG_FILE=${1:-config}
 export KUBECONFIG=$HOME/.kube/${KUBE_CFG_FILE}
 
-NAMESPACE="tap-install"
-NAMESPACE_DEMO="tap-demo"
+NAMESPACE_TAP="tap-install"
+NAMESPACE_TAP_DEMO="tap-demo"
 
 REMOTE_HOME_DIR="/home/snowdrop"
 DEST_DIR="/usr/local/bin"
 TANZU_TEMP_DIR="$REMOTE_HOME_DIR/tanzu"
 
-tanzu apps workload list -n $NAMESPACE_DEMO | awk '(NR>1)' | while read name app status age;
+tanzu apps workload list -n $NAMESPACE_TAP_DEMO | awk '(NR>1)' | while read name app status age;
 do
-  echo "Deleting the $name workload under $NAMESPACE_DEMO"
-  tanzu -n $NAMESPACE_DEMO apps workload delete $name --yes
+  if [[ $app != exit ]]; then
+    echo "Deleting the $name workload under $NAMESPACE_TAP_DEMO"
+    tanzu -n $NAMESPACE_TAP_DEMO apps workload delete $name --yes
+  fi
 done
-kubectl delete ns $NAMESPACE_DEMO
+kubectl delete ns $NAMESPACE_TAP_DEMO
 
 while read -r package; do
   name=$(echo $package | jq -r '.name')
   repo=$(echo $package | jq -r '.repository')
   tag=$(echo $package | jq -r '.tag')
   echo "Deleting the package: $name"
-  tanzu package installed delete $name -n $NAMESPACE -y
-done <<< "$(tanzu package installed list -n $NAMESPACE -o json | jq -c '.[]')"
+  tanzu package installed delete $name -n $NAMESPACE_TAP -y
+done <<< "$(tanzu package installed list -n $NAMESPACE_TAP -o json | jq -c '.[]')"
 
 while read -r package; do
   name=$(echo $package | jq -r '.name')
   repo=$(echo $package | jq -r '.repository')
   tag=$(echo $package | jq -r '.tag')
   echo "Deleting the repository: $name"
-  tanzu package repository delete $name -n $NAMESPACE -y
-done <<< "$(tanzu package repository list -n $NAMESPACE -o json | jq -c '.[]')"
+  tanzu package repository delete $name -n $NAMESPACE_TAP -y
+done <<< "$(tanzu package repository list -n $NAMESPACE_TAP -o json | jq -c '.[]')"
 
 declare -a packages=("tap-install" "secretgen-controller" "tanzu-cluster-essentials"  "tanzu-package-repo-global" "kapp-controller")
 for pkg in ${packages[@]}; do
    echo "Deleting the resources and namespace of: $pkg"
-   echo "If the namespace cannot be deleted as some finalizers are still pemding, execute this command"
-   echo "kc get ns $pkg -o json | tr -d "\n" | sed "s/\"finalizers\": \[[^]]\+\]/\"finalizers\": []/" | kubectl replace --raw /api/v1/namespaces/$NpkgS/finalize -f -"
-   kubectl delete "$(kubectl api-resources --namespaced=true --verbs=delete -o name | tr "\n" "," | sed -e 's/,$//')" --all -n $pkg
+   echo "If the namespace cannot be deleted as some finalizers are still pending, execute this command"
+   echo "kubectl get ns $pkg -o json | tr -d "\n" | sed "s/\"finalizers\": \[[^]]\+\]/\"finalizers\": []/" | kubectl replace --raw /api/v1/namespaces/$pkg/finalize -f -"
+   # kubectl delete "$(kubectl api-resources --namespaced=true --verbs=delete -o name | tr "\n" "," | sed -e 's/,$//')" --all -n $pkg
    kubectl delete ns $pkg
 done
 
