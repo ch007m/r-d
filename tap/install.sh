@@ -154,6 +154,9 @@ cat  > tap-values.yml <<EOF
 profile: light
 ceip_policy_disclosed: true # Installation fails if this is set to 'false'
 
+cnrs:
+  domain_name: "$VM_IP.nip.io"
+
 buildservice:
   kp_default_repository: "$REGISTRY_URL/build-service"
   kp_default_repository_username: "$REGISTRY_USERNAME"
@@ -295,12 +298,6 @@ EOF
 
 popd
 exit
-
-## Patch the Knative Serving config-domain configmap to expose as domain: <VM_IP>.nip.io
-PATCH="{\"data\":{\"$VM_IP.nip.io\": \"\"}}"
-kubectl patch cm/config-domain -n knative-serving \
-  --type merge \
-  -p $PATCH
 
 
 
