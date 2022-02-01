@@ -36,6 +36,9 @@ TANZU_REG_PASSWORD=".P?V9yM^e3vsVH9"
 
 INGRESS_DOMAIN=$VM_IP.nip.io
 
+NAMESPACE_DEMO="tap-demo"
+NAMESPACE_TAP="tap-install"
+
 PIVNET_CLI_VERSION="3.0.1"
 TANZU_CLUSTER_ESSENTIALS_VERSION="1.0.0"
 TAP_VERSION="1.0.0"
@@ -43,7 +46,6 @@ TANZU_CLI_VERSION="v0.10.0"
 
 # Do not use the RAW URL but instead the Github HTTPS URL followed by blob/main
 TAP_GIT_CATALOG_REPO=https://github.com/halkyonio/tap-catalog-blank/blob/main
-NAMESPACE_DEMO="tap-demo"
 
 echo "## Install useful tools: k9s, unzip, jq,..."
 wget -q https://github.com/derailed/k9s/releases/download/$K9S_VERSION/k9s_Linux_x86_64.tar.gz && tar -vxf k9s_Linux_x86_64.tar.gz
@@ -131,7 +133,7 @@ tanzu secret registry add tap-registry \
 echo "## Add Tanzu Application Platform package repository to the k8s cluster"
 tanzu package repository add tanzu-tap-repository \
   --url registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:$TAP_VERSION \
-  --namespace tap-install
+  -n $NAMESPACE_TAP
 
 sleep 10s
 
@@ -194,10 +196,10 @@ EOF
 cat tap-values.yml
 
 echo "## Installing the packages ..."
-tanzu package install tap -p tap.tanzu.vmware.com -v $TAP_VERSION --values-file tap-values.yml -n tap-install
+tanzu package install tap -p tap.tanzu.vmware.com -v $TAP_VERSION --values-file tap-values.yml -n $NAMESPACE_TAP
 
 echo "## Verify the package install"
-tanzu package installed get tap -n tap-install
+tanzu package installed get tap -n $NAMESPACE_TAP
 sleep 10m
 tanzu package installed list -A
 
