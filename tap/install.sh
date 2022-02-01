@@ -2,10 +2,15 @@
 #
 # To remotely install this script within a VM using SSH, execute:
 # Change the REMOTE_HOME_DIR var o point to the remote VM home dir
+#
+# WARNING: This script has been tested using docker.io only.
+# Why: We cannot use quay.io as it do not support to push images using sub-path as needed
+# This TAP release - 1.0.0. still do not support too using local registry as selfsigned X509 cannot be imported/mounted within a secret
+#
 # Define the following env vars:
 # - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM
 # - VM_IP: IP address of the VM where the cluster is running
-# - REGISTRY_URL: image registry (docker.io, gcr.io, localhost:5000)
+# - REGISTRY_SERVER: image registry server (docker.io, gcr.io, localhost:5000)
 # - REGISTRY_USERNAME: username to be used to log on the registry
 # - REGISTRY_PASSWORD: password to be used to log on the registry
 # - TANZU_LEGACY_API_TOKEN: Token used by pivnet to login
@@ -21,18 +26,18 @@ export KUBECONFIG=$HOME/.kube/${KUBE_CFG_FILE}
 # Terminal UI to interact with a Kubernetes cluster
 K9S_VERSION=$(curl --silent "https://api.github.com/repos/derailed/k9s/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
 
-REMOTE_HOME_DIR="/home/snowdrop"
+REMOTE_HOME_DIR="<CHANGE_ME>"
 DEST_DIR="/usr/local/bin"
 TANZU_TEMP_DIR="$REMOTE_HOME_DIR/tanzu"
 
-VM_IP=65.108.51.37
-REGISTRY_URL="docker.io"
-REGISTRY_USERNAME="cmoulliard"
-REGISTRY_PASSWORD="aGxecQquG7"
+VM_IP="<CHANGE_ME>"
+REGISTRY_SERVER="<CHANGE_ME>"
+REGISTRY_USERNAME="<CHANGE_ME>"
+REGISTRY_PASSWORD="<CHANGE_ME>"
 
-TANZU_LEGACY_API_TOKEN="jzZZHugEFBS_2K_y4KXh"
-TANZU_REG_USERNAME="cmoulliard@redhat.com"
-TANZU_REG_PASSWORD=".P?V9yM^e3vsVH9"
+TANZU_LEGACY_API_TOKEN="<CHANGE_ME>"
+TANZU_REG_USERNAME="<CHANGE_ME>"
+TANZU_REG_PASSWORD="<CHANGE_ME>"
 
 INGRESS_DOMAIN=$VM_IP.nip.io
 
@@ -50,7 +55,8 @@ TAP_GIT_CATALOG_REPO=https://github.com/halkyonio/tap-catalog-blank/blob/main
 echo "## Install useful tools: k9s, unzip, jq,..."
 wget -q https://github.com/derailed/k9s/releases/download/$K9S_VERSION/k9s_Linux_x86_64.tar.gz && tar -vxf k9s_Linux_x86_64.tar.gz
 sudo cp k9s /usr/local/bin
-sudo yum install unzip epel-release jq -y
+sudo yum install unzip epel-release -y
+sudo yum install jq -y
 
 echo "## Executing installation Part I of the TAP guide"
 echo "## Install Tanzu tools "
@@ -128,7 +134,7 @@ tanzu secret registry add tap-registry \
   --username ${INSTALL_REGISTRY_USERNAME} \
   --password ${INSTALL_REGISTRY_PASSWORD} \
   --server ${INSTALL_REGISTRY_HOSTNAME} \
-  --export-to-all-namespaces --yes --namespace tap-install
+  --export-to-all-namespaces --yes --namespace $NAMESPACE_TAP
 
 echo "## Add Tanzu Application Platform package repository to the k8s cluster"
 tanzu package repository add tanzu-tap-repository \
@@ -156,7 +162,8 @@ cnrs:
   domain_name: "$VM_IP.nip.io"
 
 buildservice:
-  kp_default_repository: "$REGISTRY_URL/build-service"
+  # Dockerhub has the form kp_default_repository: "my-dockerhub-user/build-service" or kp_default_repository: "index.docker.io/my-user/build-service"
+  kp_default_repository: "$REGISTRY_USERNAME/build-service"
   kp_default_repository_username: "$REGISTRY_USERNAME"
   kp_default_repository_password: "$REGISTRY_PASSWORD"
   # ca_cert_data: $X_509_ONELINE
@@ -168,8 +175,12 @@ supply_chain: basic
 ootb_supply_chain_basic:
   service_account: default
   registry:
-    server: "$REGISTRY_URL"
-    repository: "$NAMESPACE_DEMO"
+    # hostname of the registry server. Dockerhub has the form server: "index.docker.io", Google Cloud Registry has the form server: "gcr.io"
+    server: "$REGISTRY_SERVER"
+    # repository is where workload images are stored in the registry. Images are written to SERVER-NAME/REPO-NAME/workload-name. Examples:
+    # Dockerhub has the form repository: "my-dockerhub-user"
+    # Google Cloud Registry has the form repository: "my-project/supply-chain"
+    repository: "$REGISTRY_USERNAME"
   gitops:
     ssh_secret: ""
 
@@ -198,16 +209,16 @@ cat tap-values.yml
 echo "## Installing the packages ..."
 tanzu package install tap -p tap.tanzu.vmware.com -v $TAP_VERSION --values-file tap-values.yml -n $NAMESPACE_TAP
 
-echo "## Verify the package install"
+echo "## Verify the package installed and list them"
+sleep 5m
 tanzu package installed get tap -n $NAMESPACE_TAP
-sleep 10m
 tanzu package installed list -A
 
-echo "## Set up developer namespaces to use installed packages"
+echo "## Set up the developer namespace: $NAMESPACE_DEMO and create a secret to access the image registry: $REGISTRY_SERVER"
 kubectl create ns $NAMESPACE_DEMO
-tanzu secret registry add registry-credentials --server $REGISTRY_URL --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD --namespace $NAMESPACE_DEMO
+tanzu secret registry add registry-credentials --server $REGISTRY_SERVER --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD --namespace $NAMESPACE_DEMO
 
-echo "## Add placeholder read secrets, a service account, and RBAC rules to the developer namespace"
+echo "## Create a secret to access the tap-registry, a service account configured with imagePullSecrets, and RBAC rules to the developer namespace"
 cat <<EOF | kubectl -n $NAMESPACE_DEMO create -f -
 
 apiVersion: v1
