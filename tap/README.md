@@ -70,6 +70,9 @@ of a TAP platform
 - Tanzu Tap Repository. Use this command to see the information about the image repository `tanzu package repository get tanzu-tap-repository -n tap-install`
 - Tanzu Packages. Use this command to see the list of the packages deployed `tanzu package installed list -n tap-install`
 
+**REMARK**: As TAP packages community and proprietary projects, the only available source of information is currently this [page](https://docs.vmware.com/en/Tanzu-Application-Platform/1.1/tap/GUID-components.html).
+Nevertheless, the community edition packages list is available [here](https://github.com/vmware-tanzu/community-edition#packages).
+
 **NOTE**: As this release do not support to build/push an image using a local container registry (as we cannot inject a selfsigned CA certificate), 
 then we have used an external repository (docker.io) !!
 
