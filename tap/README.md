@@ -2,7 +2,6 @@ Table of Contents
 =================
 
 * [What is TAP](#what-is-tap)
-* [References](#references)
 * [Prerequisites](#prerequisites)
 * [Instructions](#instructions)
 * [Demo](#demo)
@@ -12,28 +11,19 @@ Table of Contents
 * [Issues](#issues)
 * [Additional tools](#additional-tools)
   * [Clean](#clean)
+* [References](#references)
 
 ## What is TAP
 
-Tanzu Application Platform 1.0 - https://docs.vmware.com/en/Tanzu-Application-Platform/1.0/tap/GUID-overview.html is a packaged set of components that helps developers and
+Tanzu Application Platform 1.1 - https://docs.vmware.com/en/Tanzu-Application-Platform/1.1/tap/GUID-overview.html is a packaged set of components that helps developers and
 operators to more easily build, deploy, and manage apps on a Kubernetes platform.
-
-
 
 TAP is a `Knative` platform using `kpack` (= buildpacks controller) to build images, `Contour` (= ingress) to route the traffic, `kapp` (= kind of helm technology but with more features) to assemble the
 `applications` and `Application Live and Application Accelerator`** to guide the Architects/Developers to design/deploy/monitor applications on k8s.
 
 **: Where VMWare/Pivotal would like to capture with a great DevExp on K8s the Spring Architects and Developers.
 
-Tanzu Application Platform simplifies workflows in both the `inner` loop and `outer` loop of Kubernetes-based app development:
-
-- Inner Loop: The inner loop describes a developer’s local development environment where they code and test apps. The activities that take place in the inner loop include writing code, committing to a version control system, deploying to a development or staging environment, testing, and then making additional code changes.
-- Outer Loop: The outer loop describes the steps to deploy apps to production and maintain them over time. For example, on a cloud-native platform, the outer loop includes activities such as building container images, adding container security, and configuring continuous integration (CI) and continuous delivery (CD) pipelines.
-
-**REMARK**: The VMWare Tanzu definition of an inner loop implies an image build while this is not the case using Openshift odo as we push the code within a pod.
-
 It packages different technology such as:
-
 
 | Name                                                                                                                 | Description                                                                                                                                                                                        | System(s)                                   | Product page                                         | Version        |
 | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------ | ---------------- |
@@ -44,30 +34,44 @@ It packages different technology such as:
 | [Flux2](https://github.com/fluxcd/flux2#flux-version-2)                                                              | Sync k8s resources and config up to date from Git repositories                                                                                                                                     | Flux2                                       | https://fluxcd.io/                                   | 0.17.0         |
 | [Kapp](https://carvel.dev/kapp-controller/)                                                                          | Deploy and view groups of Kubernetes resources as "applications" controller                                                                                                                        | kapp                                        | https://carvel.dev/kapp-controller/                  | 0.24.0         |
 
-## References
-
-Short introduction about what is TAP is available [here](https://www.youtube.com/watch?v=H6rbIkaJ1xc&ab_channel=VMwareTanzu) 
-
-The problem TAP would like to solve is presented within this [video](https://www.youtube.com/watch?v=9oupRtKT_JM)
-
-[Contour Ingres architecture](https://projectcontour.io/docs/v1.18.1/architecture/)
-
-[Use an Ingress route with Contour](https://tanzu.vmware.com/developer/guides/kubernetes/service-routing-contour-to-ingress-and-beyond/)
-
-[How to install Tanzu (Contour, Harbor, TBS) on kind](https://github.com/tanzu-japan/devsecops-demo)
-
 ## Prerequisites
 
-The following [tools](https://docs.vmware.com/en/Tanzu-Application-Platform/1.0/tap/GUID-install-general.html#prereqs) are required to install TAP.
+The following [installation](https://docs.vmware.com/en/Tanzu-Application-Platform/1.1/tap/GUID-install-general.html#prereqs) guide explain what the prerequisites are
+and the tools that TAP will require.
 
-**NOTE**: Some additional tools are installed using the [install.sh](./install.sh) bah script (unzip, k9s, pivnet).
+TL&DR; It is needed to:
+- Have a [Tanzu account](https://network.tanzu.vmware.com/) to download the software or access the [Tanzu registry](registry.tanzu.vmware.com),
+- Accept the needed [EULA](https://docs.vmware.com/en/Tanzu-Application-Platform/1.1/tap/GUID-install-general.html#eulas) 
+- Access a k8s cluster >= 1.21 with Cluster Admin Role and kubectl installed
+- Have a Linux VM machine with 8 CPUs and 8 GB or RAM
+
+**NOTE**: Some additional tools are installed within the VM by our [install.sh](./install.sh) bash script such as: unzip, k9s and pivnet !
 
 ## Instructions
 
-The instructions of the [guide](https://docs.vmware.com/en/Tanzu-Application-Platform/1.0/tap/GUID-install-intro.html) has been executed as such without problems.
+The instructions of the official [guide](https://docs.vmware.com/en/Tanzu-Application-Platform/1.1/tap/GUID-install-intro.html) has been executed as such without problem.
 
-**NOTE**: As this release do not support to build/push an image using a local container registry as we cannot inject a selfsigned CA certificate,
-then we have used an external repository (quay.io) !!
+During the installation of TAP, the following software will be deployed:
+
+1. Tools
+- [Tanzu client](https://github.com/vmware-tanzu/tanzu-framework/blob/main/docs/cli/getting-started.md) and plugins
+- [Carvel tools](https://carvel.dev/): ytt, imgpkg, kbld, kapp
+
+2. K8s controllers
+- [Certificate Manager](https://github.com/cert-manager/cert-manager),
+- [Kapp](https://carvel.dev/kapp-controller/),
+- [Secretgen](https://github.com/vmware-tanzu/carvel-secretgen-controller)
+
+3. Repository and Packages
+
+A repository is an image containing the different K8s manifest able to install/configure different packages which are the building blocks
+of a TAP platform
+
+- Tanzu Tap Repository. Use this command to see the information about the image repository `tanzu package repository get tanzu-tap-repository -n tap-install`
+- Tanzu Packages. Use this command to see the list of the packages deployed `tanzu package installed list -n tap-install`
+
+**NOTE**: As this release do not support to build/push an image using a local container registry (as we cannot inject a selfsigned CA certificate), 
+then we have used an external repository (docker.io) !!
 
 ### Install TAP - Review what it has been installed
 
@@ -533,3 +537,15 @@ kc delete clusterrolebinding/app-accelerator-tap-install-cluster-rolebinding
 ```
 
 Thats's all !
+
+## References
+
+Short introduction about what is TAP is available [here](https://www.youtube.com/watch?v=H6rbIkaJ1xc&ab_channel=VMwareTanzu)
+
+The problem TAP would like to solve is presented within this [video](https://www.youtube.com/watch?v=9oupRtKT_JM)
+
+[Contour Ingres architecture](https://projectcontour.io/docs/v1.18.1/architecture/)
+
+[Use an Ingress route with Contour](https://tanzu.vmware.com/developer/guides/kubernetes/service-routing-contour-to-ingress-and-beyond/)
+
+[How to install Tanzu (Contour, Harbor, TBS) on kind](https://github.com/tanzu-japan/devsecops-demo)
