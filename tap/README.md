@@ -42,16 +42,15 @@ The instructions of the official [guide](https://docs.vmware.com/en/Tanzu-Applic
 
 During the installation of TAP, the following software will be deployed:
 
-1. Tools
+1. Cluster Essentials (= [bundle image](registry.tanzu.vmware.com/tanzu-cluster-essentials/cluster-essentials-bundle) packaging Tools & Controllers)
 - [Tanzu client](https://github.com/vmware-tanzu/tanzu-framework/blob/main/docs/cli/getting-started.md) and plugins
 - [Carvel tools](https://carvel.dev/): ytt, imgpkg, kbld, kapp
 
-2. K8s controllers
 - [Certificate Manager](https://github.com/cert-manager/cert-manager),
 - [Kapp](https://carvel.dev/kapp-controller/),
 - [Secretgen](https://github.com/vmware-tanzu/carvel-secretgen-controller)
 
-3. Repository and Packages
+2Repository and Packages
 
 A repository is an image containing the different K8s manifest able to install/configure different packages which are the building blocks
 of a TAP platform
