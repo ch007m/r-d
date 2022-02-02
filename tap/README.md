@@ -4,13 +4,15 @@ Table of Contents
 * [What is TAP](#what-is-tap)
 * [Prerequisites](#prerequisites)
 * [Instructions](#instructions)
+* [Packages](#packages)
+   * [Install TAP - Review what it has been installed](#install-tap---review-what-it-has-been-installed)
 * [Demo](#demo)
-  * [Step by step instructions](#step-by-step-instructions)
-  * [All in one instructions](#all-in-one-instructions)
-  * [Demo shortcuts](#demo-shortcuts)
+   * [Step by step instructions](#step-by-step-instructions)
+   * [All in one instructions](#all-in-one-instructions)
+   * [Demo shortcuts](#demo-shortcuts)
 * [Issues](#issues)
 * [Additional tools](#additional-tools)
-  * [Clean](#clean)
+   * [Clean](#clean)
 * [References](#references)
 
 ## What is TAP
@@ -43,26 +45,27 @@ The instructions of the official [guide](https://docs.vmware.com/en/Tanzu-Applic
 During the installation of TAP, the following software will be deployed:
 
 1. Cluster Essentials (= [bundle image](registry.tanzu.vmware.com/tanzu-cluster-essentials/cluster-essentials-bundle) packaging Tools & Controllers)
-- [Tanzu client](https://github.com/vmware-tanzu/tanzu-framework/blob/main/docs/cli/getting-started.md) and plugins
-- [Carvel tools](https://carvel.dev/): ytt, imgpkg, kbld, kapp
-
-- [Certificate Manager](https://github.com/cert-manager/cert-manager),
-- [Kapp](https://carvel.dev/kapp-controller/),
-- [Secretgen](https://github.com/vmware-tanzu/carvel-secretgen-controller)
+   - [Tanzu client](https://github.com/vmware-tanzu/tanzu-framework/blob/main/docs/cli/getting-started.md) and plugins
+   - [Carvel tools](https://carvel.dev/): ytt, imgpkg, kbld, kapp
+   
+   - [Kapp controller](https://carvel.dev/kapp-controller/),
+   - [Secretgen controller](https://github.com/vmware-tanzu/carvel-secretgen-controller)
 
 2. Repository and Packages
 
-A repository is an image containing the different K8s manifest able to install/configure different packages which are the building blocks
+   A repository is an image containing the different K8s manifest able to install/configure different packages which are the building blocks
 of a TAP platform
 
-- Tanzu Tap Repository. Use this command to see the information about the image repository `tanzu package repository get tanzu-tap-repository -n tap-install`
-- Tanzu Packages. Use this command to see the list of the packages deployed `tanzu package installed list -n tap-install`
+   - Tanzu Tap Repository. Use this command to see the information about the image repository `tanzu package repository get tanzu-tap-repository -n tap-install`
+   - Tanzu Packages. Use this command to see the list of the packages deployed `tanzu package installed list -n tap-install`
 
 **REMARK**: As TAP packages community and proprietary projects, the only available source of information is currently this [page](https://docs.vmware.com/en/Tanzu-Application-Platform/1.1/tap/GUID-components.html).
 Nevertheless, the community edition packages list is available [here](https://github.com/vmware-tanzu/community-edition#packages).
 
 **NOTE**: As this release do not support to build/push an image using a local container registry (as we cannot inject a selfsigned CA certificate), 
 then we have used an external repository (docker.io) !!
+
+## Packages
 
 TODO: To see if we will keep this list here, up to date or using [TAP architecture slides](https://docs.google.com/presentation/d/1jf12oJIc9yoJ0TS-G7h1rmcgKzbvQ65nK36Kg_Doz9I)
 
