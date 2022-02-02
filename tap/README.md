@@ -50,7 +50,7 @@ During the installation of TAP, the following software will be deployed:
 - [Kapp](https://carvel.dev/kapp-controller/),
 - [Secretgen](https://github.com/vmware-tanzu/carvel-secretgen-controller)
 
-2Repository and Packages
+2. Repository and Packages
 
 A repository is an image containing the different K8s manifest able to install/configure different packages which are the building blocks
 of a TAP platform
