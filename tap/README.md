@@ -577,8 +577,8 @@ images:
   image: registry.tanzu.vmware.com/tanzu-application-platform/tap-packages@sha256:0e4d9f41e331efa08ee10d09a45e8217703787d8b04e08339d99d17bf234d660
 ```
 
-Get a resources packaged as a bundle using again this command:
+Get now the resources packaged (as a bundle) for the package `app-accelerator` using this command:
 ```bash
 IMG=registry.tanzu.vmware.com/tanzu-application-platform/tap-packages@sha256:0e4d9f41e331efa08ee10d09a45e8217703787d8b04e08339d99d17bf234d660
-imgpkg pull -b $IMG -o ./pkg-acc
+imgpkg pull -b $IMG -o ./pkg-app-acc
 ```
