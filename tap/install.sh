@@ -25,6 +25,8 @@ export KUBECONFIG=$HOME/.kube/${KUBE_CFG_FILE}
 
 # Terminal UI to interact with a Kubernetes cluster
 K9S_VERSION=$(curl --silent "https://api.github.com/repos/derailed/k9s/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+DIVE_RELEASE_VERSION=$(curl --silent "https://api.github.com/repos/wagoodman/dive/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+DIVE_VERSION=$(cut -c2- <<< $DIVE_RELEASE_VERSION)
 
 REMOTE_HOME_DIR="<CHANGE_ME>"
 DEST_DIR="/usr/local/bin"
@@ -52,9 +54,13 @@ TANZU_CLI_VERSION="v0.10.0"
 # Do not use the RAW URL but instead the Github HTTPS URL followed by blob/main
 TAP_GIT_CATALOG_REPO=https://github.com/halkyonio/tap-catalog-blank/blob/main
 
-echo "## Install useful tools: k9s, unzip, jq,..."
+echo "## Install useful tools: dive, k9s, unzip, jq,..."
 wget -q https://github.com/derailed/k9s/releases/download/$K9S_VERSION/k9s_Linux_x86_64.tar.gz && tar -vxf k9s_Linux_x86_64.tar.gz
 sudo cp k9s /usr/local/bin
+
+wget https://github.com/wagoodman/dive/releases/download/$DIVE_RELEASE_VERSION/dive_$DIVE_VERSION_linux_amd64.tar.gz
+tar -vxf dive_$DIVE_VERSION_linux_amd64.tar.gz && sudo cp dive /usr/local/bin
+
 sudo yum install unzip epel-release -y
 sudo yum install jq -y
 
