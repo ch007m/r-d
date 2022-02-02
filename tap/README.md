@@ -554,3 +554,31 @@ The problem TAP would like to solve is presented within this [video](https://www
 [Use an Ingress route with Contour](https://tanzu.vmware.com/developer/guides/kubernetes/service-routing-contour-to-ingress-and-beyond/)
 
 [How to install Tanzu (Contour, Harbor, TBS) on kind](https://github.com/tanzu-japan/devsecops-demo)
+
+## Get the TAP repository bundle and packages content using imgpkg
+
+To get the Package Repository, execute the following command:
+```bash
+imgpkg pull -b registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:1.0.0 -o ./repo-bundle
+```
+
+Next, open the file containing the image references of the packages using `less ./repo-bundle/.imgpkg/images.yml`
+
+```bash
+apiVersion: imgpkg.carvel.dev/v1alpha1
+images:
+...
+- annotations:
+    kbld.carvel.dev/id: dev.registry.tanzu.vmware.com/app-accelerator/acc-install-bundle:1.0.0
+    kbld.carvel.dev/origins: |
+      - resolved:
+          tag: 1.0.0
+          url: dev.registry.tanzu.vmware.com/app-accelerator/acc-install-bundle:1.0.0
+  image: registry.tanzu.vmware.com/tanzu-application-platform/tap-packages@sha256:0e4d9f41e331efa08ee10d09a45e8217703787d8b04e08339d99d17bf234d660
+```
+
+Get a resources packaged as a bundle using again this command:
+```bash
+IMG=registry.tanzu.vmware.com/tanzu-application-platform/tap-packages@sha256:0e4d9f41e331efa08ee10d09a45e8217703787d8b04e08339d99d17bf234d660
+imgpkg pull -b $IMG -o ./pkg-acc
+```
