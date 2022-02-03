@@ -11,6 +11,7 @@
 # - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM
 # - VM_IP: IP address of the VM where the cluster is running
 # - REGISTRY_SERVER: image registry server (docker.io, gcr.io, localhost:5000)
+# - REGISTRY_OWER: docker user, ghcr.io ORG owner
 # - REGISTRY_USERNAME: username to be used to log on the registry
 # - REGISTRY_PASSWORD: password to be used to log on the registry
 # - TANZU_LEGACY_API_TOKEN: Token used by pivnet to login
@@ -169,7 +170,7 @@ cnrs:
 
 buildservice:
   # Dockerhub has the form kp_default_repository: "my-dockerhub-user/build-service" or kp_default_repository: "index.docker.io/my-user/build-service"
-  kp_default_repository: "$REGISTRY_USERNAME/build-service"
+  kp_default_repository: "$REGISTRY_SERVER/$REGISTRY_OWER/build-service"
   kp_default_repository_username: "$REGISTRY_USERNAME"
   kp_default_repository_password: "$REGISTRY_PASSWORD"
   # ca_cert_data: $X_509_ONELINE
@@ -186,7 +187,7 @@ ootb_supply_chain_basic:
     # repository is where workload images are stored in the registry. Images are written to SERVER-NAME/REPO-NAME/workload-name. Examples:
     # Dockerhub has the form repository: "my-dockerhub-user"
     # Google Cloud Registry has the form repository: "my-project/supply-chain"
-    repository: "$REGISTRY_USERNAME"
+    repository: "$REGISTRY_OWER"
   gitops:
     ssh_secret: ""
 
