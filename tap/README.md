@@ -2,45 +2,37 @@ Table of Contents
 =================
 
 * [What is TAP](#what-is-tap)
-* [References](#references)
+* [Packages](#packages)
 * [Prerequisites](#prerequisites)
 * [Instructions](#instructions)
-  * [Tanzu client and TAP repository](#tanzu-client-and-tap-repository)
-  * [Install TAP - Cloud Native Runtimes](#install-tap---cloud-native-runtimes)
-  * [Install TAP - Accelerator](#install-tap---accelerator)
-  * [Install TAP - Review what it has been installed](#install-tap---review-what-it-has-been-installed)
-  * [Install Tanzu Build Service (TBS)](#install-tanzu-build-service-tbs)
+   * [Introduction](#introduction)
+   * [How to install TAP](#how-to-install-tap)
+   * [How to remove TAP](#how-to-remove-tap)
+   * [Review what it has been installed](#review-what-it-has-been-installed)
 * [Demo](#demo)
-  * [Step by step instructions](#step-by-step-instructions)
-  * [All in one instructions](#all-in-one-instructions)
-  * [Demo shortcuts](#demo-shortcuts)
-* [Issues](#issues)
-* [Additional tools](#additional-tools)
-  * [Clean](#clean)
+   * [Step by step instructions](#step-by-step-instructions)
+   * [All in one instructions](#all-in-one-instructions)
+   * [Demo shortcuts](#demo-shortcuts)
+   * [Clean](#clean)
+* [References](#references)
+* [Get the TAP repository bundle and packages content using imgpkg](#get-the-tap-repository-bundle-and-packages-content-using-imgpkg)
 
 ## What is TAP
 
-Tanzu Application Platform - https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/0.1/tap-0-1/GUID-overview.html is a packaged set of components that helps developers and
+Tanzu Application Platform 1.1 - https://docs.vmware.com/en/Tanzu-Application-Platform/1.1/tap/GUID-overview.html is a packaged set of components that helps developers and
 operators to more easily build, deploy, and manage apps on a Kubernetes platform.
-
-Short introduction about what is TAP is available [here](http://i-programmer.cloudapp.net/news/90-tools/9503-vmware-announces-tanzu-application-platform-.html) and could be summarized as such:
 
 TAP is a `Knative` platform using `kpack` (= buildpacks controller) to build images, `Contour` (= ingress) to route the traffic, `kapp` (= kind of helm technology but with more features) to assemble the
 `applications` and `Application Live and Application Accelerator`** to guide the Architects/Developers to design/deploy/monitor applications on k8s.
 
 **: Where VMWare/Pivotal would like to capture with a great DevExp on K8s the Spring Architects and Developers.
 
-Tanzu Application Platform simplifies workflows in both the `inner` loop and `outer` loop of Kubernetes-based app development:
+## Packages
 
-- Inner Loop: The inner loop describes a developer’s local development environment where they code and test apps. The activities that take place in the inner loop include writing code, committing to a version control system, deploying to a development or staging environment, testing, and then making additional code changes.
-- Outer Loop: The outer loop describes the steps to deploy apps to production and maintain them over time. For example, on a cloud-native platform, the outer loop includes activities such as building container images, adding container security, and configuring continuous integration (CI) and continuous delivery (CD) pipelines.
+As the TAP product packages community but also commercial projects, the only available source of information is currently this [page](https://docs.vmware.com/en/Tanzu-Application-Platform/1.1/tap/GUID-components.html).
+Nevertheless, the community edition packages list is available [here](https://github.com/vmware-tanzu/community-edition#packages).
 
-**REMARK**: The VMWare Tanzu definition of an inner loop implies an image build while this is not the case using Openshift odo as we push the code within a pod.
-
-**NOTE**: The problem TAP `beta 0.1` would like to solve is presented within this [video](https://www.youtube.com/watch?v=9oupRtKT_JM)
-
-It packages different technology such as:
-
+TODO: To see if we will keep this list here, up to date or using [TAP architecture slides](https://docs.google.com/presentation/d/1jf12oJIc9yoJ0TS-G7h1rmcgKzbvQ65nK36Kg_Doz9I)
 
 | Name                                                                                                                 | Description                                                                                                                                                                                        | System(s)                                   | Product page                                         | Version        |
 | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------ | ---------------- |
@@ -51,484 +43,130 @@ It packages different technology such as:
 | [Flux2](https://github.com/fluxcd/flux2#flux-version-2)                                                              | Sync k8s resources and config up to date from Git repositories                                                                                                                                     | Flux2                                       | https://fluxcd.io/                                   | 0.17.0         |
 | [Kapp](https://carvel.dev/kapp-controller/)                                                                          | Deploy and view groups of Kubernetes resources as "applications" controller                                                                                                                        | kapp                                        | https://carvel.dev/kapp-controller/                  | 0.24.0         |
 
-## References
-
-[Contour Ingres architecture](https://projectcontour.io/docs/v1.18.1/architecture/)
-
-[Use an Ingress route with Contour](https://tanzu.vmware.com/developer/guides/kubernetes/service-routing-contour-to-ingress-and-beyond/)
-
-[How to install Tanzu (Contour, Harbor, TBS) on kind](https://github.com/tanzu-japan/devsecops-demo)
-
 ## Prerequisites
 
-The following tools are required to install App Accelerator:
+The following [installation](https://docs.vmware.com/en/Tanzu-Application-Platform/1.1/tap/GUID-install-general.html#prereqs) guide explain what the prerequisites.
 
-- `shasum` binary (for linux OS) using `yum install perl-Digest-SHA -y`
-- Carvel [tools](https://carvel.dev/#whole-suite) - `curl -L https://carvel.dev/install.sh | sudo bash`
-  - ytt version v0.34.0 or later.
-  - kbld version v0.30.0 or later.
-  - imgpkg version v0.12.0 or later.
-  - kapp version v0.37.0 or later.
-- kubectl and Kubernetes v1.17 and later.
-- [Flux2](https://github.com/fluxcd/flux2#flux-version-2).
-- [Tanzu Build Service](#TAS)
+TL&DR; It is needed to:
+- Have a [Tanzu account](https://network.tanzu.vmware.com/) to download the software or access the [Tanzu registry](registry.tanzu.vmware.com),
+- Accept the needed [EULA](https://docs.vmware.com/en/Tanzu-Application-Platform/1.1/tap/GUID-install-general.html#eulas) 
+- Access a k8s cluster >= 1.21 with Cluster Admin Role and kubectl installed
+- Have a Linux VM machine with 8 CPUs and 8 GB or RAM
 
 ## Instructions
 
-The commands listed hereafter have been executed top of a `k8s 1.21` cluster and have been reviewed due to some issues discovered using the
-[tanzu installation guide](https://docs.vmware.com/en/VMware-Tanzu-Application-Platform/0.1/tap-0-1/GUID-install.html).
+### Introduction
 
-### Tanzu client and TAP repository
+The instructions of the official [guide](https://docs.vmware.com/en/Tanzu-Application-Platform/1.1/tap/GUID-install-intro.html) have been executed without problem.
+**WARNING**: As the TAP release `1.0` do not support to build/push an image using a local container registry (as we cannot inject a self-signed CA certificate),
+then it is needed to use an external repository (ghcr.io, docker.io) !
 
-To install/uninstall TAP on a k8s cluster, it is needed to install The Tanzu client that we can download from the `https://network.pivotal.io/products/` website
-or using the tool `pivnet`.
+To simplify your life, we have designed a [bash script](./install.sh) which allow to install the following software:
 
-- Download the Mac/Linux or Windows client from - https://network.pivotal.io/products/tanzu-application-platform
+1. Cluster Essentials (= [bundle image](registry.tanzu.vmware.com/tanzu-cluster-essentials/cluster-essentials-bundle) packaging Tools & Controllers)
+    - [Tanzu client](https://github.com/vmware-tanzu/tanzu-framework/blob/main/docs/cli/getting-started.md) and plugins
+    - [Carvel tools](https://carvel.dev/): ytt, imgpkg, kbld, kapp
 
-```bash
-# Macos installation
-mkdir ~/tanzu && cd ~/tanzu
-mv ~/Downloads/tanzu-cli-bundle-darwin-amd64.tar .
-tar -vxf tanzu-cli-bundle-darwin-amd64.tar
-cp core/v1.4.0/tanzu-core-darwin_amd64 /usr/local/bin/tanzu
-```
+    - [Kapp controller](https://carvel.dev/kapp-controller/),
+    - [Secretgen controller](https://github.com/vmware-tanzu/carvel-secretgen-controller)
 
-- Or use the `pivnet` client tool
+2. Repository
 
-```bash
-# To auth the user, use the API legacy token which is available here : https://network.pivotal.io/users/dashboard/edit-profile
-pivnet login --api-token=$LEGACY_API_TOKEN
-mkdir ~/tanzu && cd ~/tanzu
-pivnet download-product-files --product-slug='tanzu-application-platform' --release-version='0.1.0' --product-file-id=1030933
-tar -vxf tanzu-cli-bundle-linux-amd64.tar
-cp cli/core/v1.4.0/tanzu-core-linux_amd64 $HOME/bin/tanzu
-```
+   A repository is an image bundle containing different K8s manifests, templates, files able to install/configure the TAP packages.
+   Such a repository are managed using the Tanzu command `tanzu package repository ...`
 
-- Next, configure the Tanzu client to install the plugin `package`. This extension will be used to download the resources from the Pivotal registry
+3. TAP Packages
 
-```bash
-tanzu plugin clean
-tanzu plugin install -v v1.4.0 --local cli package
-✔  successfully installed package
-tanzu package version
-```
+   The packages are the building blocks or components part of the TAP platform. Each of them will install a specific feature such as Knative, cartographer, contour, cnrs, ...
+   They are managed using the following command `tanzu package installed ...`
 
-- Install the needed projects such as `flux2` and `kapp-controller` not installed by the Tanzu client
+**NOTE**: Some additional tools are installed within the VM by our [install.sh](./install.sh) bash script such as: unzip, k9s and pivnet !
 
-```bash
-kapp deploy -a flux -f https://github.com/fluxcd/flux2/releases/download/v0.17.0/install.yaml
-kapp deploy -a kc -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/latest/download/release.yml
-```
+### How to install TAP
 
-- Create the `tap-install` namespace and the secret containing your pivotal registry credentials:
+To install TAP, it is needed to have access to a Linux VM (locally or remotely) where a Kubernetes cluster has been deployed (version >= 1.20).
+The VM should have least 8GB of RAM and 8 CPU.
 
-```bash
-alias kc=kubectl
-kc create ns tap-install
+As different images will be pulled, pushed to an images registry, then it is needed to configure the credentials to access it like also the Tanzu registry server
+using the following variables of the [install.sh](./install.sh) bash script:
 
-export VMWARE_USERNAME="<VMWARE_USERNAME>"
-export VMWARE_PASSWORD="<VMWARE_PASSWORD>"
-kc create secret docker-registry tap-registry -n tap-install --docker-server='registry.pivotal.io' --docker-username=$VMWARE_USERNAME --docker-password=$VMWARE_PASSWORD
-```
+- **REGISTRY_SERVER**: registry DNS name (docker.io, ghcr.io, quay.io,...)
+- **REGISTRY_OWNER**: docker username, ghcr.io ORG owner
+- **REGISTRY_USERNAME**: username to be used to log on the registry
+- **REGISTRY_PASSWORD**: password to be used to log on the registry
 
-- Download using `pivnet` client the `PackageRepository` CRD containing the reference of the image installing TAP `registry.pivotal.io/tanzu-application-platform/tap-packages:0.1.0` :
+- **TANZU_REG_USERNAME**: user to be used to be authenticated against the Tanzu images registry
+- **TANZU_REG_PASSWORD**: password to be used to be authenticated against the Tanzu images registry
+
+Remark: As the script will download the TAP packages, repository using the tool [pivnet](https://github.com/pivotal-cf/pivnet-cli), then you must also configure the following variable:
+- **TANZU_LEGACY_API_TOKEN**: Token used by pivnet CLI to login to the Tanzu products website
+
+Finally, define the home directory and IP address of the VM hosting TAP and the kubernetes cluster: 
+- **REMOTE_HOME_DIR**: home directory where files will be installed within the VM
+- **VM_IP**: IP address of the VM where the cluster is running
 
 ```bash
-pivnet download-product-files --product-slug='tanzu-application-platform' --release-version='0.1.0' --product-file-id=1029762
-2021/09/14 15:26:39 Downloading 'tap-package-repo.yaml' to 'tap-package-repo.yaml'
-...
+./install.sh
+
+ssh -i ${SSH_KEY} ${USER}@${IP} -p ${PORT} "bash -s" -- < ./install.sh
 ```
 
-- Deploy the CRD within the `tap-install` namespace using `kapp` and the application name `tap-package-repo`:
+### How to remove TAP
 
+Define first the following variable within the [uninstall.sh](./uninstall.sh) bash script
+- **REMOTE_HOME_DIR**: home directory where files will be installed within the VM
+
+Next, execute locally or remotely this bash script:
 ```bash
-kapp deploy -a tap-package-repo -n tap-install -f ./tap-package-repo.yaml -y
+./uninstall.sh
+
+ssh -i ${SSH_KEY} ${USER}@${IP} -p ${PORT} "bash -s" -- < ./uninstall.sh
 ```
 
-- You can check what the repository contains like the packages you can install using the following commands:
+### Review what it has been installed
 
-```bash
-tanzu package repository list -n tap-install
-/ Retrieving repositories...
-  NAME                  REPOSITORY                                                         STATUS               DETAILS
-  tanzu-tap-repository  registry.pivotal.io/tanzu-application-platform/tap-packages:0.1.0  Reconcile succeeded
-
-tanzu package available list -n tap-install
-/ Retrieving available packages...
-  NAME                               DISPLAY-NAME                              SHORT-DESCRIPTION
-  accelerator.apps.tanzu.vmware.com  Application Accelerator for VMware Tanzu  Used to create new projects and configurations.
-  appliveview.tanzu.vmware.com       Application Live View for VMware Tanzu    App for monitoring and troubleshooting running apps
-  cnrs.tanzu.vmware.com              Cloud Native Runtimes                     Cloud Native Runtimes is a serverless runtime based on Knative
-```
-
-- To see the detail of the parameters of a package to be installed, execute the command:
-
-```bash
-tanzu package available get cnrs.tanzu.vmware.com/1.0.1 --values-schema -n tap-install
-| Retrieving package details for cnrs.tanzu.vmware.com/1.0.1...
-  KEY                         DEFAULT  TYPE     DESCRIPTION
-  ingress.reuse_crds          false    boolean  set true to reuse existing Contour instance
-  ingress.external.namespace  <nil>    string   external namespace
-  ingress.internal.namespace  <nil>    string   internal namespace
-  local_dns.domain            <nil>    string   domain name
-  local_dns.enable            false    boolean  specify true if local DNS needs to be enabled
-  pdb.enable                  true     boolean  <nil>
-  provider                    <nil>    string   Kubernetes cluster provider
-  registry.password           <nil>    string   registry password
-  registry.server             <nil>    string   registry server
-  registry.username           <nil>    string   registry username
-```
-
-### Install TAP - Cloud Native Runtimes
-
-- In order to install the package `CNR = Cloud Native Runtimes`, we will create a yaml file containing the parameters such as the `creds` to access the registry, the provider, ...
-
-  **WARNING**: If the k8s cluster that you will use do not run a LB, then configure the field `provider: local`
-
-```bash
-cat <<EOF > cnr.yml
----
-registry:
-  server: "registry.pivotal.io"
-  username: "$VMWARE_USERNAME"
-  password: "$VMWARE_PASSWORD"
-
-provider: local
-pdb:
-  enable: "true"
-
-ingress:
-  reuse_crds:
-  external:
-    namespace:
-  internal:
-    namespace:
-
-local_dns:
-  enable: "false"
-EOF
-
-tanzu package install cloud-native-runtimes -p cnrs.tanzu.vmware.com -v 1.0.1 -n tap-install -f ./cnr.yml
-\ Installing package 'cnrs.tanzu.vmware.com'
-| Getting namespace 'tap-install'
-| Getting package metadata for 'cnrs.tanzu.vmware.com'
-| Creating service account 'cloud-native-runtimes-tap-install-sa'
-| Creating cluster admin role 'cloud-native-runtimes-tap-install-cluster-role'
-| Creating cluster role binding 'cloud-native-runtimes-tap-install-cluster-rolebinding'
-| Creating secret 'cloud-native-runtimes-tap-install-values'
-- Creating package resource
-- Package install status: Reconciling
-...
-Added installed package 'cloud-native-runtimes' in namespace 'tap-install'
-```
-
-### Install TAP - Accelerator
-
-- When this is done, we will proceed to the deployment of the `Application accelerator` and create another config yaml file:
-
-  **WARNING**: If the k8s cluster that you will use do not run a LB, then configure the field `service_type` to use `NodePort`
-
-```bash
-cat <<EOF > app-accelerator.yml
-registry:
-  server: "registry.pivotal.io"
-  username: "$VMWARE_USERNAME"
-  password: "$VMWARE_PASSWORD"
-server:
-  # Set this service_type to "NodePort" for local clusters like minikube.
-  service_type: "NodePort"
-  watched_namespace: "default"
-  engine_invocation_url: "http://acc-engine.accelerator-system.svc.cluster.local/invocations"
-engine:
-  service_type: "ClusterIP"
-EOF
-```
-
-- Deploy the `app-accelerator` package:
-
-```bash
-tanzu package install app-accelerator -p accelerator.apps.tanzu.vmware.com -v 0.2.0 -n tap-install -f app-accelerator.yml
-- Installing package 'accelerator.apps.tanzu.vmware.com'
-| Getting namespace 'tap-install'
-| Getting package metadata for 'accelerator.apps.tanzu.vmware.com'
-| Creating service account 'app-accelerator-tap-install-sa'
-| Creating cluster admin role 'app-accelerator-tap-install-cluster-role'
-| Creating cluster role binding 'app-accelerator-tap-install-cluster-rolebinding'
-| Creating secret 'app-accelerator-tap-install-values'
-- Creating package resource
-/ Package install status: Reconciling
-...
-```
-
-- Next, install some sample accelerators (= Application templates) to feed the `Application Accelerator` dashboard :
-
-```bash
-cat <<EOF > sample-accelerators-0-2.yaml
----
-apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
-kind: Accelerator
-metadata:
-  name: new-accelerator
-spec:
-  git:
-    url: https://github.com/sample-accelerators/new-accelerator
-    ref:
-      branch: main
-      tag: v0.2.x
----
-apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
-kind: Accelerator
-metadata:
-  name: hello-fun
-spec:
-  git:
-    url: https://github.com/sample-accelerators/hello-fun
-    ref:
-      branch: main
-      tag: v0.2.x
----
-apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
-kind: Accelerator
-metadata:
-  name: hello-ytt
-spec:
-  git:
-    url: https://github.com/sample-accelerators/hello-ytt
-    ref:
-      branch: main
-      tag: v0.2.x
----
-apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
-kind: Accelerator
-metadata:
-  name: spring-petclinic
-spec:
-  git:
-    ignore: ".git"
-    url: https://github.com/sample-accelerators/spring-petclinic
-    ref:
-      branch: main
-      tag: v0.2.x
----
-apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
-kind: Accelerator
-metadata:
-  name: spring-sql-jpa
-spec:
-  git:
-    url: https://github.com/sample-accelerators/spring-sql-jpa
-    ref:
-      branch: main
-      tag: v0.2.x
----
-apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
-kind: Accelerator
-metadata:
-  name: node-accelerator
-spec:
-  git:
-    url: https://github.com/sample-accelerators/node-accelerator
-    ref:
-      branch: main
-      tag: v0.2.x
-EOF
-
-kc apply -f ./sample-accelerators-0-2.yaml
-accelerator.accelerator.apps.tanzu.vmware.com/hello-fun created
-accelerator.accelerator.apps.tanzu.vmware.com/hello-ytt created
-accelerator.accelerator.apps.tanzu.vmware.com/spring-petclinic created
-accelerator.accelerator.apps.tanzu.vmware.com/spring-sql-jpa created
-accelerator.accelerator.apps.tanzu.vmware.com/node-accelerator created
-```
-
-- When done, install the `application live` package and configure it:
-
-```bash
-cat <<EOF > app-live-view.yml
----
-registry:
-  server: "registry.pivotal.io"
-  username: "$VMWARE_USERNAME"
-  password: "$VMWARE_PASSWORD"
-
-EOF
-
-tanzu package install app-live-view -p appliveview.tanzu.vmware.com -v 0.1.0 -n tap-install -f ./app-live-view.yml
-\ Installing package 'appliveview.tanzu.vmware.com'
-| Getting namespace 'tap-install'
-| Getting package metadata for 'appliveview.tanzu.vmware.com'
-| Creating service account 'app-live-view-tap-install-sa'
-| Creating cluster admin role 'app-live-view-tap-install-cluster-role'
-| Creating cluster role binding 'app-live-view-tap-install-cluster-rolebinding'
-| Creating secret 'app-live-view-tap-install-values'
-- Creating package resource
-/ Package install status: Reconciling
-```
-
-### Install TAP - Review what it has been installed
-
-- Check the status of the 3 packages installed:
+- Check the status of the TAP packages installed and if all the packages are well deployed 
 
 ```bash
 tanzu package installed list -n tap-install
-\ Retrieving installed packages...
-  NAME                   PACKAGE-NAME                       PACKAGE-VERSION  STATUS
-  app-accelerator        accelerator.apps.tanzu.vmware.com  0.2.0            Reconcile succeeded
-  app-live-view          appliveview.tanzu.vmware.com       0.1.0            Reconcile succeeded
-  cloud-native-runtimes  cnrs.tanzu.vmware.com              1.0.1            Reconcile succeeded
+/ Retrieving installed packages...
+  NAME                      PACKAGE-NAME                                  PACKAGE-VERSION  STATUS
+  accelerator               accelerator.apps.tanzu.vmware.com             1.0.0            Reconcile succeeded
+  appliveview               run.appliveview.tanzu.vmware.com              1.0.1            Reconcile succeeded
+  appliveview-conventions   build.appliveview.tanzu.vmware.com            1.0.1            Reconcile succeeded
+  buildservice              buildservice.tanzu.vmware.com                 1.4.2            Reconcile succeeded
+  cartographer              cartographer.tanzu.vmware.com                 0.1.0            Reconcile succeeded
+  cert-manager              cert-manager.tanzu.vmware.com                 1.5.3+tap.1      Reconcile succeeded
+  cnrs                      cnrs.tanzu.vmware.com                         1.1.0            Reconcile succeeded
+  contour                   contour.tanzu.vmware.com                      1.18.2+tap.1     Reconcile succeeded
+  conventions-controller    controller.conventions.apps.tanzu.vmware.com  0.5.0            Reconcile succeeded
+  developer-conventions     developer-conventions.tanzu.vmware.com        0.5.0-build.1    Reconcile succeeded
+  fluxcd-source-controller  fluxcd.source.controller.tanzu.vmware.com     0.16.0           Reconcile succeeded
+  ootb-delivery-basic       ootb-delivery-basic.tanzu.vmware.com          0.5.1            Reconcile succeeded
+  ootb-supply-chain-basic   ootb-supply-chain-basic.tanzu.vmware.com      0.5.1            Reconcile succeeded
+  ootb-templates            ootb-templates.tanzu.vmware.com               0.5.1            Reconcile succeeded
+  service-bindings          service-bindings.labs.vmware.com              0.6.0            Reconcile succeeded
+  services-toolkit          services-toolkit.tanzu.vmware.com             0.5.0            Reconcile succeeded
+  source-controller         controller.source.apps.tanzu.vmware.com       0.2.0            Reconcile succeeded
+  spring-boot-conventions   spring-boot-conventions.tanzu.vmware.com      0.3.0            Reconcile succeeded
+  tap                       tap.tanzu.vmware.com                          1.0.0            Reconcile succeeded
+  tap-gui                   tap-gui.tanzu.vmware.com                      1.0.1            Reconcile succeeded
+  tap-telemetry             tap-telemetry.tanzu.vmware.com                0.1.2            Reconcile succeeded
+  tekton-pipelines          tekton.tanzu.vmware.com                       0.30.0           Reconcile succeeded
   
 # or individually
-tanzu package installed get -n tap-install cloud-native-runtimes
-tanzu package installed get -n tap-install app-live-view
-tanzu package installed get -n tap-install app-accelerator
+tanzu package installed get -n tap-install <package_name>
 ```
 
-- To update a package if some errors are reported, use the following commands:
+- To update a package or some of the parameters, use the following command:
 
 ```bash
-tanzu package installed update cloud-native-runtimes -v 1.0.1 -n tap-install -f cnr.yml
-tanzu package installed update app-accelerator -v 0.2.0 -n tap-install -f app-accelerator.yml
-tanzu package installed update app-live-view -v 0.1.0 -n tap-install -f app-live-view.yml
-```
-
-**WARNING**: Be sure that you have accepted the needed EULAs - https://network.tanzu.vmware.com/users/dashboard/eulas, otherwise some images will not be installed !
-
-- Move now to the next section to install `Tanzu Build Services` as it is needed to build the image of the DEMO.
-
-### Install Tanzu Build Service (TBS)
-
-To install the `Tanzu Build Service` (aka [TBS](https://docs.pivotal.io/build-service/1-2/installing.html)) on your k8s cluster, execute the commands described hereafter.
-The commands have been tested successfully against `docker.io`, `private docker registry` version 2.6 (as version 2.7 fails)
-
-- Login in first to `registry.pivotal.io` and your public or private images registry (e.g. docker.io, ...).
-
-```bash
-export REG_USER="<REG_USER>"
-export REG_PWD="<REG_PWD>"
-docker login -u=$REG_USER -p=$REG_PWD docker.io
-
-export PIVOTAL_REG_USER="<TANZUNET_USERNAME>"
-export PIVOTAL_REG_PWD="<TANZUNET_PWD>"
-docker login -u=$PIVOTAL_REG_USER -p=$PIVOTAL_REG_PWD registry.pivotal.io
-```
-
-- Copy the TBS images to your `<REGISTRY_USER>`/build-service
-
-**REMARK**: When this demo has been performed, the TBS version used was `1.2.2`
-
-**NOTE**: You can also use a private docker registry running on your k8s cluster. Use, in this case, the version `2.6` as `2.7` reports `MANIFEST_BLOB_UNKNOWN` during imgpkg import !!
-
-```bash
-export IMAGE_REPOSITORY="<YOUR_IMAGE_REPOSITORY"
-export TBS_VERSION="1.2.2"
-imgpkg copy -b "registry.pivotal.io/build-service/bundle:$TBS_VERSION" --to-repo $IMAGE_REPOSITORY
-copy | exporting 17 images...
-copy | will export registry.pivotal.io/build-service/bundle@sha256:e03765dbce254a1266a8bba026a71ec908854681bd12bf69cd7d55d407bbca95
-copy | will export registry.pivotal.io/build-service/dependency-updater@sha256:9f71c2fa6f7779924a95d9bcdedc248b4623c4d446ecddf950a21117e1cebd76
-copy | will export registry.pivotal.io/build-service/kpack-build-init-windows@sha256:20758ba22ead903aa4aacaa08a3f89dce0586f938a5d091e6c37bf5b13d632f3
-copy | will export registry.pivotal.io/build-service/kpack-build-init@sha256:31e95adee6d59ac46f5f2ec48208cbd154db0f4f8e6c1de1b8edf0cd9418bba8
-copy | will export registry.pivotal.io/build-service/kpack-completion-windows@sha256:1f8f1d98ea439ba6a25808a29af33259ad926a7054ad8f4b1aea91abf8a8b141
-copy | will export registry.pivotal.io/build-service/kpack-completion@sha256:1c63b9c876b11b7bf5f83095136b690fc07860c80b62a167c41b4c3efd1910bd
-copy | will export registry.pivotal.io/build-service/kpack-controller@sha256:4b3c825d6fb656f137706738058aab59051d753312e75404fc5cdaf49c352867
-copy | will export registry.pivotal.io/build-service/kpack-lifecycle@sha256:c923a81a1c3908122e29a30bae5886646d6ec26429bad4842c67103636041d93
-copy | will export registry.pivotal.io/build-service/kpack-rebase@sha256:79ae0f103bb39d7ef498202d950391c6ef656e06f937b4be4ec2abb6a37ad40a
-copy | will export registry.pivotal.io/build-service/kpack-webhook@sha256:594fe3525a8bc35f99280e31ebc38a3f1f8e02e0c961c35d27b6397c2ad8fa68
-copy | will export registry.pivotal.io/build-service/pod-webhook@sha256:3d8b31e5fba451bb51ccd586b23c439e0cab293007748c546ce79f698968dab8
-copy | will export registry.pivotal.io/build-service/secret-syncer@sha256:77aecf06753ddca717f63e0a6c8b8602381fef7699856fa4741617b965098d57
-copy | will export registry.pivotal.io/build-service/setup-ca-certs@sha256:3f8342b534e3e308188c3d0683c02c941c407a1ddacb086425499ed9cf0888e9
-copy | will export registry.pivotal.io/build-service/sleeper@sha256:0881284ec39f0b0e00c0cfd2551762f14e43580085dce9d0530717c704ade988
-copy | will export registry.pivotal.io/build-service/smart-warmer@sha256:4c8627a7f23d84fc25b409b7864930d27acc6454e3cdaa5e3917b5f252ff65ad
-copy | will export registry.pivotal.io/build-service/stackify@sha256:a40af2d5d569ea8bee8ec1effc43ba0ddf707959b63e7c85587af31f49c4157f
-copy | will export registry.pivotal.io/build-service/stacks-operator@sha256:1daa693bd09a1fcae7a2f82859115dc1688823330464e5b47d8b9b709dee89f1
-copy | exported 17 images
-copy | importing 17 images...
-```
-
-**NOTe**: When you deploy to a private docker registry, then provide as additional parameter the path to the CA certificate of the registry `--registry-ca-cert-path certs/ca.crt`
-
-- Export the content of the images locally under the folder `./bundle`
-
-```bash
-imgpkg pull -b "$IMAGE_REPOSITORY:$TBS_VERSION" -o ./bundle
-```
-
-- Alternatively, we can export the content of the TAS image from the pivotal registry using the following command
-
-```bash
-imgpkg pull -b "registry.pivotal.io/build-service/bundle:$TBS_VERSION" -o ./bundle
-```
-
-- Deploy `TBS`
-
-```bash
-export IMAGE-REPOSITORY="quay.io/<REG_USER>/build-service" ## BUT SHOULD BE FOR DOCKER --> "docker.io/<REG_USER>"
-ytt -f ./bundle/values.yaml \
-    -f ./bundle/config/ \
-    -v docker_repository='<IMAGE-REPOSITORY>' \
-    -v docker_username='<REGISTRY-USERNAME>' \
-    -v docker_password='<REGISTRY-PASSWORD>' \
-    -v tanzunet_username='<TANZUNET_USERNAME>' \
-    -v tanzunet_password='<TANZUNET_PASSWORD>' \
-    | kbld -f ./bundle/.imgpkg/images.yml -f- \
-    | kapp deploy -a tanzu-build-service -f- -y
-```
-
-- If you use a private docker registry, then execute this command
-
-```bash
-ytt -f ./bundle/values.yaml \
-    -f ./bundle/config/ \
-    -f <PATH-TO-CA> \
-    -v docker_repository='<PRIVATE_IMAGE_REPOSITORY>' \
-    -v docker_username='<PRIVATE_REGISTRY_USERNAME>' \
-    -v docker_password='<PRIVATE_REGISTRY-PASSWORD>' \
-    | kbld -f ./bundle/.imgpkg/images.yml -f- \
-    | kapp deploy -a tanzu-build-service -f- -y
-```
-
-**NOTE**: The `<PRIVATE_IMAGE_REPOSITORY>` should include as latest char a `/` (e.g: `<IP_ADDRESS>:<PORT>/`). Otherwise the `.dockerconfigjson` file generated for the `canonical-registry-secret` will include
-as registry `http//index.docker.io/v1/`
-
-- Install the `kp` cli
-
-```bash
-pivnet download-product-files --product-slug='build-service' --release-version=$TBS_VERSION --product-file-id=1000629
-chmod +x kp-linux-0.3.1
-cp kp-linux-0.3.1 ~/bin/kp
-```
-
-- Finally, import the `Tanzu Build Service` dependencies such as: lifecycle, buildpacks (go, java, python, ..) using the dependency descriptor `descriptor-<version>.yaml` file
-  that you can download using pivnet
-
-```bash
-pivnet download-product-files --product-slug='tbs-dependencies' --release-version='100.0.155' --product-file-id=1036685
-2021/09/14 11:11:26 Downloading 'descriptor-100.0.155.yaml' to 'descriptor-100.0.155.yaml'
-kp import -f ./descriptor-<version>.yaml
-
-e.g: kp import -f ./descriptor-100.0.155.yaml
-Importing Lifecycle...
-	Uploading '95.217.159.244:32500/lifecycle@sha256:c923a81a1c3908122e29a30bae5886646d6ec26429bad4842c67103636041d93'
-Importing ClusterStore 'default'...
-	Uploading '95.217.159.244:32500/tanzu-buildpacks_go@sha256:9fd3ba0f1f99f7dba25d22dc955233c7b38b7f1b55b038464968d1f1e37afd3d'
-	Uploading '95.217.159.244:32500/tanzu-buildpacks_java@sha256:578bccbfc996184ea3181b4b0fa39f98f456db1e2e427ef163db98224cd9ea04'
-	Uploading '95.217.159.244:32500/tanzu-buildpacks_nodejs@sha256:c2b47f6f74055bade5456c17dd92c5ef035fab7e075d0ce0b14afc15b2efa06c'
-	Uploading '95.217.159.244:32500/tanzu-buildpacks_java-native-image@sha256:74d8f4ba944ee1e62e7fc68654ee09fb89e0b26cb8eeda3a587322e9e7bd6bf5'
-	Uploading '95.217.159.244:32500/tanzu-buildpacks_dotnet-core@sha256:6d57e312e7ac86f78ece4afcc3967e5314fbb71fe592800fd6f0f58bd923945a'
-	Uploading '95.217.159.244:32500/tanzu-buildpacks_python@sha256:1222d5f695222597687173b1b8612844f3ccd763eae86e99c3ebacc41390db40'
-	 \ 578.31 MB
-...
-```
-
-**WARNING**: This step to import the `buildpacks` will take time !
-
-- When done, play with the [demo](#Demo) :-)
-- To delete the `build-service` using kapp
-
-```bash
-kapp delete -a tanzu-build-service -n build-service
+tanzu package installed update tap -p tap.tanzu.vmware.com -v 1.0.0 --values-file tap-values.yml -n tap-install
 ```
 
 ## Demo
+
+TODO: To be reviewed before to release 1.0 !!
 
 ### Step by step instructions
 
@@ -852,115 +490,63 @@ echo "Petclinic demo: http://petclinic.tap-install.$VM_IP.nip.io:$ENVOY_NODE_POR
 open -na "Google Chrome" --args --incognito http://petclinic.tap-install.$VM_IP.nip.io:$ENVOY_NODE_PORT
 ```
 
-## Issues
-
-If during the build of the application the step `detect` (= iniContainer) reports such an error
-```bash
-ERROR: failed to detect: open /cnb/buildpacks/paketo-buildpacks_procfile/4.3.0/buildpack.toml: no such file or directory
-```
-verify then that the latest images are well deployed !!
-
-This could be done automatically using a `TanzuNetDependencyUpdater` CR as documented [here](https://docs.pivotal.io/build-service/1-2/updating-deps.html)
-
-```bash
-kp secret create dependency-updater-secret --registry registry.pivotal.io --registry-user $TANZU_REG_USERNAME -n tap-install
-
-cat <<EOF > TanzuNetDependencyUpdater.yml
-apiVersion: buildservice.tanzu.vmware.com/v1alpha1
-kind: TanzuNetDependencyUpdater
-metadata:
-  name: dependency-updater
-  namespace: tap-install
-spec:
-  serviceAccountName: default
-  productSlug: tbs-dependencies
-  checkEvery: 120m
-EOF
-
-kubectl apply -f TanzuNetDependencyUpdater.yml
-
-kubectl get TanzuNetDependencyUpdater -A
-NAMESPACE     NAME                 DESCRIPTORVERSION   READY
-tap-install   dependency-updater
-```
-To bulk update the `ClusterStores|Stack|Builders`, use the latest version of the `descriptor.yml` file publised [here](https://network.pivotal.io/products/tbs-dependencies/)
-```bash
-pivnet download-product-files --product-slug='tbs-dependencies' --release-version='100.0.187' --product-file-id=1059210
-kp import -f descriptor-100.0.187.yaml
-```
-
-## Additional tools
-
-To download the VMWare products from the Network Pivotal web site, as wget/curl cannot be used, we must install the `pivnet` client.
-
-```bash
-wget https://github.com/pivotal-cf/pivnet-cli/releases/download/v3.0.1/pivnet-linux-amd64-3.0.1
-cp pivnet-linux-amd64-3.0.1 $HOME/bin/pivnet
-chmod +x $HOME/bin/pivnet
-```
-
-As `shasum` binary is not installed by default on centos7, we must deploy it using the following perl package
-as it will be used by `carvel`
-
-```bash
-sudo yum install perl-Digest-SHA -y
-```
-
-If you plan to use kpack, then install the `kp` client
-
-```bash
-pivnet download-product-files --product-slug='build-service' --release-version='`TBS_VERSION' --product-file-id=1000629
-chmod +x kp-linux-0.3.1
-cp kp-linux-0.3.1 ~/bin/kp
-```
-
-- As this is easier to use the `docker client tool` than `ctr, crictl, ..`, please install it on a `containerd` linux machine like `dockerd`
-
-```bash
-sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-sudo yum list installed | grep docker
-sudo yum -y remove docker-ce.x86_64
-sudo yum -y remove docker-ce-cli.x86_64
-sudo yum -y remove containerd.io.x86_64
-
-sudo yum install docker-ce docker-ce-client containerd
-sudo systemctl enable docker
-sudo systemctl start docker
-sudo gpasswd -a snowdrop docker
-sudo reboot
-```
-
 ### Clean
 
-To delete the installed packages or applications:
+To delete the installed packages:
 
 1. List the installed packages: `tanzu package installed list -n tap-install`
 2. Remove a package by running: `tanzu package installed delete PACKAGE-NAME -n tap-install`
 3. or execute the following `All in one command`
 
 ```bash
-declare -a packages=("app-accelerator" "app-live-view" "cloud-native-runtimes")
-for pkg in ${packages[@]}; do
-  tanzu package installed delete $pkg -n tap-install -y
-done
-
-declare -a packages=("flux" "tanzu-build-service" "kc")
-for pkg in ${packages[@]}; do
-  kapp delete -a $pkg 
-done
+NAMESPACE_TAP=tap-install
+while read -r package; do
+  name=$(echo $package | jq -r '.name')
+  repo=$(echo $package | jq -r '.repository')
+  tag=$(echo $package | jq -r '.tag')
+  echo "Deleting the package: $name"
+  tanzu package installed delete $name -n $NAMESPACE_TAP -y
+done <<< "$(tanzu package installed list -n $NAMESPACE_TAP -o json | jq -c '.[]')"
 ```
 
-Sometimes it has been needed to delete some resources manually when problems occurred during installation of a package (CNR, ...):
+That's all !
+
+## References
+
+Short introduction about what is TAP is available [here](https://www.youtube.com/watch?v=H6rbIkaJ1xc&ab_channel=VMwareTanzu)
+
+The problem TAP would like to solve is presented within this [video](https://www.youtube.com/watch?v=9oupRtKT_JM)
+
+[Contour Ingres architecture](https://projectcontour.io/docs/v1.18.1/architecture/)
+
+[Use an Ingress route with Contour](https://tanzu.vmware.com/developer/guides/kubernetes/service-routing-contour-to-ingress-and-beyond/)
+
+[How to install Tanzu (Contour, Harbor, TBS) on kind](https://github.com/tanzu-japan/devsecops-demo)
+
+## Get the TAP repository bundle and packages content using imgpkg
+
+To get the Package Repository, execute the following command:
+```bash
+imgpkg pull -b registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:1.0.0 -o ./repo-bundle
+```
+
+Next, open the file containing the image references of the packages using `less ./repo-bundle/.imgpkg/images.yml`
 
 ```bash
-kc delete clusterrole/cloud-native-runtimes-tap-install-cluster-role
-kc delete clusterrolebinding/cloud-native-runtimes-tap-install-cluster-rolebinding
-kc delete sa/cloud-native-runtimes-tap-install-sa -n tap-install
-kc delete -n tap-install secrets/cloud-native-runtimes-tap-install-values
-
-kc delete -n tap-install sa/app-accelerator-tap-install-sa
-kc delete clusterrole/app-accelerator-tap-install-cluster-role
-kc delete clusterrolebinding/app-accelerator-tap-install-cluster-rolebinding
+apiVersion: imgpkg.carvel.dev/v1alpha1
+images:
+...
+- annotations:
+    kbld.carvel.dev/id: dev.registry.tanzu.vmware.com/app-accelerator/acc-install-bundle:1.0.0
+    kbld.carvel.dev/origins: |
+      - resolved:
+          tag: 1.0.0
+          url: dev.registry.tanzu.vmware.com/app-accelerator/acc-install-bundle:1.0.0
+  image: registry.tanzu.vmware.com/tanzu-application-platform/tap-packages@sha256:0e4d9f41e331efa08ee10d09a45e8217703787d8b04e08339d99d17bf234d660
 ```
 
-Thats's all !
+Get now the resources packaged (as a bundle) for the package `app-accelerator` using this command:
+```bash
+IMG=registry.tanzu.vmware.com/tanzu-application-platform/tap-packages@sha256:0e4d9f41e331efa08ee10d09a45e8217703787d8b04e08339d99d17bf234d660
+imgpkg pull -b $IMG -o ./pkg-app-acc
+```

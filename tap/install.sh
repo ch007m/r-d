@@ -1,334 +1,311 @@
-
-KUBE_CFG_FILE=${1:-h01-121}
+#!/usr/bin/env bash
+#
+# Execute this command locally
+#
+# ./install
+#
+# or remotely
+# ssh -i <PUB_KEY_FILE_PATH> <USER>@<IP> -p <PORT> "bash -s" -- < ./install.sh
+#
+# Define the following env vars:
+# - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM
+# - VM_IP: IP address of the VM where the cluster is running
+# - REGISTRY_SERVER: image registry server (docker.io, gcr.io, localhost:5000)
+# - REGISTRY_OWNER: docker user, ghcr.io ORG owner
+# - REGISTRY_USERNAME: username to be used to log on the registry
+# - REGISTRY_PASSWORD: password to be used to log on the registry
+# - TANZU_LEGACY_API_TOKEN: Token used by pivnet to login
+# - TANZU_REG_USERNAME: user to be used to be authenticated against the Tanzu image registry
+# - TANZU_REG_PASSWORD: password to be used to be authenticated against the Tanzu image registry
+#
+#
+KUBE_CFG_FILE=${1:-config}
 export KUBECONFIG=$HOME/.kube/${KUBE_CFG_FILE}
 
+# Terminal UI to interact with a Kubernetes cluster
+K9S_VERSION=$(curl --silent "https://api.github.com/repos/derailed/k9s/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+
+REMOTE_HOME_DIR="<CHANGE_ME>"
 DEST_DIR="/usr/local/bin"
+TANZU_TEMP_DIR="$REMOTE_HOME_DIR/tanzu"
 
 VM_IP="<CHANGE_ME>"
-CONTAINER_REGISTRY_URL="$VM_IP:32500"
-CONTAINER_REGISTRY_USERNAME="<CHANGE_ME>"
-CONTAINER_REGISTRY_PASSWORD="<CHANGE_ME>"
+REGISTRY_SERVER="<CHANGE_ME>"
+REGISTRY_OWER="<CHANGE_ME>"
+REGISTRY_USERNAME="<CHANGE_ME>"
+REGISTRY_PASSWORD="<CHANGE_ME>"
 
 TANZU_LEGACY_API_TOKEN="<CHANGE_ME>"
 TANZU_REG_USERNAME="<CHANGE_ME>"
 TANZU_REG_PASSWORD="<CHANGE_ME>"
 
-TANZU_TAP_CLI_VERSION="v1.4.0"
-TANZU_FLUX_VERSION="v0.17.0"
-TANZU_KAPP_VERSION="latest"
-TANZU_BUILD_SERVICE_VERSION="1.2.2"
-TANZU_TEMP_DIR="./tanzu"
+INGRESS_DOMAIN=$VM_IP.nip.io
 
-function pause(){
- read -s -n 1 -p "Press any key to continue . . ."
- echo ""
-}
+NAMESPACE_DEMO="tap-demo"
+NAMESPACE_TAP="tap-install"
 
-echo "#### Install Tanzu tools: pivnet, ytt, kapp, imgpkg, kbld #####"
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  echo "#### Detected Linux OS ####"
-  curl -L https://carvel.dev/install.sh | sudo bash
-  echo "TODO : Add command to install pivnet"
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-  echo "#### Detected Mac OS ####"
-  brew tap vmware-tanzu/carvel
-  brew reinstall ytt kbld kapp kwt imgpkg vendir
-  brew reinstall pivotal/tap/pivnet-cli
-fi
+PIVNET_CLI_VERSION="3.0.1"
+TANZU_CLUSTER_ESSENTIALS_VERSION="1.0.0"
+TAP_VERSION="1.0.0"
+TANZU_CLI_VERSION="v0.10.0"
 
-echo "### Create tanzu directory ####"
+# Do not use the RAW URL but instead the Github HTTPS URL followed by blob/main
+TAP_GIT_CATALOG_REPO=https://github.com/halkyonio/tap-catalog-blank/blob/main
+
+echo "## Install useful tools: dive, k9s, unzip, jq,..."
+wget -q https://github.com/derailed/k9s/releases/download/$K9S_VERSION/k9s_Linux_x86_64.tar.gz && tar -vxf k9s_Linux_x86_64.tar.gz
+sudo cp k9s /usr/local/bin
+
+sudo yum install unzip epel-release -y
+sudo yum install jq -y
+
+echo "## Executing installation Part I of the TAP guide"
+echo "## Install Tanzu tools "
+echo "## Installing pivnet tool ..."
+wget -q -c https://github.com/pivotal-cf/pivnet-cli/releases/download/v$PIVNET_CLI_VERSION/pivnet-linux-amd64-$PIVNET_CLI_VERSION
+chmod +x pivnet-linux-amd64-$PIVNET_CLI_VERSION && mv pivnet-linux-amd64-$PIVNET_CLI_VERSION pivnet && sudo cp pivnet /usr/local/bin
+pivnet version
+
+echo "### Pivnet log in to Tanzu "
+pivnet login --api-token=$TANZU_LEGACY_API_TOKEN
+
+echo "### Create tanzu directory "
 if [ ! -d $TANZU_TEMP_DIR ]; then
     mkdir -p $TANZU_TEMP_DIR
 fi
 
 pushd $TANZU_TEMP_DIR
 
-echo "### Download TANZU CLIENT"
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  echo "#### Detected Linux OS ####"
-  TANZU_PRODUCT_FILE_ID="1040320"
-  TANZU_PRODUCT_NAME="tanzu-cli-bundle-linux-amd64"
+## Install the Tanzu Application Platform GUI Blank Catalog
+##pivnet download-product-files --product-slug='tanzu-application-platform' --release-version=$TAP_VERSION --product-file-id=1099786
+## echo "TODO: You must extract that catalog to the preceding Git repository of choice. This serves as the configuration location for your Organization's Catalog inside Tanzu Application Platform GUI."
 
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-  echo "#### Detected Mac OS ####"
-  TANZU_PRODUCT_FILE_ID="1040323"
-  TANZU_PRODUCT_NAME="tanzu-cli-bundle-darwin-amd64"
-fi
+# Download Cluster Essentials for VMware Tanzu
+echo "### Set the Cluster Essentials product ID "
+TANZU_CLUSTER_ESSENTIALS_FILE_ID="1105818"
+TANZU_CLUSTER_ESSENTIALS_IMAGE_SHA="sha256:82dfaf70656b54dcba0d4def85ccae1578ff27054e7533d08320244af7fb0343"
 
-echo "### Pivnet log in to Tanzu ###"
-pivnet login --api-token=$TANZU_LEGACY_API_TOKEN
+echo "## Download Cluster Essentials ... "
+pivnet download-product-files --product-slug='tanzu-cluster-essentials' --release-version=$TANZU_CLUSTER_ESSENTIALS_VERSION --product-file-id=$TANZU_CLUSTER_ESSENTIALS_FILE_ID
+mkdir -p tanzu-cluster-essentials && tar -xvf tanzu-cluster-essentials-linux-amd64-$TANZU_CLUSTER_ESSENTIALS_VERSION.tgz -C ./tanzu-cluster-essentials
 
-# Download the TANZU client
-pivnet download-product-files --product-slug='tanzu-application-platform' --release-version='0.1.0' --product-file-id=$TANZU_PRODUCT_FILE_ID
+echo "## Install Cluster essentials (kapp, kbld, ytt, imgpkg)"
+echo "## Configure and run install.sh, which installs kapp-controller and secretgen-controller on your cluster"
+export INSTALL_BUNDLE=registry.tanzu.vmware.com/tanzu-cluster-essentials/cluster-essentials-bundle@$TANZU_CLUSTER_ESSENTIALS_IMAGE_SHA
+export INSTALL_REGISTRY_HOSTNAME=registry.tanzu.vmware.com
+export INSTALL_REGISTRY_USERNAME=$TANZU_REG_USERNAME
+export INSTALL_REGISTRY_PASSWORD=$TANZU_REG_PASSWORD
+cd ./tanzu-cluster-essentials
+export KUBECONFIG="/home/snowdrop/.kube/config"
+./install.sh
+
+echo "## Install the kapp CLI onto your $PATH:"
+sudo cp ./kapp /usr/local/bin/kapp
+cd ..
+
+echo "## Install the Tanzu client & plug-ins"
+echo "## Download the Tanzu client and extract it"
+TANZU_PRODUCT_FILE_ID="1114447"
+TANZU_PRODUCT_NAME="tanzu-framework-linux-amd64"
+pivnet download-product-files --product-slug='tanzu-application-platform' --release-version=$TAP_VERSION --product-file-id=$TANZU_PRODUCT_FILE_ID
 tar -vxf $TANZU_PRODUCT_NAME.tar
-cp cli/core/$TANZU_TAP_CLI_VERSION/tanzu-core* $DEST_DIR/tanzu
 
-# Next, configure the Tanzu client to install the plugin `package`. This extension will be used to download the resources from the Pivotal registry
-tanzu plugin clean
-tanzu plugin install -v $TANZU_TAP_CLI_VERSION --local cli package
-tanzu package version
+echo "## Set env var TANZU_CLI_NO_INIT to true to assure the local downloaded versions of the CLI core and plug-ins are installed"
+export TANZU_CLI_NO_INIT=true
+sudo install cli/core/$TANZU_CLI_VERSION/tanzu-core-linux_amd64 /usr/local/bin/tanzu
+tanzu version
 
-# Install the needed components: kapp controller, fluxcd
-kapp deploy -a flux -f https://github.com/fluxcd/flux2/releases/download/$TANZU_FLUX_VERSION/install.yaml -y
-sleep 1m
-kapp deploy -a kc -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/$TANZU_KAPP_VERSION/download/release.yml -y
-sleep 1m
+echo "## Clean install Tanzu CLI plug-ins now"
+export TANZU_CLI_NO_INIT=true
+tanzu plugin install --local cli all
+tanzu plugin list
 
-# Deploy TAP
-# 1. Create NS
+echo "## Executing installation Part II of the TAP guide"
+echo "## Install profiles ..."
+
+export INSTALL_REGISTRY_USERNAME=$TANZU_REG_USERNAME
+export INSTALL_REGISTRY_PASSWORD=$TANZU_REG_PASSWORD
+export INSTALL_REGISTRY_HOSTNAME=registry.tanzu.vmware.com
+
+echo "## Create a namespace called tap-install for deploying the packages"
 kubectl create ns tap-install
 
-# Step 2. Create K8S secret containing Tanzu registry creds
-kubectl create secret docker-registry tap-registry \
-  -n tap-install \
-  --docker-server='registry.pivotal.io' \
-  --docker-username=$TANZU_REG_USERNAME \
-  --docker-password=$TANZU_REG_PASSWORD
+echo "## Create a registry secret"
+tanzu secret registry add tap-registry \
+  --username ${INSTALL_REGISTRY_USERNAME} \
+  --password ${INSTALL_REGISTRY_PASSWORD} \
+  --server ${INSTALL_REGISTRY_HOSTNAME} \
+  --export-to-all-namespaces --yes --namespace $NAMESPACE_TAP
 
-# Step 3. Download the TAP repository
-echo "### Pivnet log in to Tanzu ###"
-pivnet download-product-files --product-slug='tanzu-application-platform' \
-   --release-version='0.1.0' \
-   --product-file-id=1029762
+echo "## Add Tanzu Application Platform package repository to the k8s cluster"
+tanzu package repository add tanzu-tap-repository \
+  --url registry.tanzu.vmware.com/tanzu-application-platform/tap-packages:$TAP_VERSION \
+  -n $NAMESPACE_TAP
 
-kapp deploy -a tap-package-repo \
-   -n tap-install \
-   -f ./tap-package-repo.yaml -y
+sleep 10s
 
-# 4. Install the TAP packages
-# Configure and install: CNR
-cat <<EOF > cnr.yml
----
-registry:
-  server: "registry.pivotal.io"
-  username: "$TANZU_REG_USERNAME"
-  password: "$TANZU_REG_PASSWORD"
+# TODO: Document the following step of the script to pass as parameter the secret and namespace to be used
+#echo "## Store the X509 certificate of the local registry"
+#X_509=$(kubectl get secret/cert-key -n infra -o=go-template='{{index .data "server.crt"}}' | base64 -d)
+#echo $X_509 > server.crt
+#X_509_ONELINE=$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' server.crt)
 
-provider: local
-pdb:
-  enable: "true"
+echo "## Install the Tanzu Application Platform profile: light"
+echo "## Create first the tap-values.yaml file to configure the profile .... .light"
 
-ingress:
-  reuse_crds:
-  external:
-    namespace:
-  internal:
-    namespace:
+cat  > tap-values.yml <<EOF
+profile: light
+ceip_policy_disclosed: true # Installation fails if this is set to 'false'
 
-local_dns:
-  enable: "false"
+cnrs:
+  domain_name: "$VM_IP.nip.io"
+
+buildservice:
+  # Dockerhub has the form kp_default_repository: "my-dockerhub-user/build-service" or kp_default_repository: "index.docker.io/my-user/build-service"
+  kp_default_repository: "$REGISTRY_SERVER/$REGISTRY_OWER/build-service"
+  kp_default_repository_username: "$REGISTRY_USERNAME"
+  kp_default_repository_password: "$REGISTRY_PASSWORD"
+  # ca_cert_data: $X_509_ONELINE
+  tanzunet_username: "$TANZU_REG_USERNAME"
+  tanzunet_password: "$TANZU_REG_PASSWORD"
+
+supply_chain: basic
+
+ootb_supply_chain_basic:
+  service_account: default
+  registry:
+    # hostname of the registry server. Dockerhub has the form server: "index.docker.io", Google Cloud Registry has the form server: "gcr.io"
+    server: "$REGISTRY_SERVER"
+    # repository is where workload images are stored in the registry. Images are written to SERVER-NAME/REPO-NAME/workload-name. Examples:
+    # Dockerhub has the form repository: "my-dockerhub-user"
+    # Google Cloud Registry has the form repository: "my-project/supply-chain"
+    repository: "$REGISTRY_OWER"
+  gitops:
+    ssh_secret: ""
+
+tap_gui:
+  service_type: ClusterIP
+  ingressEnabled: "true"
+  ingressDomain: "$INGRESS_DOMAIN"
+  app_config:
+    app:
+      baseUrl: http://tap-gui.$INGRESS_DOMAIN
+    catalog:
+      locations:
+        - type: url
+          target: $TAP_GIT_CATALOG_REPO/catalog-info.yaml
+    backend:
+      baseUrl: http://tap-gui.$INGRESS_DOMAIN
+      cors:
+        origin: http://tap-gui.$INGRESS_DOMAIN
+
+metadata_store:
+  app_service_type: NodePort
 EOF
 
-tanzu package install cloud-native-runtimes \
-   -p cnrs.tanzu.vmware.com \
-   -v 1.0.1 \
-   -n tap-install \
-   -f ./cnr.yml
+cat tap-values.yml
 
-# 4. Install the TAP packages
-# Configure and install: Application Accelerator
-cat <<EOF > app-accelerator.yml
-registry:
-  server: "registry.pivotal.io"
-  username: "$TANZU_REG_USERNAME"
-  password: "$TANZU_REG_PASSWORD"
-server:
-  # Set this service_type to "NodePort" for local clusters like minikube.
-  service_type: "NodePort" # or LoadBalancer
-  watched_namespace: "default"
-  engine_invocation_url: "http://acc-engine.accelerator-system.svc.cluster.local/invocations"
-engine:
-  service_type: "ClusterIP"
+echo "## Installing the packages ..."
+tanzu package install tap -p tap.tanzu.vmware.com -v $TAP_VERSION --values-file tap-values.yml -n $NAMESPACE_TAP
+
+echo "## Wait till TAP installation is over"
+resp=$(tanzu package installed get tap -n tap-install -o json | jq -r .[].status)
+while [[ "$resp" != "Reconcile succeeded" ]]; do
+  echo "TAP installation status: $resp";
+  sleep 10s;
+  resp=$(tanzu package installed get tap -n tap-install -o json | jq -r .[].status);
+done
+
+echo "## List TAP the packages installed"
+tanzu package available list -n $NAMESPACE_TAP
+
+echo "## Set up the developer namespace: $NAMESPACE_DEMO, its RBAC and a secret able to access: tanzu registry & registry defined bvy the user: $REGISTRY_SERVER"
+cat <<EOF | kubectl -n $NAMESPACE_DEMO create -f -
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: $NAMESPACE_DEMO
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tap-registry
+  annotations:
+    secretgen.carvel.dev/image-pull-secret: ""
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: e30K
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: default
+rules:
+- apiGroups: [source.toolkit.fluxcd.io]
+  resources: [gitrepositories]
+  verbs: ['*']
+- apiGroups: [source.apps.tanzu.vmware.com]
+  resources: [imagerepositories]
+  verbs: ['*']
+- apiGroups: [carto.run]
+  resources: [deliverables, runnables]
+  verbs: ['*']
+- apiGroups: [kpack.io]
+  resources: [images]
+  verbs: ['*']
+- apiGroups: [conventions.apps.tanzu.vmware.com]
+  resources: [podintents]
+  verbs: ['*']
+- apiGroups: [""]
+  resources: ['configmaps']
+  verbs: ['*']
+- apiGroups: [""]
+  resources: ['pods']
+  verbs: ['list']
+- apiGroups: [tekton.dev]
+  resources: [taskruns, pipelineruns]
+  verbs: ['*']
+- apiGroups: [tekton.dev]
+  resources: [pipelines]
+  verbs: ['list']
+- apiGroups: [kappctrl.k14s.io]
+  resources: [apps]
+  verbs: ['*']
+- apiGroups: [serving.knative.dev]
+  resources: ['services']
+  verbs: ['*']
+- apiGroups: [servicebinding.io]
+  resources: ['servicebindings']
+  verbs: ['*']
+- apiGroups: [services.apps.tanzu.vmware.com]
+  resources: ['resourceclaims']
+  verbs: ['*']
+- apiGroups: [scanning.apps.tanzu.vmware.com]
+  resources: ['imagescans', 'sourcescans']
+  verbs: ['*']
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: default
+subjects:
+  - kind: ServiceAccount
+    name: default
 EOF
 
-tanzu package install app-accelerator \
-   -p accelerator.apps.tanzu.vmware.com \
-   -v 0.2.0 \
-   -n tap-install \
-   -f app-accelerator.yml
+echo "## Create the secret hosting the user's credentials to access the image registry"
+tanzu secret registry add registry-credentials --server $REGISTRY_SERVER --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD --namespace $NAMESPACE_DEMO
 
-# Configure and install: Application View
-cat <<EOF > app-live-view.yml
----
-registry:
-  server: "registry.pivotal.io"
-  username: "$VMWARE_USERNAME"
-  password: "$VMWARE_PASSWORD"
-EOF
-
-tanzu package install app-live-view \
-   -p appliveview.tanzu.vmware.com \
-   -v 0.1.0 \
-   -n tap-install \
-   -f ./app-live-view.yml
-
-# 5. Deploy some Accelerator samples to feed the `Application Accelerator` dashboard
-cat <<EOF > sample-accelerators-0-2.yaml
----
-apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
-kind: Accelerator
-metadata:
-  name: new-accelerator
-spec:
-  git:
-    url: https://github.com/sample-accelerators/new-accelerator
-    ref:
-      branch: main
-      tag: v0.2.x
----
-apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
-kind: Accelerator
-metadata:
-  name: hello-fun
-spec:
-  git:
-    url: https://github.com/sample-accelerators/hello-fun
-    ref:
-      branch: main
-      tag: v0.2.x
----
-apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
-kind: Accelerator
-metadata:
-  name: hello-ytt
-spec:
-  git:
-    url: https://github.com/sample-accelerators/hello-ytt
-    ref:
-      branch: main
-      tag: v0.2.x
----
-apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
-kind: Accelerator
-metadata:
-  name: spring-petclinic
-spec:
-  git:
-    ignore: ".git"
-    url: https://github.com/sample-accelerators/spring-petclinic
-    ref:
-      branch: main
-      tag: v0.2.x
----
-apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
-kind: Accelerator
-metadata:
-  name: spring-sql-jpa
-spec:
-  git:
-    url: https://github.com/sample-accelerators/spring-sql-jpa
-    ref:
-      branch: main
-      tag: v0.2.x
----
-apiVersion: accelerator.apps.tanzu.vmware.com/v1alpha1
-kind: Accelerator
-metadata:
-  name: node-accelerator
-spec:
-  git:
-    url: https://github.com/sample-accelerators/node-accelerator
-    ref:
-      branch: main
-      tag: v0.2.x
-EOF
-
-kubectl apply -f ./sample-accelerators-0-2.yaml
-
-# Install Tanzu Build Service
-
-# The following certificate (TO BE CHANGED) is only needed when you use a local private container registry
-cat <<EOF > reg-ca.crt
------BEGIN CERTIFICATE-----
-MIIC5zCCAc+gAwIBAgIBADANBgkqhkiG9w0BAQsFADAVMRMwEQYDVQQDEwprdWJl
-cm5ldGVzMB4XDTIxMDkxNDEyMTM0NFoXDTMxMDkxMjEyMTM0NFowFTETMBEGA1UE
-AxMKa3ViZXJuZXRlczCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJCC
-uxekCnvsm2Sv5Pui5GZIu3x/wkfJfWkiLDPuCB1pFHPK4GVShNIynHDwwGeaTCzL
-L44Pz4YDcL3Jbk9sT3cGBy5BJw81TWLJ8Yrm+HCTc9QWnQBFJuYVp5MylR2MfdvZ
-anw0gJTlTRUUVmmd2XznV2nCr+Ncb4LIG1Yo56VGvUC/DQV9oxRGGQA4W2rG2WqC
-HSefsqry1g/HIMyb+G8cXf1k655aA44wtC2oHEN3clcY3CYxjZdOg18Qyg7LaPB5
-CvIjsI1mVRVCgaXSR9HKP1vIJyvnRw853ClfCSqHKLgGoWvMijimb5grpFbXEypl
-VZIURtX3UhHwamBXCusCAwEAAaNCMEAwDgYDVR0PAQH/BAQDAgKkMA8GA1UdEwEB
-/wQFMAMBAf8wHQYDVR0OBBYEFAvapiI873ufa88VpVdU4hYr/kXwMA0GCSqGSIb3
-DQEBCwUAA4IBAQBHSBBzhWklQPefBZC0G5TeZeJeN8Wf5sB1pRjqwe111XbsF6cP
-t5RZqKLJXSj4NIIJIPXKgDjAyfRt/dkeMeVqbuBA7mB+iFu/5lyI4nZtywOxp+0s
-qBtMI+ASLketAxHtqn6CmIQSRC4dNCEmVW2iHzhUxPutOjcKsAMONhj9aRFs3Yy1
-nWs+sTbsABmNR3qUBKsiiLJa2FeTtTnu2cOeHw1xIN4+/1UriqbfMIwv9i3/w+sP
-9SEgQWnRR4dwSWlz2z0vzMYYUPjW1m0t+kDhI5NoTgVXDXbnwpo6CihYlDSK9/WS
-qhq84mkP+KnMmozE3/JN8CMSnTYNYAIaNBq0
------END CERTIFICATE-----
-EOF
-#
-# DO NOT FORGET TO COPY THE CERTIFICATE UNDER /etc/docker/certs.d !
-# sudo mkdir -p /etc/docker/certs.d/95.217.159.244:32500
-# sudo cp reg-ca.crt /etc/docker/certs.d/95.217.159.244:32500/ca.crt
-#
-
-# 1. Log on to the private or public container registry
-docker login \
-   -u=$CONTAINER_REGISTRY_USERNAME \
-   -p=$CONTAINER_REGISTRY_PASSWORD \
-   $CONTAINER_REGISTRY_URL
-
-# 2. Log on to the Tanzu container registry
-docker login \
-   -u=$TANZU_REG_USERNAME \
-   -p=$TANZU_REG_PASSWORD \
-   registry.pivotal.io
-
-# 3. Copy the TBS images to the `<REGISTRY_USER>`/build-service repository
-
-IMAGE_REPOSITORY=$CONTAINER_REGISTRY_URL/buildservice
-imgpkg copy -b "registry.pivotal.io/build-service/bundle:$TANZU_BUILD_SERVICE_VERSION" --to-repo $IMAGE_REPOSITORY --registry-ca-cert-path reg-ca.crt
-
-imgpkg pull -b "$IMAGE_REPOSITORY:$TBS_VERSION" -o ./bundle --registry-ca-cert-path reg-ca.crt
-
-# 4. Deploy TBS
-ytt -f ./bundle/values.yaml \
-    -f ./bundle/config/ \
-    -f reg-ca.crt \
-    -v docker_repository=$CONTAINER_REGISTRY_URL/ \
-    -v docker_username=$CONTAINER_REGISTRY_USERNAME \
-    -v docker_password=$CONTAINER_REGISTRY_PASSWORD \
-    | kbld -f ./bundle/.imgpkg/images.yml -f- \
-    | kapp deploy -a tanzu-build-service -f- -y
-
-# 5. Install the kp client
-echo "### Download KP"
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  echo "#### Detected Linux OS ####"
-  TANZU_PRODUCT_FILE_ID="1000629"
-  TANZU_PRODUCT_NAME="kp-linux-0.3.1"
-
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-  echo "#### Detected Mac OS ####"
-  TANZU_PRODUCT_FILE_ID="1000628"
-  TANZU_PRODUCT_NAME="kp-darwin-0.3.1"
-fi
-
-pivnet download-product-files --product-slug='build-service' \
-   --release-version=$TANZU_BUILD_SERVICE_VERSION \
-   --product-file-id=$TANZU_PRODUCT_FILE_ID
-
-chmod +x $TANZU_PRODUCT_NAME
-cp $TANZU_PRODUCT_NAME $DEST_DIR/kp
-
-# 6. Import the `Tanzu Build Service` dependencies` such as: lifecycle, buildpacks (go, java, python, ..)
-#    using the dependency descriptor `descriptor-<version>.yaml` file
-pivnet download-product-files --product-slug='tbs-dependencies' \
-    --release-version='100.0.155'\
-    --product-file-id=1036685
-
-kp import -f ./descriptor-100.0.155.yaml \
-   --registry-ca-cert-path reg-ca.crt
-
-## Patch the KNative Serving config-domain configmap to expose as domain: <VM_IP>.nip.io
-PATCH="{\"data\":{\"$VM_IP.nip.io\": \"\"}}"
-kubectl patch cm/config-domain -n knative-serving \
-  --type merge \
-  -p $PATCH
+echo "## Patch the service account of the $NAMESPACE_DEMO to define the secret & imagePullSecret to be used"
+kubectl patch serviceaccount default -n $NAMESPACE_DEMO -p '{"secrets": [{"name":"registry-credentials"}]}'
+kubectl patch serviceaccount default -n $NAMESPACE_DEMO -p '{"imagePullSecrets": [{"name":"tap-registry"},{"name":"registry-credentials"}]}'
 
 popd
+exit
 
 
 

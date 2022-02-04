@@ -5,3 +5,4 @@ manifest.yml
 /tap/cli/
 /tap/tanzu/
 /tap/k8s/generated/
+/tap/tmp/
