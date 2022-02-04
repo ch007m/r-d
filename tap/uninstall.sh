@@ -1,5 +1,10 @@
+#!/usr/bin/env bash
 #
-# Execute this command remotely
+# Execute this command locally
+#
+# ./uninstall
+#
+# or remotely
 # ssh -i <PUB_KEY_FILE_PATH> <USER>@<IP> -p <PORT> "bash -s" -- < ./uninstall.sh
 #
 # Define the following env vars:

@@ -1,33 +1,29 @@
 #!/usr/bin/env bash
 #
-# To remotely install this script within a VM using SSH, execute:
-# Change the REMOTE_HOME_DIR var o point to the remote VM home dir
+# Execute this command locally
 #
-# WARNING: This script has been tested using docker.io only.
-# Why: We cannot use quay.io as it do not support to push images using sub-path as needed
-# This TAP release - 1.0.0. still do not support too using local registry as selfsigned X509 cannot be imported/mounted within a secret
+# ./install
+#
+# or remotely
+# ssh -i <PUB_KEY_FILE_PATH> <USER>@<IP> -p <PORT> "bash -s" -- < ./install.sh
 #
 # Define the following env vars:
 # - REMOTE_HOME_DIR: home directory where files will be installed within the remote VM
 # - VM_IP: IP address of the VM where the cluster is running
 # - REGISTRY_SERVER: image registry server (docker.io, gcr.io, localhost:5000)
-# - REGISTRY_OWER: docker user, ghcr.io ORG owner
+# - REGISTRY_OWNER: docker user, ghcr.io ORG owner
 # - REGISTRY_USERNAME: username to be used to log on the registry
 # - REGISTRY_PASSWORD: password to be used to log on the registry
 # - TANZU_LEGACY_API_TOKEN: Token used by pivnet to login
 # - TANZU_REG_USERNAME: user to be used to be authenticated against the Tanzu image registry
 # - TANZU_REG_PASSWORD: password to be used to be authenticated against the Tanzu image registry
 #
-# Execute this command remotely
-# ssh -i <PUB_KEY_FILE_PATH> <USER>@<IP> -p <PORT> "bash -s" -- < ./uninstall.sh
 #
 KUBE_CFG_FILE=${1:-config}
 export KUBECONFIG=$HOME/.kube/${KUBE_CFG_FILE}
 
 # Terminal UI to interact with a Kubernetes cluster
 K9S_VERSION=$(curl --silent "https://api.github.com/repos/derailed/k9s/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
-DIVE_RELEASE_VERSION=$(curl --silent "https://api.github.com/repos/wagoodman/dive/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
-DIVE_VERSION=$(cut -c2- <<< $DIVE_RELEASE_VERSION)
 
 REMOTE_HOME_DIR="<CHANGE_ME>"
 DEST_DIR="/usr/local/bin"
@@ -35,6 +31,7 @@ TANZU_TEMP_DIR="$REMOTE_HOME_DIR/tanzu"
 
 VM_IP="<CHANGE_ME>"
 REGISTRY_SERVER="<CHANGE_ME>"
+REGISTRY_OWER="<CHANGE_ME>"
 REGISTRY_USERNAME="<CHANGE_ME>"
 REGISTRY_PASSWORD="<CHANGE_ME>"
 
@@ -58,9 +55,6 @@ TAP_GIT_CATALOG_REPO=https://github.com/halkyonio/tap-catalog-blank/blob/main
 echo "## Install useful tools: dive, k9s, unzip, jq,..."
 wget -q https://github.com/derailed/k9s/releases/download/$K9S_VERSION/k9s_Linux_x86_64.tar.gz && tar -vxf k9s_Linux_x86_64.tar.gz
 sudo cp k9s /usr/local/bin
-
-wget https://github.com/wagoodman/dive/releases/download/$DIVE_RELEASE_VERSION/dive_$DIVE_VERSION_linux_amd64.tar.gz
-tar -vxf dive_$DIVE_VERSION_linux_amd64.tar.gz && sudo cp dive /usr/local/bin
 
 sudo yum install unzip epel-release -y
 sudo yum install jq -y
@@ -150,15 +144,13 @@ tanzu package repository add tanzu-tap-repository \
 
 sleep 10s
 
-tanzu package available list --namespace tap-install
-
 # TODO: Document the following step of the script to pass as parameter the secret and namespace to be used
 #echo "## Store the X509 certificate of the local registry"
 #X_509=$(kubectl get secret/cert-key -n infra -o=go-template='{{index .data "server.crt"}}' | base64 -d)
 #echo $X_509 > server.crt
 #X_509_ONELINE=$(awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' server.crt)
 
-echo "## Install a Tanzu Application Platform profile"
+echo "## Install the Tanzu Application Platform profile: light"
 echo "## Create first the tap-values.yaml file to configure the profile .... .light"
 
 cat  > tap-values.yml <<EOF
@@ -216,21 +208,24 @@ cat tap-values.yml
 echo "## Installing the packages ..."
 tanzu package install tap -p tap.tanzu.vmware.com -v $TAP_VERSION --values-file tap-values.yml -n $NAMESPACE_TAP
 
-echo "## Verify the package installed and list them"
-sleep 5m
-tanzu package installed get tap -n $NAMESPACE_TAP
-tanzu package installed list -A
+echo "## Wait till TAP installation is over"
+resp=$(tanzu package installed get tap -n tap-install -o json | jq -r .[].status)
+while [[ "$resp" != "Reconcile succeeded" ]]; do
+  echo "TAP installation status: $resp";
+  sleep 10s;
+  resp=$(tanzu package installed get tap -n tap-install -o json | jq -r .[].status);
+done
 
-echo "## Set up the developer namespace: $NAMESPACE_DEMO and create a secret to access the image registry: $REGISTRY_SERVER"
-kubectl create ns $NAMESPACE_DEMO
-tanzu secret registry add registry-credentials --server $REGISTRY_SERVER --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD --namespace $NAMESPACE_DEMO
+echo "## List TAP the packages installed"
+tanzu package available list -n $NAMESPACE_TAP
 
-echo "## Create a secret to access the tap-registry, a service account configured with imagePullSecrets, and RBAC rules to the developer namespace"
-echo "### Delete the service account as it has already been created ... strange"
-kubectl delete sa default -n $NAMESPACE_DEMO --ignore-not-found
-
+echo "## Set up the developer namespace: $NAMESPACE_DEMO, its RBAC and a secret able to access: tanzu registry & registry defined bvy the user: $REGISTRY_SERVER"
 cat <<EOF | kubectl -n $NAMESPACE_DEMO create -f -
-
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: $NAMESPACE_DEMO
+---
 apiVersion: v1
 kind: Secret
 metadata:
@@ -240,18 +235,6 @@ metadata:
 type: kubernetes.io/dockerconfigjson
 data:
   .dockerconfigjson: e30K
-
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: default
-secrets:
-  - name: registry-credentials
-imagePullSecrets:
-  - name: registry-credentials
-  - name: tap-registry
-
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -300,7 +283,6 @@ rules:
 - apiGroups: [scanning.apps.tanzu.vmware.com]
   resources: ['imagescans', 'sourcescans']
   verbs: ['*']
-
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -314,6 +296,13 @@ subjects:
   - kind: ServiceAccount
     name: default
 EOF
+
+echo "## Create the secret hosting the user's credentials to access the image registry"
+tanzu secret registry add registry-credentials --server $REGISTRY_SERVER --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD --namespace $NAMESPACE_DEMO
+
+echo "## Patch the service account of the $NAMESPACE_DEMO to define the secret & imagePullSecret to be used"
+kubectl patch serviceaccount default -n $NAMESPACE_DEMO -p '{"secrets": [{"name":"registry-credentials"}]}'
+kubectl patch serviceaccount default -n $NAMESPACE_DEMO -p '{"imagePullSecrets": [{"name":"tap-registry"},{"name":"registry-credentials"}]}'
 
 popd
 exit
