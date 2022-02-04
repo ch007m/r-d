@@ -16,7 +16,7 @@ REMOTE_HOME_DIR="/home/snowdrop"
 DEST_DIR="/usr/local/bin"
 TANZU_TEMP_DIR="$REMOTE_HOME_DIR/tanzu"
 
-# Checking about workload to be deleted
+echo "## Delete the workload(s) created under the namespace: $NAMESPACE_TAP_DEMO"
 tanzu apps workload list -n $NAMESPACE_TAP_DEMO | awk '(NR>1)' | while read name app status age;
 do
   if [[ $app != exit ]]; then
@@ -25,10 +25,11 @@ do
   fi
 done
 
-# Delete all the resources of the namespace and finally the namespace
+echo "## Delete the resources and the namespace: $NAMESPACE_TAP_DEMO"
 kubectl delete "$(kubectl api-resources --namespaced=true --verbs=delete -o name | tr "\n" "," | sed -e 's/,$//')" --all -n $NAMESPACE_TAP_DEMO
 kubectl delete ns $NAMESPACE_TAP_DEMO
 
+echo "## Remove the TAP packages"
 while read -r package; do
   name=$(echo $package | jq -r '.name')
   repo=$(echo $package | jq -r '.repository')
@@ -37,6 +38,7 @@ while read -r package; do
   tanzu package installed delete $name -n $NAMESPACE_TAP -y
 done <<< "$(tanzu package installed list -n $NAMESPACE_TAP -o json | jq -c '.[]')"
 
+echo "## Remove the TAP repository"
 while read -r package; do
   name=$(echo $package | jq -r '.name')
   repo=$(echo $package | jq -r '.repository')
@@ -45,14 +47,13 @@ while read -r package; do
   tanzu package repository delete $name -n $NAMESPACE_TAP -y
 done <<< "$(tanzu package repository list -n $NAMESPACE_TAP -o json | jq -c '.[]')"
 
-declare -a packages=("tap-install" "secretgen-controller" "tanzu-cluster-essentials"  "tanzu-package-repo-global" "kapp-controller")
-for pkg in ${packages[@]}; do
-   echo "Deleting the resources and namespace of: $pkg"
-   echo "If the namespace cannot be deleted as some finalizers are still pending, execute this command"
-   echo "kubectl get ns $pkg -o json | tr -d "\n" | sed "s/\"finalizers\": \[[^]]\+\]/\"finalizers\": []/" | kubectl replace --raw /api/v1/namespaces/$pkg/finalize -f -"
-   kubectl delete "$(kubectl api-resources --namespaced=true --verbs=delete -o name | tr "\n" "," | sed -e 's/,$//')" --all -n $pkg
-   kubectl delete ns $pkg
-done
+
+echo "## Clean up kapp and secretgen controllers"
+kapp delete -a secretgen-controller -n tanzu-cluster-essentials -y
+kapp delete -a kapp-controller -n tanzu-cluster-essentials -y
+
+echo "## Remove the tanzu-cluster-essentials namespace"
+kubectl delete ns tanzu-cluster-essentials
 
 echo "## Clean previous installation of the Tanzu client"
 rm -rf $TANZU_TEMP_DIR/cli    # Remove previously downloaded cli files
